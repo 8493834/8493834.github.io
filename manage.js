@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MASTER_KEY = "$2a$10$azSAXeXTJbjCAqqu6H7Uoe4nn4f4Igi5dZduAMli/aFG3Z35Edqym"; // WARNING: Highly insecure if exposed on the frontend. Use for PUT.
     const ACCESS_KEY = "$2a$10$/g8l6LETRviezqkgy1C9ZefSedNUYW1RsJs4wKoaBzhp/30dozNli"; // Use for GET if the bin is private.
 
-    const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+    const API_URL = `https://api.jsonbin.io/v3/b/68f6a629ae596e708f20081b${BIN_ID}`;
     // -------------------------------------------------------------
 
     // --- API Functions (Using Fetch) ---
