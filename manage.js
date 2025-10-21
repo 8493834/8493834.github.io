@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🛑 REPLACE THESE WITH YOUR ACTUAL JSONBIN.IO CREDENTIALS 🛑
     const MANAGE_PASSWORD = "admin123"; 
     const BIN_ID = "68f6a629ae596e708f20081b"; // e.g., '653a29b05775c742c38edc6d'
-    const MASTER_KEY = "$2a$10$azSAXeXTJbjCAqqu6H7Uoe4nn4f4Igi5dZduAMli/aFG3Z35Edqym"; // WARNING: Highly insecure if exposed on the frontend. Use for PUT.
-    const ACCESS_KEY = "$2a$10$/g8l6LETRviezqkgy1C9ZefSedNUYW1RsJs4wKoaBzhp/30dozNli"; // Use for GET if the bin is private.
+    const MASTER_KEY = "$2a$10$ftLmd0x0qulLl6i13jfib.qmGYaNp0vidFNH1gqnsBwY0/6o1UXxG"; // WARNING: Highly insecure if exposed on the frontend. Use for PUT.
+    const ACCESS_KEY = "$2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa"; // Use for GET if the bin is private.
 
     const API_URL = `https://api.jsonbin.io/v3/b/68f6a629ae596e708f20081b${BIN_ID}`;
     // -------------------------------------------------------------
