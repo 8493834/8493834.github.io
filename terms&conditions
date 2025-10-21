@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms and Conditions - [Your Website Name]</title>
+    <style>
+        /* Basic CSS for Readability - Embed for simplicity, but a separate CSS file is better for larger projects */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 40px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+
+        p, ul {
+            margin-bottom: 15px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Highlight the 'Effective Date' for visibility */
+        .effective-date {
+            text-align: right;
+            font-style: italic;
+            margin-bottom: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Terms and Conditions</h1>
+
+        <p class="effective-date">
+            **Effective Date: October 21, 2025**
+        </p>
+
+        <section>
+            <h2>1. Introduction and Acceptance</h2>
+            <p>Welcome to **[Your Website Name]** (the "Site"). These Terms and Conditions ("Terms") govern your use of the Site and all services provided by **[Your Company Name]** ("we", "us", or "our").</p>
+            <p>By accessing or using the Site, you agree to be bound by these Terms and our **<a href="/privacy-policy.html">Privacy Policy</a>**. If you disagree with any part of the terms, then you may not access the Site.</p>
+        </section>
+
+        <section>
+            <h2>2. Intellectual Property Rights</h2>
+            <p>The content, features, and functionality (including but not limited to all information, software, text, displays, images, video, and audio, and the design, selection, and arrangement thereof) are owned by **[Your Company Name]**, its licensors, or other providers of such material and are protected by copyright, trademark, patent, trade secret, and other intellectual property or proprietary rights laws.</p>
+        </section>
+
+        <section>
+            <h2>3. User Obligations and Prohibited Conduct</h2>
+            <p>As a user of the Site, you agree **not** to:</p>
+            <ul>
+                <li>Systematically retrieve data or other content from the Site to create or compile, directly or indirectly, a collection, compilation, database, or directory without written permission from us.</li>
+                <li>Make any unauthorized use of the Site, including collecting usernames and/or email addresses of users by electronic or other means for the purpose of sending unsolicited email.</li>
+                <li>Interfere with, disrupt, or create an undue burden on the Site or the networks or services connected to the Site.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>4. Disclaimer of Warranties</h2>
+            <p>The Site is provided on an "as-is" and "as-available" basis. Your use of the Site is at your sole risk. To the fullest extent permitted by law, we disclaim all warranties, express or implied, in connection with the site and your use thereof, including, without limitation, the implied warranties of merchantability, fitness for a particular purpose, and non-infringement.</p>
+        </section>
+
+        <section>
+            <h2>5. Limitation of Liability</h2>
+            <p>In no event will **[Your Company Name]**, its directors, employees, or agents be liable to you or any third party for any direct, indirect, consequential, exemplary, incidental, special, or punitive damages, including lost profit, lost revenue, loss of data, or other damages arising from your use of the Site.</p>
+        </section>
+
+        <section>
+            <h2>6. Governing Law</h2>
+            <p>These Terms and your use of the Site are governed by and construed in accordance with the laws of **[Your State/Country]**, without regard to its conflict of law principles.</p>
+        </section>
+
+        <section>
+            <h2>7. Contact Information</h2>
+            <p>For any questions or concerns regarding these Terms, please contact us at:</p>
+            <address>
+                Email: <a href="mailto:support@[yourwebsitename].com">support@[yourwebsitename].com</a><br>
+                Address: [Your Company Address - Optional]
+            </address>
+        </section>
+
+        <footer>
+            <p style="text-align: center; font-size: 0.8em; margin-top: 50px;">
+                &copy; [Current Year] [Your Company Name]. All rights reserved.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
