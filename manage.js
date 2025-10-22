@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_URL}/latest`, {
                 method: 'GET',
                 headers: {
-                    'X-Access-Key': ACCESS_KEY // Use less-privileged key for public read
+                    'X-Access-Key': $2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa // Use less-privileged key for public read
                 }
             });
 
