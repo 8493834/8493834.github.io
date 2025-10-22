@@ -1,22 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Simple Pong Game</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Dealers Inc. - Professional Card Services</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="nav.js" defer></script>
+    <script src="manage.js" defer></script>
 </head>
 <body>
-  <h1>Simple Pong Game</h1>
-  <div class="controls">
-    <button id="pauseBtn">Pause</button>
-    <label for="difficulty">Difficulty:</label>
-    <select id="difficulty">
-      <option value="easy">Easy</option>
-      <option value="medium" selected>Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-  </div>
-  <canvas id="pong" width="800" height="400"></canvas>
-  <script src="game.js"></script>
+
+    <header class="site-header">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">Card Dealers Inc.</a>
+            </div>
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li><a href="index.html#about">About</a></li>
+                    <li><a href="index.html#services">Services</a></li>
+                    <li><a href="index.html#portfolio">Portfolio</a></li>
+                    <li><a href="ads.html">New Ads</a></li>
+                    <li><a href="shop.html">Shop</a></li>
+                    <li><a href="other-businesses.html">Our Other Businesses</a></li>
+                </ul>
+            </nav>
+            <button class="nav-toggle" aria-label="toggle navigation">
+                <span class="hamburger"></span>
+            </button>
+        </div>
+    </header>
+
+    <section id="home" class="hero-section">
+        <div class="container">
+            <h1>Your Premier Destination for Card Services</h1>
+            <p>We are the leading experts in card dealing, event management, and private lessons.</p>
+            <a href="ads.html" class="cta-button">View Our Ads</a>
+        </div>
+    </section>
+
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2>About Card Dealers Inc.</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>Founded on a passion for the game, Card Dealers Inc. was established to bring a new level of professionalism and skill to the card dealing industry. Our team consists of seasoned professionals with decades of combined experience in casinos, high-stakes tournaments, and private events. We pride ourselves on our integrity, efficiency, and dedication to creating an unparalleled experience for every client.</p>
+                    <p>Whether you're hosting a small get-together or a large corporate event, we guarantee a flawless and engaging service that will leave your guests impressed. Our mission is to not just deal cards, but to deal in excellence.</p>
+                </div>
+                <div class="about-image">
+                    <img src="https://via.placeholder.com/400x300.png?text=Professional+Dealer" alt="Professional Card Dealer">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="services-section">
+        <div class="container">
+            <h2>Our Services</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3>Event Dealing</h3>
+                    <p>Professional dealers for casino nights, poker tournaments, and private parties. We handle everything from setup to dealing a variety of games.</p>
+                </div>
+                <div class="service-card">
+                    <h3>Private Lessons</h3>
+                    <p>One-on-one or group lessons to master card games like Blackjack, Poker, or Baccarat. Learn from the best and improve your skills.</p>
+                </div>
+                <div class="service-card">
+                    <h3>Consultation</h3>
+                    <p>Expert advice on managing card rooms, organizing tournaments, or planning your next high-stakes event. We provide strategic insights to ensure success.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="portfolio-section">
+        <div class="container">
+            <h2>Our Portfolio</h2>
+            <p>A look at some of the events and clients we've had the pleasure of working with.</p>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300.png?text=Event+1" alt="Card Dealers Inc. event photo">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300.png?text=Event+2" alt="Card Dealers Inc. event photo">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300.png?text=Event+3" alt="Card Dealers Inc. event photo">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300.png?text=Event+4" alt="Card Dealers Inc. event photo">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300.png?text=Event+5" alt="Card Dealers Inc. event photo">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://via.placeholder.com/300.png?text=Event+6" alt="Card Dealers Inc. event photo">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2025 Card Dealers Inc. All Rights Reserved.</p>
+            <div class="social-links">
+                <a href="#">Facebook</a>
+                <a href="#">Twitter</a>
+                <a href="#">LinkedIn</a>
+            </div>
+            <a href="manage.html" id="manage-button" class="management-button">Manage Content</a>
+        </div>
+    </footer>
+
 </body>
 </html>
