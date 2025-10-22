@@ -3,20 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🛑 REPLACE THESE WITH YOUR ACTUAL JSONBIN.IO CREDENTIALS 🛑
     const MANAGE_PASSWORD = "admin123"; 
     const BIN_ID = "68f6a629ae596e708f20081b"; // e.g., '653a29b05775c742c38edc6d'
-    const MASTER_KEY = "$2a$10$ftLmd0x0qulLl6i13jfib.qmGYaNp0vidFNH1gqnsBwY0/6o1UXxG"; // WARNING: Highly insecure if exposed on the frontend. Use for PUT.
+    const MASTER_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; // WARNING: Highly insecure if exposed on the frontend. Use for PUT.
     const ACCESS_KEY = "$2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa"; // Use for GET if the bin is private.
 
-    const API_URL = `https://api.jsonbin.io/v3/b/68f6a629ae596e708f20081b${BIN_ID}`;
+    const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
     // -------------------------------------------------------------
 
     // --- API Functions (Using Fetch) ---
 
     async function fetchContentFromAPI() {
         try {
-            const response = await fetch(`${https://api.jsonbin.io/v3/b/68f6a629ae596e708f20081b}/latest`, {
+            const response = await fetch(`${API_URL}/latest`, {
                 method: 'GET',
                 headers: {
-                    'X-Access-Key': $2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa // Use less-privileged key for public read
+                    'X-Access-Key': ACCESS_KEY // Use less-privileged key for public read
                 }
             });
 
