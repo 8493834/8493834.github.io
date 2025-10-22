@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchContentFromAPI() {
         try {
-            const response = await fetch(`${API_URL}/latest`, {
+            const response = await fetch(`${https://api.jsonbin.io/v3/b/68f6a629ae596e708f20081b}/latest`, {
                 method: 'GET',
                 headers: {
                     'X-Access-Key': $2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa // Use less-privileged key for public read
