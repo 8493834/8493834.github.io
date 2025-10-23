@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3>${item.name}</h3>
                 <p>${item.desc}</p>
                 <p class="price">${item.price}</p>
-                <a href="https://8493834.github.io/hi/index.html" class="cta-button">Buy Now</a>
+                <a href="https://inccard.github.io/hi/index.html" class="cta-button">Buy Now</a>
             `;
             shopContainer.appendChild(shopItem);
         });
