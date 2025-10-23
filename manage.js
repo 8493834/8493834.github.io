@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 🛑 REPLACE THESE WITH YOUR ACTUAL JSONBIN.IO CREDENTIALS 🛑
     // 1. Password to enter the manage.html page
-    const MANAGE_PASSWORD = "admin123"; 
+    const MANAGE_PASSWORD = "p@$$worD"; 
     
     // 2. The unique ID of your JSON Bin (e.g., '653a29b05775c742c38edc6d')
     const BIN_ID = "68f6a629ae596e708f20081b"; 
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3>${item.name}</h3>
                 <p>${item.desc}</p>
                 <p class="price">${item.price}</p>
-                <a href="#" class="cta-button">Buy Now</a>
+                <a href="8493834.github.io/hi/" class="cta-button">Buy Now</a>
             `;
             shopContainer.appendChild(shopItem);
         });
