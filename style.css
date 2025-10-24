@@ -1,4 +1,327 @@
-/* Styles for Edit/Delete functionality in manage.html */
+/* Core Styling for Card Dealers Inc. Website */
+
+/* --- Variables and Global Reset --- */
+:root {
+    --primary-color: #0d1117; /* Dark background */
+    --secondary-color: #6d071a; /* Rich red/maroon for accents (e.g., poker table felt) */
+    --accent-color: #ffcc00; /* Gold/yellow for highlights */
+    --text-color: #f0f6fc; /* Light text */
+    --text-secondary: #aaaaaa; /* Lighter grey text */
+    --spacing-unit: 20px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--primary-color);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-unit);
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #ffd84d;
+}
+
+h1, h2, h3 {
+    margin-bottom: var(--spacing-unit);
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+section {
+    padding: 80px 0;
+    text-align: center;
+}
+
+/* --- Header and Navigation --- */
+.site-header {
+    background-color: rgba(0, 0, 0, 0.9);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.site-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-unit) var(--spacing-unit);
+}
+
+.logo a {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.main-nav .nav-list {
+    list-style: none;
+    display: flex;
+}
+
+.main-nav .nav-list li {
+    margin-left: var(--spacing-unit);
+}
+
+.main-nav .nav-list a {
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 5px 10px;
+}
+
+.main-nav .nav-list a:hover {
+    color: var(--accent-color);
+}
+
+.nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* --- Call-to-Action (CTA) Button --- */
+.cta-button {
+    display: inline-block;
+    background-color: var(--secondary-color);
+    color: #fff;
+    padding: 10px 25px;
+    border-radius: 5px;
+    margin-top: var(--spacing-unit);
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: background-color 0.3s;
+}
+
+.cta-button:hover {
+    background-color: #920b22;
+    color: #fff;
+}
+
+/* --- Hero Section --- */
+.hero-section {
+    background: url('https://via.placeholder.com/1500x800.png?text=High-Stakes+Table') no-repeat center center/cover;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    padding-top: 60px; /* Account for fixed header */
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-section h1 {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+.hero-section p {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.9);
+}
+
+/* --- About Section --- */
+.about-section {
+    background-color: #161b22;
+}
+
+.about-content {
+    display: flex;
+    text-align: left;
+    gap: 40px;
+    align-items: center;
+}
+
+.about-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Services/Ads/Games/Businesses Grid --- */
+.services-section, .ads-section, .games-section, .businesses-section {
+    background-color: var(--primary-color);
+}
+
+.services-grid, .ads-grid, .games-grid, .businesses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-unit);
+    margin-top: 40px;
+}
+
+.service-card {
+    background-color: #161b22;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    transition: transform 0.3s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+}
+
+.service-card h3 {
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+}
+
+.service-card p {
+    color: var(--text-secondary);
+    flex-grow: 1;
+    margin-bottom: 20px;
+}
+
+/* --- Portfolio/Shop/Games Gallery --- */
+.portfolio-section, .shop-section {
+    background-color: #161b22;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 40px;
+}
+
+.gallery-item {
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s;
+}
+
+.gallery-item img:hover {
+    transform: scale(1.05);
+}
+
+/* --- Shop Specific Styles --- */
+.product-item {
+    background-color: #161b22;
+    padding: 20px;
+    text-align: center;
+}
+
+.product-item h3 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.product-item p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.product-item .price {
+    color: var(--accent-color);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+/* --- Management (manage.html) Styles --- */
+.manage-section .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-unit);
+    text-align: left;
+}
+
+.manage-section h2, .manage-section p {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.manage-card {
+    padding: 25px;
+    background-color: #161b22;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.content-form .form-group {
+    margin-bottom: 15px;
+}
+
+.content-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.content-form input[type="text"],
+.content-form input[type="url"],
+.content-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    background-color: #0d1117;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+/* Management List for Current Items (Add/Edit/Delete) */
+.manage-list {
+    list-style: none;
+    padding: 0;
+}
+
 .manage-list li {
     display: flex;
     justify-content: space-between;
@@ -10,6 +333,13 @@
     border-left: 5px solid var(--secondary-color);
 }
 
+.manage-list li span {
+    max-width: 70%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .manage-list li .actions {
     display: flex;
     gap: 10px;
@@ -17,7 +347,7 @@
 }
 
 .edit-btn {
-    background-color: #3f6eb7; /* A blue color for editing */
+    background-color: #3f6eb7; /* Blue for editing */
     color: #fff;
     padding: 5px 10px;
     border: none;
@@ -32,8 +362,7 @@
 }
 
 .delete-btn {
-    /* Existing style: #dc3545 red color */
-    background-color: #dc3545;
+    background-color: #dc3545; /* Red for deletion */
     color: #fff;
     padding: 5px 10px;
     border: none;
@@ -45,4 +374,119 @@
 
 .delete-btn:hover {
     background-color: #c82333;
+}
+
+/* Adjust button spacing on the form */
+.content-form button.cta-button {
+    margin-top: 10px;
+}
+
+
+/* --- Footer --- */
+.site-footer {
+    background-color: #0d1117;
+    color: var(--text-secondary);
+    padding: var(--spacing-unit) 0;
+    font-size: 0.9rem;
+    border-top: 1px solid #161b22;
+    text-align: center;
+}
+
+.site-footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.site-footer p {
+    margin: 5px 0;
+}
+
+.social-links a {
+    color: var(--text-secondary);
+    margin-left: 15px;
+}
+
+.social-links a:hover {
+    color: var(--accent-color);
+}
+
+.management-button {
+    background-color: #30363d;
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: var(--text-color);
+    font-weight: normal;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.management-button:hover {
+    background-color: #3f444c;
+}
+
+/* --- Mobile and Responsive Styles --- */
+@media (max-width: 900px) {
+    .main-nav {
+        display: none;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.95);
+        position: absolute;
+        top: 60px; /* Adjust based on header height */
+        left: 0;
+    }
+
+    .main-nav.nav-open {
+        display: block;
+    }
+
+    .main-nav .nav-list {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 0;
+    }
+
+    .main-nav .nav-list li {
+        margin: 10px 0;
+    }
+
+    .nav-toggle {
+        display: block;
+    }
+
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-section p {
+        font-size: 1.2rem;
+    }
+    
+    .about-content {
+        flex-direction: column;
+    }
+    
+    .about-image {
+        order: -1; /* Image on top on mobile */
+        margin-bottom: 20px;
+    }
+    
+    .manage-section .container {
+        grid-template-columns: 1fr; /* Single column layout for management on mobile */
+    }
+
+    .site-footer .container {
+        flex-direction: column;
+    }
+
+    .site-footer p, .social-links, .management-button {
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
+    }
+    
+    .social-links a {
+        margin: 0 10px;
+    }
 }
