@@ -23,7 +23,8 @@
                     <li><a href="index.html#portfolio">Portfolio</a></li>
                     <li><a href="ads.html">New Ads</a></li>
                     <li><a href="shop.html">Shop</a></li>
-                    <li><a href="games.html">Online Games</a></li> <li><a href="other-businesses.html">Our Other Businesses</a></li>
+                    <li><a href="games.html">Online Games</a></li>
+                    <li><a href="other-businesses.html">Our Other Businesses</a></li>
                 </ul>
             </nav>
             <button class="nav-toggle" aria-label="toggle navigation">
@@ -36,10 +37,10 @@
         <section class="manage-section" style="padding-top: 100px;">
             <div class="container">
                 <h2>Manage Site Content</h2>
-                <p>Use the forms below to manage the dynamic content on your site.</p>
+                <p>Use the forms below to manage the dynamic content on your site. Use the **Edit** button on existing items to update them.</p>
 
                 <div class="manage-card service-card">
-                    <h3>Add New Ad</h3>
+                    <h3>Add/Edit Ad</h3>
                     <form id="add-ad-form" class="content-form">
                         <div class="form-group">
                             <label for="ad-title">Ad Title</label>
@@ -54,11 +55,12 @@
                             <input type="url" id="ad-link" name="ad-link">
                         </div>
                         <button type="submit" class="cta-button">Add Ad</button>
+                        <button type="button" id="edit-cancel-btn-ad" class="cta-button" style="background-color: #555; display:none; margin-left: 10px;">Cancel Edit</button>
                     </form>
                 </div>
 
                 <div class="manage-card service-card">
-                    <h3>Add New Shop Item</h3>
+                    <h3>Add/Edit Shop Item</h3>
                     <form id="add-shop-form" class="content-form">
                         <div class="form-group">
                             <label for="item-img">Image URL</label>
@@ -77,11 +79,12 @@
                             <input type="text" id="item-price" name="item-price" required>
                         </div>
                         <button type="submit" class="cta-button">Add Product</button>
+                        <button type="button" id="edit-cancel-btn-shop" class="cta-button" style="background-color: #555; display:none; margin-left: 10px;">Cancel Edit</button>
                     </form>
                 </div>
                 
                 <div class="manage-card service-card">
-                    <h3>Add New Online Game</h3>
+                    <h3>Add/Edit Online Game</h3>
                     <form id="add-game-form" class="content-form">
                         <div class="form-group">
                             <label for="game-img">Image URL</label>
@@ -100,6 +103,7 @@
                             <input type="url" id="game-link" name="game-link" required>
                         </div>
                         <button type="submit" class="cta-button">Add Game</button>
+                        <button type="button" id="edit-cancel-btn-game" class="cta-button" style="background-color: #555; display:none; margin-left: 10px;">Cancel Edit</button>
                     </form>
                 </div>
 
