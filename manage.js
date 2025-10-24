@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MANAGE_PASSWORD = "p@$$worD"; 
     
     // 2. The unique ID of your JSON Bin (e.g., '653a29b05775c742c38edc6d')
-    const BIN_ID = "68f6a629ae596e708f20081b"; 
+    const BIN_ID = "68fb133f43b1c97be97c60c2"; 
     
     // 3. Your Master Key (for PUT/writing operations - BE CAREFUL exposing this)
     const MASTER_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
