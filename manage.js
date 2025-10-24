@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // 🛑 REPLACE THESE WITH YOUR ACTUAL JSONBIN.IO CREDENTIALS 🛑
-    const MANAGE_PASSWORD = "admin123"; 
-    const BIN_ID = "YOUR_BIN_ID"; //  <-- Your unique Bin ID here
-    const MASTER_KEY = "\"; 
+    const MANAGE_PASSWORD = "P@$$worD"; 
+    const BIN_ID = "68fb133f43b1c97be97c60c2"; //  <-- Your unique Bin ID here
+    const MASTER_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
     const ACCESS_KEY = "$2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa"; 
 
     const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
