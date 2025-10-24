@@ -2,41 +2,116 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 🛑 REPLACE THESE WITH YOUR ACTUAL JSONBIN.IO CREDENTIALS 🛑
     const MANAGE_PASSWORD = "admin123"; 
-    const BIN_ID = "68fb133f43b1c97be97c60c2"; //  <-- Your unique Bin ID here
+    const BIN_ID = "68fb133f43b1c97be97c60c2"; 
     const MASTER_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
     const ACCESS_KEY = "$2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa"; 
 
     const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
     // -------------------------------------------------------------
     
-    // 🎯 NEW: State to track which item is being edited 🎯
+    // 🎯 OFFLINE STORAGE KEYS 🎯
+    const CACHE_KEY = 'contentCache';
+    const SYNC_QUEUE_KEY = 'syncQueue';
+    
     let editingItem = null; 
 
-    // --- API Functions (Using Fetch) ---
+    // --- Local Storage Helpers ---
 
+    function getLocalContent() {
+        try {
+            const cached = localStorage.getItem(CACHE_KEY);
+            return cached ? JSON.parse(cached) : { ads: [], shopItems: [], onlineGames: [] };
+        } catch (e) {
+            console.error("Error reading from local storage:", e);
+            return { ads: [], shopItems: [], onlineGames: [] };
+        }
+    }
+
+    function setLocalContent(content) {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(content));
+        } catch (e) {
+            console.error("Error writing to local storage:", e);
+        }
+    }
+    
+    function getSyncQueue() {
+        try {
+            const queue = localStorage.getItem(SYNC_QUEUE_KEY);
+            return queue ? JSON.parse(queue) : [];
+        } catch (e) {
+            console.error("Error reading sync queue:", e);
+            return [];
+        }
+    }
+
+    function setSyncQueue(queue) {
+        try {
+            localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
+        } catch (e) {
+            console.error("Error writing sync queue:", e);
+        }
+    }
+    
+    // --- API Functions (Now Offline-Aware) ---
+
+    // 🎯 MODIFIED: Fetches from network, saves to cache, falls back to cache 🎯
     async function fetchContentFromAPI() {
+        console.log('Attempting to fetch content from API...');
         try {
             const response = await fetch(`${API_URL}/latest`, {
                 method: 'GET',
-                headers: {
-                    'X-Access-Key': ACCESS_KEY
-                }
+                headers: { 'X-Access-Key': ACCESS_KEY }
             });
 
             if (!response.ok) {
+                // If network succeeds but API returns error, throw to fall back to cache
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
             const data = await response.json();
-            return data.record || { ads: [], shopItems: [], onlineGames: [] }; 
+            const content = data.record || { ads: [], shopItems: [], onlineGames: [] };
+            
+            // Success: Save the fresh content to local storage
+            setLocalContent(content);
+            console.log('Content fetched from API and cached.');
+            return content;
 
         } catch (error) {
-            console.error('Error fetching data from JSONBin:', error);
-            return { ads: [], shopItems: [], onlineGames: [] }; 
+            console.error('API fetch failed. Falling back to Local Storage cache.', error);
+            // Fallback: Return cached content
+            return getLocalContent();
         }
     }
+    
+    // 🎯 NEW: Attempts to save to the API and runs the sync queue 🎯
+    async function updateContentInAPI(newContent, skipQueue = false) {
+        if (!navigator.onLine || skipQueue) {
+            
+            if (!skipQueue) {
+                console.log('Offline or API blocked. Queuing changes locally...');
+                // If offline, queue the entire new content structure
+                let queue = getSyncQueue();
+                queue.push(newContent);
+                setSyncQueue(queue);
+                alert('⚠️ You are offline. Changes saved locally and will sync when online.');
+                
+                // Immediately update local content so the user sees their change
+                setLocalContent(newContent); 
+            }
+            
+            // If the call was a result of the syncQueue, we skip the alert/queue step
+            if (skipQueue) {
+                setLocalContent(newContent); // Always update local state immediately
+            }
 
-    async function updateContentInAPI(newContent) {
+            // Always try to sync after a change, just in case connection just returned
+            syncQueue(); 
+            return false; // Return false to indicate the change was not immediately live
+        }
+        
+        // --- ONLINE LOGIC ---
+        console.log('Attempting to update API directly...');
         try {
             const response = await fetch(API_URL, {
                 method: 'PUT',
@@ -48,22 +123,78 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
+                // If API call fails (e.g., key error, rate limit), queue the change
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             
+            // Success: Update local cache and return true
+            setLocalContent(newContent); 
             return true; 
 
         } catch (error) {
-            console.error('Error updating data in JSONBin:', error);
-            return false;
+            console.error('Online update failed. Queuing content for sync.', error);
+            // On failure, fall back to queuing and running the sync routine
+            return updateContentInAPI(newContent, false); 
         }
     }
+    
+    // 🎯 NEW: Synchronization Logic 🎯
+    async function syncQueue() {
+        if (!navigator.onLine) {
+            console.log('Cannot sync: Still offline.');
+            return;
+        }
+
+        let queue = getSyncQueue();
+        if (queue.length === 0) {
+            console.log('Sync queue is empty.');
+            return;
+        }
+        
+        // The last item in the queue is the most recent (and correct) state
+        const contentToSync = queue[queue.length - 1]; 
+
+        console.log(`Attempting to sync ${queue.length} pending update(s)...`);
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': MASTER_KEY
+                },
+                body: JSON.stringify(contentToSync)
+            });
+
+            if (response.ok) {
+                // Success: Clear the queue and notify
+                setSyncQueue([]);
+                setLocalContent(contentToSync); // Ensure local cache is updated after successful sync
+                alert('✅ Synchronization successful! Offline changes are now live.');
+                loadCurrentContent(); // Refresh the management page data
+            } else {
+                 console.error('Sync failed on the server side:', response.status);
+            }
+        } catch (error) {
+            console.error('Sync failed due to network or server error.', error);
+        }
+    }
+
 
     // --- Initialization and Routing ---
 
     function init() {
         const path = window.location.pathname;
 
+        // Add listener to automatically sync when the browser detects an internet connection
+        window.addEventListener('online', syncQueue);
+        
+        // Run an initial sync check if we load while online
+        if (navigator.onLine) {
+            syncQueue();
+        }
+
+        // ... (rest of init remains the same, but now uses offline-aware loaders) ...
         if (path.endsWith('index.html') || path === '/') {
             // Nothing to do on home
         } else if (path.endsWith('manage.html')) {
@@ -89,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 🎯 NEW: Reset state and form 🎯
+    // ... (endEditMode remains the same) ...
     function endEditMode(form) {
         editingItem = null;
         form.reset();
@@ -98,20 +229,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Form and Add/Delete Logic (Now includes Edit) ---
+    // --- Form Submission Logic (MODIFIED for Offline-Awareness) ---
 
     function setupManagementForms() {
         const addAdForm = document.getElementById('add-ad-form');
         const addShopForm = document.getElementById('add-shop-form');
         const addGameForm = document.getElementById('add-game-form');
 
-        // Setup Cancel Buttons
         document.getElementById('edit-cancel-btn-ad').addEventListener('click', () => endEditMode(addAdForm));
         document.getElementById('edit-cancel-btn-shop').addEventListener('click', () => endEditMode(addShopForm));
         document.getElementById('edit-cancel-btn-game').addEventListener('click', () => endEditMode(addGameForm));
 
 
-        // 🎯 MODIFIED: AD FORM SUBMISSION 🎯
+        // AD FORM SUBMISSION
         addAdForm.setAttribute('data-type', 'Ad');
         addAdForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -120,26 +250,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const adLink = document.getElementById('ad-link').value;
             const newAd = { title: adTitle, desc: adDesc, link: adLink };
             
-            const content = await fetchContentFromAPI();
+            const content = getLocalContent(); // Start with cached content
             
             if (editingItem && editingItem.type === 'ad') {
-                content.ads[editingItem.index] = newAd; // Update existing item
-                alert('✅ Ad updated successfully!');
+                content.ads[editingItem.index] = newAd;
                 endEditMode(addAdForm);
             } else {
-                content.ads.push(newAd); // Add new item
-                alert('✅ New ad added successfully!');
+                content.ads.push(newAd);
             }
             
-            if (await updateContentInAPI(content)) {
-                loadCurrentContent(); 
-                loadAdsContent(); 
-            } else {
-                alert('❌ Failed to save content to the API.');
-            }
+            // Use the offline-aware update function
+            await updateContentInAPI(content);
+            loadCurrentContent(); 
+            loadAdsContent(); 
         });
 
-        // 🎯 MODIFIED: SHOP FORM SUBMISSION 🎯
+        // SHOP FORM SUBMISSION
         addShopForm.setAttribute('data-type', 'Product');
         addShopForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -149,26 +275,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemPrice = document.getElementById('item-price').value;
             const newItem = { img: itemImg, name: itemName, desc: itemDesc, price: itemPrice };
             
-            const content = await fetchContentFromAPI();
+            const content = getLocalContent();
 
             if (editingItem && editingItem.type === 'shop') {
-                content.shopItems[editingItem.index] = newItem; // Update existing item
-                alert('✅ Shop item updated successfully!');
+                content.shopItems[editingItem.index] = newItem;
                 endEditMode(addShopForm);
             } else {
-                content.shopItems.push(newItem); // Add new item
-                alert('✅ New shop item added successfully!');
+                content.shopItems.push(newItem);
             }
             
-            if (await updateContentInAPI(content)) {
-                loadCurrentContent();
-                loadShopContent();
-            } else {
-                 alert('❌ Failed to save content to the API.');
-            }
+            await updateContentInAPI(content);
+            loadCurrentContent();
+            loadShopContent();
         });
         
-        // 🎯 MODIFIED: GAME FORM SUBMISSION 🎯
+        // GAME FORM SUBMISSION
         addGameForm.setAttribute('data-type', 'Game');
         addGameForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -178,31 +299,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const gameLink = document.getElementById('game-link').value;
             const newGame = { img: gameImg, name: gameName, desc: gameDesc, link: gameLink };
             
-            const content = await fetchContentFromAPI();
+            const content = getLocalContent();
             
             if (!content.onlineGames) content.onlineGames = []; 
 
             if (editingItem && editingItem.type === 'game') {
-                content.onlineGames[editingItem.index] = newGame; // Update existing item
-                alert('✅ Online game updated successfully!');
+                content.onlineGames[editingItem.index] = newGame;
                 endEditMode(addGameForm);
             } else {
-                content.onlineGames.push(newGame); // Add new item
-                alert('✅ New online game added successfully!');
+                content.onlineGames.push(newGame);
             }
             
-            if (await updateContentInAPI(content)) {
-                loadCurrentContent();
-                loadGamesContent();
-            } else {
-                 alert('❌ Failed to save content to the API.');
-            }
+            await updateContentInAPI(content);
+            loadCurrentContent();
+            loadGamesContent();
         });
     }
 
-    // 🎯 NEW: Start Edit Mode 🎯
+    // --- Start Edit Mode (Remains the same, uses getLocalContent now) ---
     async function startEdit(index, type) {
-        const content = await fetchContentFromAPI();
+        // Use local content since we are already on the manage page
+        const content = getLocalContent(); 
         let item;
         let formId;
         
@@ -252,18 +369,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Content Loading (Updated to include Edit button) ---
+    // --- Content Loading (MODIFIED to rely on Local/Fetched Content) ---
 
+    // loadCurrentContent now always uses the cached content (which might be the latest sync)
     async function loadCurrentContent() {
         const currentAdsList = document.getElementById('current-ads-list');
         const currentShopList = document.getElementById('current-shop-list');
         const currentGamesList = document.getElementById('current-games-list');
         
-        const content = await fetchContentFromAPI();
+        // Ensures we either get fresh content or the cached content for management
+        const content = await fetchContentFromAPI(); 
+        
         const ads = content.ads;
         const items = content.shopItems;
         const games = content.onlineGames;
 
+        // ... (rest of list rendering logic is the same) ...
+        
         // Load Ads
         if (currentAdsList) {
             currentAdsList.innerHTML = '';
@@ -313,11 +435,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         setupDeleteButtons();
-        setupEditButtons(); // 🎯 NEW: Setup Edit button listeners 🎯
+        setupEditButtons();
     }
     
-    // ... (loadAdsContent, loadShopContent, loadGamesContent remain the same) ...
-    // Note: These functions are kept separate for modularity, they rely on the updated fetchContentFromAPI.
+    // The public facing content loaders must also use fetchContentFromAPI for offline resilience
     async function loadAdsContent() {
         const adsContainer = document.getElementById('ads-container');
         if (!adsContainer) return;
@@ -326,6 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const ads = content.ads;
         adsContainer.innerHTML = ''; 
 
+        // ... (rest of ads content rendering remains the same) ...
         if (ads.length === 0) {
             adsContainer.innerHTML = '<p style="text-align:center;">No new ads are currently running. Check back soon!</p>';
         }
@@ -350,6 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const shopItems = content.shopItems;
         shopContainer.innerHTML = ''; 
 
+        // ... (rest of shop content rendering remains the same) ...
         if (shopItems.length === 0) {
              shopContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align:center;">We are currently restocking the shop. Check back soon!</p>';
         }
@@ -376,6 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const onlineGames = content.onlineGames;
         gamesContainer.innerHTML = ''; 
 
+        // ... (rest of games content rendering remains the same) ...
         if (onlineGames.length === 0) {
              gamesContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align:center;">Our online games are currently offline for maintenance. Check back soon!</p>';
         }
@@ -394,18 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Edit Button Setup ---
-    function setupEditButtons() {
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const index = parseInt(e.target.getAttribute('data-index'));
-                const type = e.target.getAttribute('data-type');
-                startEdit(index, type);
-            });
-        });
-    }
-    
-    // --- Deleting items (unchanged logic) ---
+    // --- Deleting items (MODIFIED for Offline-Awareness) ---
     
     function setupDeleteButtons() {
         document.querySelectorAll('.delete-btn').forEach(button => {
@@ -415,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (confirm(`Are you sure you want to delete this ${type} item? This will affect the live site.`)) {
                     
-                    const content = await fetchContentFromAPI();
+                    const content = getLocalContent();
 
                     if (type === 'ad') {
                         content.ads.splice(index, 1);
@@ -425,16 +538,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         content.onlineGames.splice(index, 1);
                     }
                     
-                    if (await updateContentInAPI(content)) {
-                        alert('✅ Item deleted successfully from the live site!');
-                        loadCurrentContent(); 
-                        loadAdsContent();
-                        loadShopContent();
-                        loadGamesContent(); 
-                    } else {
-                        alert('❌ Failed to delete item from the API.');
-                    }
+                    // Use the offline-aware update function
+                    await updateContentInAPI(content);
+                    
+                    loadCurrentContent(); 
+                    loadAdsContent();
+                    loadShopContent();
+                    loadGamesContent(); 
                 }
+            });
+        });
+    }
+
+    // ... (setupEditButtons remains the same) ...
+    function setupEditButtons() {
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const index = parseInt(e.target.getAttribute('data-index'));
+                const type = e.target.getAttribute('data-type');
+                startEdit(index, type);
             });
         });
     }
