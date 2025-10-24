@@ -1,13 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // 🛑 REPLACE THESE WITH YOUR ACTUAL JSONBIN.IO CREDENTIALS 🛑
-    const MANAGE_PASSWORD = "P@$$worD"; 
+    const MANAGE_PASSWORD = "admin123"; 
     const BIN_ID = "68fb133f43b1c97be97c60c2"; //  <-- Your unique Bin ID here
     const MASTER_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
     const ACCESS_KEY = "$2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa"; 
 
     const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
     // -------------------------------------------------------------
+    
+    // 🎯 NEW: State to track which item is being edited 🎯
+    let editingItem = null; 
 
     // --- API Functions (Using Fetch) ---
 
@@ -25,12 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
-            // Ensure the default structure includes the new onlineGames array
             return data.record || { ads: [], shopItems: [], onlineGames: [] }; 
 
         } catch (error) {
             console.error('Error fetching data from JSONBin:', error);
-            // Fallback to empty structure on failure
             return { ads: [], shopItems: [], onlineGames: [] }; 
         }
     }
@@ -71,13 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
             loadAdsContent();
         } else if (path.endsWith('shop.html')) {
             loadShopContent();
-        } else if (path.endsWith('games.html')) { // 🎯 NEW ROUTE 🎯
+        } else if (path.endsWith('games.html')) {
             loadGamesContent();
         }
     }
 
-    // --- Authentication Flow ---
-
+    // ... (authenticateAndSetupManagement remains the same) ...
     function authenticateAndSetupManagement() {
         const enteredPassword = prompt("🔐 Please enter the password to access the content management page:");
         if (enteredPassword === MANAGE_PASSWORD) {
@@ -89,13 +89,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Form and Add/Delete Logic ---
+    // 🎯 NEW: Reset state and form 🎯
+    function endEditMode(form) {
+        editingItem = null;
+        form.reset();
+        form.querySelector('button[type="submit"]').textContent = `Add ${form.getAttribute('data-type')}`;
+        document.getElementById('edit-cancel-btn-' + form.getAttribute('data-type')).style.display = 'none';
+    }
+
+
+    // --- Form and Add/Delete Logic (Now includes Edit) ---
 
     function setupManagementForms() {
         const addAdForm = document.getElementById('add-ad-form');
         const addShopForm = document.getElementById('add-shop-form');
-        const addGameForm = document.getElementById('add-game-form'); // 🎯 NEW FORM 🎯
+        const addGameForm = document.getElementById('add-game-form');
 
+        // Setup Cancel Buttons
+        document.getElementById('edit-cancel-btn-ad').addEventListener('click', () => endEditMode(addAdForm));
+        document.getElementById('edit-cancel-btn-shop').addEventListener('click', () => endEditMode(addShopForm));
+        document.getElementById('edit-cancel-btn-game').addEventListener('click', () => endEditMode(addGameForm));
+
+
+        // 🎯 MODIFIED: AD FORM SUBMISSION 🎯
+        addAdForm.setAttribute('data-type', 'Ad');
         addAdForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const adTitle = document.getElementById('ad-title').value;
@@ -104,11 +121,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const newAd = { title: adTitle, desc: adDesc, link: adLink };
             
             const content = await fetchContentFromAPI();
-            content.ads.push(newAd);
+            
+            if (editingItem && editingItem.type === 'ad') {
+                content.ads[editingItem.index] = newAd; // Update existing item
+                alert('✅ Ad updated successfully!');
+                endEditMode(addAdForm);
+            } else {
+                content.ads.push(newAd); // Add new item
+                alert('✅ New ad added successfully!');
+            }
             
             if (await updateContentInAPI(content)) {
-                alert('✅ New ad added successfully for everyone!');
-                addAdForm.reset();
                 loadCurrentContent(); 
                 loadAdsContent(); 
             } else {
@@ -116,6 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // 🎯 MODIFIED: SHOP FORM SUBMISSION 🎯
+        addShopForm.setAttribute('data-type', 'Product');
         addShopForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const itemImg = document.getElementById('item-img').value;
@@ -125,11 +150,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const newItem = { img: itemImg, name: itemName, desc: itemDesc, price: itemPrice };
             
             const content = await fetchContentFromAPI();
-            content.shopItems.push(newItem);
+
+            if (editingItem && editingItem.type === 'shop') {
+                content.shopItems[editingItem.index] = newItem; // Update existing item
+                alert('✅ Shop item updated successfully!');
+                endEditMode(addShopForm);
+            } else {
+                content.shopItems.push(newItem); // Add new item
+                alert('✅ New shop item added successfully!');
+            }
             
             if (await updateContentInAPI(content)) {
-                alert('✅ New shop item added successfully for everyone!');
-                addShopForm.reset();
                 loadCurrentContent();
                 loadShopContent();
             } else {
@@ -137,7 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // 🎯 NEW GAME FORM SUBMISSION 🎯
+        // 🎯 MODIFIED: GAME FORM SUBMISSION 🎯
+        addGameForm.setAttribute('data-type', 'Game');
         addGameForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const gameImg = document.getElementById('game-img').value;
@@ -147,13 +179,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const newGame = { img: gameImg, name: gameName, desc: gameDesc, link: gameLink };
             
             const content = await fetchContentFromAPI();
-            // Check if onlineGames exists, initialize if it doesn't (safety check)
+            
             if (!content.onlineGames) content.onlineGames = []; 
-            content.onlineGames.push(newGame);
+
+            if (editingItem && editingItem.type === 'game') {
+                content.onlineGames[editingItem.index] = newGame; // Update existing item
+                alert('✅ Online game updated successfully!');
+                endEditMode(addGameForm);
+            } else {
+                content.onlineGames.push(newGame); // Add new item
+                alert('✅ New online game added successfully!');
+            }
             
             if (await updateContentInAPI(content)) {
-                alert('✅ New online game added successfully!');
-                addGameForm.reset();
                 loadCurrentContent();
                 loadGamesContent();
             } else {
@@ -162,17 +200,69 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Content Loading (Now Asynchronous) ---
+    // 🎯 NEW: Start Edit Mode 🎯
+    async function startEdit(index, type) {
+        const content = await fetchContentFromAPI();
+        let item;
+        let formId;
+        
+        // Determine the array and form based on type
+        if (type === 'ad') {
+            item = content.ads[index];
+            formId = 'add-ad-form';
+        } else if (type === 'shop') {
+            item = content.shopItems[index];
+            formId = 'add-shop-form';
+        } else if (type === 'game') {
+            item = content.onlineGames[index];
+            formId = 'add-game-form';
+        }
+
+        if (!item) return;
+
+        // Set editing state
+        editingItem = { index, type };
+
+        // Get the form elements
+        const form = document.getElementById(formId);
+        
+        // Populate the form fields
+        if (type === 'ad') {
+            document.getElementById('ad-title').value = item.title;
+            document.getElementById('ad-desc').value = item.desc;
+            document.getElementById('ad-link').value = item.link;
+        } else if (type === 'shop') {
+            document.getElementById('item-img').value = item.img;
+            document.getElementById('item-name').value = item.name;
+            document.getElementById('item-desc').value = item.desc;
+            document.getElementById('item-price').value = item.price;
+        } else if (type === 'game') {
+            document.getElementById('game-img').value = item.img;
+            document.getElementById('game-name').value = item.name;
+            document.getElementById('game-desc').value = item.desc;
+            document.getElementById('game-link').value = item.link;
+        }
+        
+        // Change button text and display cancel
+        form.querySelector('button[type="submit"]').textContent = `Save Changes (${type.toUpperCase()})`;
+        document.getElementById('edit-cancel-btn-' + type).style.display = 'inline-block';
+
+        // Scroll to the form
+        form.scrollIntoView({ behavior: 'smooth' });
+    }
+
+
+    // --- Content Loading (Updated to include Edit button) ---
 
     async function loadCurrentContent() {
         const currentAdsList = document.getElementById('current-ads-list');
         const currentShopList = document.getElementById('current-shop-list');
-        const currentGamesList = document.getElementById('current-games-list'); // 🎯 NEW LIST 🎯
+        const currentGamesList = document.getElementById('current-games-list');
         
         const content = await fetchContentFromAPI();
         const ads = content.ads;
         const items = content.shopItems;
-        const games = content.onlineGames; // 🎯 NEW DATA 🎯
+        const games = content.onlineGames;
 
         // Load Ads
         if (currentAdsList) {
@@ -181,7 +271,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <span>${ad.title}</span>
-                    <button data-index="${index}" data-type="ad" class="delete-btn">Delete</button>
+                    <div class="actions">
+                        <button data-index="${index}" data-type="ad" class="edit-btn">Edit</button>
+                        <button data-index="${index}" data-type="ad" class="delete-btn">Delete</button>
+                    </div>
                 `;
                 currentAdsList.appendChild(li);
             });
@@ -194,30 +287,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <span>${item.name}</span>
-                    <button data-index="${index}" data-type="shop" class="delete-btn">Delete</button>
+                    <div class="actions">
+                        <button data-index="${index}" data-type="shop" class="edit-btn">Edit</button>
+                        <button data-index="${index}" data-type="shop" class="delete-btn">Delete</button>
+                    </div>
                 `;
                 currentShopList.appendChild(li);
             });
         }
         
-        // 🎯 Load Games 🎯
+        // Load Games
         if (currentGamesList) {
             currentGamesList.innerHTML = '';
             games.forEach((game, index) => {
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <span>${game.name}</span>
-                    <button data-index="${index}" data-type="game" class="delete-btn">Delete</button>
+                    <div class="actions">
+                        <button data-index="${index}" data-type="game" class="edit-btn">Edit</button>
+                        <button data-index="${index}" data-type="game" class="delete-btn">Delete</button>
+                    </div>
                 `;
                 currentGamesList.appendChild(li);
             });
         }
         
         setupDeleteButtons();
+        setupEditButtons(); // 🎯 NEW: Setup Edit button listeners 🎯
     }
     
-    // ... (loadAdsContent and loadShopContent are unchanged, but rely on the updated fetchContentFromAPI) ...
-    
+    // ... (loadAdsContent, loadShopContent, loadGamesContent remain the same) ...
+    // Note: These functions are kept separate for modularity, they rely on the updated fetchContentFromAPI.
     async function loadAdsContent() {
         const adsContainer = document.getElementById('ads-container');
         if (!adsContainer) return;
@@ -268,7 +368,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 🎯 NEW FUNCTION TO LOAD GAMES CONTENT 🎯
     async function loadGamesContent() {
         const gamesContainer = document.getElementById('games-container');
         if (!gamesContainer) return;
@@ -295,7 +394,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Deleting items (Now Asynchronous) ---
+    // --- Edit Button Setup ---
+    function setupEditButtons() {
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const index = parseInt(e.target.getAttribute('data-index'));
+                const type = e.target.getAttribute('data-type');
+                startEdit(index, type);
+            });
+        });
+    }
+    
+    // --- Deleting items (unchanged logic) ---
     
     function setupDeleteButtons() {
         document.querySelectorAll('.delete-btn').forEach(button => {
@@ -311,16 +421,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         content.ads.splice(index, 1);
                     } else if (type === 'shop') {
                         content.shopItems.splice(index, 1);
-                    } else if (type === 'game') { // 🎯 NEW DELETION LOGIC 🎯
+                    } else if (type === 'game') { 
                         content.onlineGames.splice(index, 1);
                     }
                     
                     if (await updateContentInAPI(content)) {
                         alert('✅ Item deleted successfully from the live site!');
-                        loadCurrentContent(); // Refresh the manage list
+                        loadCurrentContent(); 
                         loadAdsContent();
                         loadShopContent();
-                        loadGamesContent(); // Refresh games list
+                        loadGamesContent(); 
                     } else {
                         alert('❌ Failed to delete item from the API.');
                     }
