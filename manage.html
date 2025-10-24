@@ -23,7 +23,7 @@
                     <li><a href="index.html#portfolio">Portfolio</a></li>
                     <li><a href="ads.html">New Ads</a></li>
                     <li><a href="shop.html">Shop</a></li>
-                    <li><a href="other-businesses.html">Our Other Businesses</a></li>
+                    <li><a href="games.html">Online Games</a></li> <li><a href="other-businesses.html">Our Other Businesses</a></li>
                 </ul>
             </nav>
             <button class="nav-toggle" aria-label="toggle navigation">
@@ -36,7 +36,7 @@
         <section class="manage-section" style="padding-top: 100px;">
             <div class="container">
                 <h2>Manage Site Content</h2>
-                <p>Use the forms below to add new advertisements and shop items. Changes are live for all users.</p>
+                <p>Use the forms below to manage the dynamic content on your site.</p>
 
                 <div class="manage-card service-card">
                     <h3>Add New Ad</h3>
@@ -79,6 +79,29 @@
                         <button type="submit" class="cta-button">Add Product</button>
                     </form>
                 </div>
+                
+                <div class="manage-card service-card">
+                    <h3>Add New Online Game</h3>
+                    <form id="add-game-form" class="content-form">
+                        <div class="form-group">
+                            <label for="game-img">Image URL</label>
+                            <input type="url" id="game-img" name="game-img" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="game-name">Game Name</label>
+                            <input type="text" id="game-name" name="game-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="game-desc">Description</label>
+                            <textarea id="game-desc" name="game-desc" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="game-link">Play Link (URL)</label>
+                            <input type="url" id="game-link" name="game-link" required>
+                        </div>
+                        <button type="submit" class="cta-button">Add Game</button>
+                    </form>
+                </div>
 
                 <div class="manage-card service-card">
                     <h3>Manage Our Other Businesses</h3>
@@ -99,6 +122,13 @@
                     <ul id="current-shop-list" class="manage-list">
                         </ul>
                 </div>
+
+                <div class="manage-card service-card">
+                    <h3>Current Online Games</h3>
+                    <ul id="current-games-list" class="manage-list">
+                        </ul>
+                </div>
+
             </div>
         </section>
     </main>
