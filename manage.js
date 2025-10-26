@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // 🛑 REPLACE THESE WITH YOUR ACTUAL JSONBIN.IO CREDENTIALS 🛑
-    const MANAGE_PASSWORD = "admin123"; 
+    const MANAGE_PASSWORD = "ADMIN!@#"; 
     const BIN_ID = "68fb133f43b1c97be97c60c2"; 
     const MASTER_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
     const ACCESS_KEY = "$2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa"; 
