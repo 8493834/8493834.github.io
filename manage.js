@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3>${item.name}</h3>
                 <p>${item.desc}</p>
                 <p class="price">${item.price}</p>
-                <a href="#" class="cta-button">Buy Now</a>
+                <a href="inccard.github.io/hi/" class="cta-button">Buy Now</a>
             `;
             shopContainer.appendChild(shopItem);
         });
