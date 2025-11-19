@@ -1,0 +1,15 @@
+# robots.txt file for Card Dealers Inc.
+
+# 1. Block access to the management page (security precaution)
+# Search engines should not index your management portal.
+User-agent: *
+Disallow: /manage.html
+
+# 2. Allow all other pages to be crawled
+# (The pages listed in your sitemap: index, ads, shop, games, other-businesses, terms)
+User-agent: *
+Allow: /
+
+# 3. Direct all search engines to the location of your sitemap
+# IMPORTANT: Replace 'https://www.yourdomain.com' with your actual website URL
+Sitemap: https://8493834.github.io/sitemap.xml
