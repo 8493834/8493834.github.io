@@ -563,3 +563,20 @@ document.addEventListener('DOMContentLoaded', () => {
     
     init();
 });
+function init() {
+    // 🎯 SECURITY CHECK: Is the user the admin?
+    const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const ADMIN_EMAIL = "joshuasteeljoshua19@gmail.com"; // Must match nav.js
+
+    if (!isLoggedIn || userData.email !== ADMIN_EMAIL) {
+        alert("🚫 Access Denied: This area is for the site administrator only.");
+        window.location.href = "index.html";
+        return; // Stop the script from running
+    }
+
+    // ... rest of your existing init code (Service Worker, online listeners, etc.)
+    const path = window.location.pathname;
+    window.addEventListener('online', syncQueue);
+    // ... 
+}
