@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Card Dealers Inc.</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-page">
+    <header class="site-header">
+        <div class="container">
+            <div class="logo"><a href="index.html">Card Dealers Inc.</a></div>
+        </div>
+    </header>
+
+    <main class="auth-container">
+        <div class="auth-card service-card">
+            <h2 id="auth-title">Welcome Back</h2>
+            <p id="auth-subtitle">Sign in to manage your account</p>
+
+            <div id="google-btn-container">
+                <div id="g_id_onload"
+                     data-client_id="824439940987-8503jqau2c7lrqn9vidk0rmuubd1mr12.apps.googleusercontent.com"
+                     data-context="signin"
+                     data-ux_mode="popup"
+                     data-callback="handleCredentialResponse"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+            </div>
+
+            <div class="divider"><span>OR</span></div>
+
+            <form id="email-auth-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="poker@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="cta-button" style="width: 100%;">Continue</button>
+            </form>
+
+            <p class="auth-switch">
+                Don't have an account? <a href="#" id="toggle-auth">Create one</a>
+            </p>
+        </div>
+    </main>
+
+    <script src="auth.js"></script>
+</body>
+</html>
