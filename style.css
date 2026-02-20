@@ -539,3 +539,34 @@ section {
     justify-content: center;
     margin-bottom: 10px;
 }
+@media (max-width: 900px) {
+    .nav-toggle {
+        display: block; /* Shows the hamburger icon */
+        font-size: 2rem;
+        background: none;
+        border: none;
+        color: var(--accent-color);
+        cursor: pointer;
+    }
+
+    .main-nav {
+        display: none; /* Hides the menu links initially */
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background-color: var(--primary-color);
+        padding: 20px 0;
+        border-bottom: 2px solid var(--secondary-color);
+    }
+
+    /* This is what the JavaScript toggles */
+    .main-nav.nav-open {
+        display: block; 
+    }
+
+    .nav-list {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
