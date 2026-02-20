@@ -87,3 +87,20 @@ document.addEventListener('DOMContentLoaded', updateNavForAuth);
 
 // Call this inside your DOMContentLoaded listener
 document.addEventListener('DOMContentLoaded', updateNavForAuth);
+
+document.addEventListener('DOMContentLoaded', () => {
+    const navToggle = document.getElementById('nav-toggle');
+    const mainNav = document.getElementById('main-nav');
+
+    if (navToggle && mainNav) {
+        navToggle.addEventListener('click', () => {
+            mainNav.classList.toggle('nav-open');
+            
+            // Optional: Change icon from ☰ to ✕ when open
+            navToggle.innerText = mainNav.classList.contains('nav-open') ? '✕' : '☰';
+        });
+    }
+    
+    // Keep your updateNavForAuth() function here as well!
+    updateNavForAuth(); 
+});
