@@ -413,13 +413,14 @@ section {
 }
 
 .management-button {
+    display: none; /* 🎯 Hidden by default! JS will show it for the admin. */
     background-color: #30363d;
     padding: 5px 10px;
     border-radius: 4px;
     color: var(--text-color);
-    font-weight: normal;
     font-size: 0.8rem;
     margin-top: 5px;
+}
 }
 
 .management-button:hover {
