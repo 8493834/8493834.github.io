@@ -50,7 +50,8 @@
         import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // 🛑 REPLACE THESE WITH YOUR KEY FROM FIREBASE CONSOLE 🛑
-        const firebaseConfig = {
+ // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
   apiKey: "AIzaSyAsi9jP_5NtfkFG5A98pPZJRopf91noTos",
   authDomain: "github-daeca.firebaseapp.com",
   projectId: "github-daeca",
@@ -58,7 +59,7 @@
   messagingSenderId: "998884967329",
   appId: "1:998884967329:web:e782bec98cb64ce9d2c1e0",
   measurementId: "G-WQ8GE6VE4C"
-        };
+};
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
