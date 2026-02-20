@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Card Dealers Inc.</title>
+    <title>Account - Card Dealers Inc.</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="auth-page">
     <header class="site-header">
@@ -16,20 +15,14 @@
     </header>
 
     <main class="auth-container">
-        <div class="auth-card service-card">
+        <div class="auth-card">
             <h2 id="auth-title">Welcome Back</h2>
             <p id="auth-subtitle">Sign in to manage your account</p>
 
-            <div id="google-btn-container">
-                <div id="g_id_onload"
-                     data-client_id="824439940987-8503jqau2c7lrqn9vidk0rmuubd1mr12.apps.googleusercontent.com"
-                     data-context="signin"
-                     data-ux_mode="popup"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
-            </div>
+            <button id="google-signin-btn" class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/layout/google.svg" alt="Google logo">
+                Continue with Google
+            </button>
 
             <div class="divider"><span>OR</span></div>
 
@@ -42,15 +35,45 @@
                     <label for="password">Password</label>
                     <input type="password" id="password" required placeholder="••••••••">
                 </div>
-                <button type="submit" class="cta-button" style="width: 100%;">Continue</button>
+                <button type="submit" id="submit-btn" class="cta-button" style="width: 100%;">Sign In</button>
             </form>
 
             <p class="auth-switch">
-                Don't have an account? <a href="#" id="toggle-auth">Create one</a>
+                <span id="switch-text">Don't have an account?</span> 
+                <a href="#" id="toggle-auth">Create one</a>
             </p>
         </div>
     </main>
 
-    <script src="auth.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // 🛑 REPLACE THESE WITH YOUR KEY FROM FIREBASE CONSOLE 🛑
+        const firebaseConfig = {
+  apiKey: "AIzaSyAsi9jP_5NtfkFG5A98pPZJRopf91noTos",
+  authDomain: "github-daeca.firebaseapp.com",
+  projectId: "github-daeca",
+  storageBucket: "github-daeca.firebasestorage.app",
+  messagingSenderId: "998884967329",
+  appId: "1:998884967329:web:e782bec98cb64ce9d2c1e0",
+  measurementId: "G-WQ8GE6VE4C"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Attach Firebase functions to window so auth.js can use them
+        window.fbAuth = auth;
+        window.fbMethods = { 
+            createUser: createUserWithEmailAndPassword,
+            verifyEmail: sendEmailVerification,
+            signIn: signInWithEmailAndPassword,
+            googleSignIn: signInWithPopup,
+            googleProvider: new GoogleAuthProvider(),
+            logout: signOut
+        };
+    </script>
+    <script src="auth.js" defer></script>
 </body>
 </html>
