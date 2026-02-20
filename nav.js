@@ -38,7 +38,7 @@ function updateNavForAuth() {
         navList.appendChild(loginLi);
     }
     // 🛑 REPLACE WITH YOUR ACTUAL GOOGLE EMAIL 🛑
-const ADMIN_EMAIL = "your-google-email@gmail.com";
+const ADMIN_EMAIL = "joshuasteeljoshua19@gmail.com";
 
 function updateNavForAuth() {
     const navList = document.querySelector('.nav-list');
