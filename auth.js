@@ -28,23 +28,21 @@ emailForm.addEventListener('submit', async (e) => {
 
     try {
         if (isLogin) {
-            // --- LOGIN LOGIC ---
-            const userCredential = await window.fbMethods.signIn(window.fbAuth, email, password);
-            const user = userCredential.user;
+           // --- SIGN UP LOGIC (Update this section) ---
+const userCredential = await window.fbMethods.createUser(window.fbAuth, email, password);
 
-            if (!user.emailVerified) {
-                alert("❌ Please verify your email first! We sent a link to " + email);
-                await window.fbMethods.logout(window.fbAuth); // Don't let them in yet
-            } else {
-                saveUserAndRedirect(user);
-            }
-        } else {
-            // --- SIGN UP LOGIC ---
-            const userCredential = await window.fbMethods.createUser(window.fbAuth, email, password);
-            await window.fbMethods.verifyEmail(userCredential.user);
-            
-            alert("✅ Account created! Check your email (" + email + ") for a verification link before signing in.");
-            window.location.reload(); // Reset to login view
+// Define where the user should go after clicking the link
+const actionCodeSettings = {
+  url: 'https://yourdomain.com/index.html', // 🎯 Replace with your real URL
+  handleCodeInApp: true,
+};
+
+setStatus("Sending verification email...", 'loading');
+await window.fbMethods.verifyEmail(userCredential.user, actionCodeSettings);
+
+setStatus("Email sent! Check your inbox.", 'success');
+alert("✅ Account created! Check your email to verify your account."); 
+            // Reset to login view
         }
     } catch (error) {
         alert("Error: " + error.message);
