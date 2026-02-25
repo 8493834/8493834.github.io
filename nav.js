@@ -118,16 +118,14 @@ function saveUserAndRedirect(user) {
     const closeBtn = document.getElementById('close-welcome');
 
     // Check if we should show the welcome message
-    if (localStorage.getItem('showWelcome') === 'true') {
-        modal.classList.add('active');
-        
-        closeBtn.addEventListener('click', () => {
-            modal.classList.remove('active');
-            localStorage.removeItem('showWelcome'); // 🎯 Delete flag so it never shows again
-        });
+    iif (localStorage.getItem('showWelcome') === 'true') {
+    const dateDisplay = document.getElementById('member-date-display');
+    const joinDate = localStorage.getItem('memberSince') || 'Today';
+    
+    if (dateDisplay) {
+        dateDisplay.innerText = `Official Member Since: ${joinDate}`;
     }
-});
-        name: user.displayName || user.email.split('@')[0]
-    }));
-    window.location.href = 'index.html';
+
+    modal.classList.add('active');
+    // ... rest of your close button logic
 }
