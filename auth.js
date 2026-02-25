@@ -33,7 +33,7 @@ const userCredential = await window.fbMethods.createUser(window.fbAuth, email, p
 
 // Define where the user should go after clicking the link
 const actionCodeSettings = {
-  url: 'https://yourdomain.com/index.html', // 🎯 Replace with your real URL
+  url: 'https://8493834.github.io', // 🎯 Replace with your real URL
   handleCodeInApp: true,
 };
 
