@@ -104,3 +104,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Keep your updateNavForAuth() function here as well!
     updateNavForAuth(); 
 });
+function saveUserAndRedirect(user) {
+    localStorage.setItem('userLoggedIn', 'true');
+    // 🎯 Set a flag if they just registered (you can detect this by checking if they just came from the signup flow)
+    if (!isLogin) {
+        localStorage.setItem('showWelcome', 'true');
+    }
+    
+    localStorage.setItem('userData', JSON.stringify({
+        email: user.email,
+        name: user.displayName || user.email.split('@')[0]
+    }));
+    window.location.href = 'index.html';
+}
