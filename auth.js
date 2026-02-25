@@ -21,13 +21,56 @@ toggleBtn.addEventListener('click', (e) => {
 });
 
 // 2. Handle Email/Password Auth
-emailForm.addEventListener('submit', async (e) => {
+emailForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
 
-    try {
-        if (isLogin) {
+    // 1. Trigger reCAPTCHA
+    grecaptcha.ready(function() {
+        grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY', {action: 'submit'}).then(async (token) => {
+            
+            // 2. Now proceed with your existing Firebase Logic
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const actionText = isLogin ? "Signing in..." : "Creating account...";
+            setStatus(actionText, 'loading');
+
+            try {
+                if (isLogin) {
+                    // --- LOGIN LOGIC ---
+                    const userCredential = await window.fbMethods.signIn(window.fbAuth, email, password);
+                    const user = userCredential.user;
+
+                    if (!user.emailVerified) {
+                        setStatus("Verification required.", 'error');
+                        alert("❌ Please verify your email first!");
+                        await window.fbMethods.logout(window.fbAuth);
+                    } else {
+                        saveUserAndRedirect(user);
+                    }
+                } else {
+                    // --- SIGN UP LOGIC ---
+                    const userCredential = await window.fbMethods.createUser(window.fbAuth, email, password);
+                    
+                    // Add the "Member Since" data we discussed
+                    const memberSince = new Date().toLocaleDateString();
+                    
+                    await window.fbMethods.verifyEmail(userCredential.user);
+                    
+                    // Save temporary data so the Welcome Modal can show the date later
+                    localStorage.setItem('memberSince', memberSince);
+                    
+                    setStatus("Email sent! Check your inbox.", 'success');
+                    alert("✅ Account created! Verify your email to join the club.");
+                    window.location.reload();
+                }
+            } catch (error) {
+                setStatus("Error occurred.", 'error');
+                alert("Error: " + error.message);
+                setStatus("", "");
+            }
+        });
+    });
+});
            // --- SIGN UP LOGIC (Update this section) ---
 const userCredential = await window.fbMethods.createUser(window.fbAuth, email, password);
 
