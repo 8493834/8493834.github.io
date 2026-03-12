@@ -79,7 +79,7 @@ return "my creator rome";
 // 🔥 Custom Rome Trigger
 
 if(
-lower.includes("i like money") ||
+lower.includes("money") ||
 lower.includes("i likee money") ||
 lower.includes("i like moneey") ||
 lower.includes("i like moneey") ||
