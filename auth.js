@@ -1,54 +1,50 @@
-const ADMIN_EMAIL = "your-email@gmail.com";
+const emailForm = document.getElementById('email-auth-form');
+const statusDiv = document.getElementById('auth-status');
+const toggleBtn = document.getElementById('toggle-auth');
+let isLogin = true;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Update Navigation based on Auth
-    const navList = document.querySelector('.nav-list');
-    const manageBtn = document.getElementById('manage-button');
-    const securityPanel = document.getElementById('admin-security-panel');
-    const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+toggleBtn.onclick = () => {
+    isLogin = !isLogin;
+    document.getElementById('auth-title').innerText = isLogin ? "Welcome Back" : "Create Account";
+    document.getElementById('submit-btn').innerText = isLogin ? "Sign In" : "Register";
+};
 
-    if (isLoggedIn) {
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        
-        // Show Admin Features
-        if (userData.email === ADMIN_EMAIL) {
-            if (manageBtn) manageBtn.style.display = 'inline-block';
-            if (securityPanel) {
-                securityPanel.style.display = 'block';
-                document.getElementById('bot-score').innerText = `reCAPTCHA Score: 0.9 (Safe)`;
+emailForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Execute reCAPTCHA v3
+    grecaptcha.ready(() => {
+        grecaptcha.execute('YOUR_RECAPTCHA_SITE_KEY', {action: 'submit'}).then(async (token) => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            statusDiv.innerText = "Processing...";
+
+            try {
+                if (isLogin) {
+                    const res = await window.fbMethods.signIn(window.fbAuth, email, password);
+                    if (!res.user.emailVerified) {
+                        alert("Verify your email first!");
+                        await window.fbMethods.logout(window.fbAuth);
+                    } else {
+                        saveAndGo(res.user);
+                    }
+                } else {
+                    const res = await window.fbMethods.createUser(window.fbAuth, email, password);
+                    await window.fbMethods.verifyEmail(res.user);
+                    localStorage.setItem('memberSince', new Date().toLocaleDateString());
+                    localStorage.setItem('showWelcome', 'true');
+                    alert("Check your email for a verification link!");
+                    window.location.reload();
+                }
+            } catch (err) {
+                statusDiv.innerText = "Error: " + err.message;
             }
-        }
-
-        const logoutLi = document.createElement('li');
-        logoutLi.innerHTML = `<a href="#" id="logout">Logout</a>`;
-        navList.appendChild(logoutLi);
-        document.getElementById('logout').onclick = () => {
-            localStorage.clear();
-            window.location.reload();
-        };
-    } else {
-        const loginLi = document.createElement('li');
-        loginLi.innerHTML = `<a href="auth.html">Sign In</a>`;
-        navList.appendChild(loginLi);
-    }
-
-    // 2. Welcome Modal Logic
-    if (localStorage.getItem('showWelcome') === 'true') {
-        const modal = document.getElementById('welcome-modal');
-        const dateDisplay = document.getElementById('member-date-display');
-        dateDisplay.innerText = `Member Since: ${localStorage.getItem('memberSince')}`;
-        
-        modal.classList.add('active');
-        document.getElementById('close-welcome').onclick = () => {
-            modal.classList.remove('active');
-            localStorage.removeItem('showWelcome');
-        };
-    }
-
-    // 3. Mobile Menu Toggle
-    const toggle = document.getElementById('nav-toggle');
-    const nav = document.getElementById('main-nav');
-    if(toggle) {
-        toggle.onclick = () => nav.classList.toggle('nav-open');
-    }
+        });
+    });
 });
+
+function saveAndGo(user) {
+    localStorage.setItem('userLoggedIn', 'true');
+    localStorage.setItem('userData', JSON.stringify({ email: user.email, name: user.email.split('@')[0] }));
+    window.location.href = 'index.html';
+}
