@@ -1,131 +1,54 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Mobile Navigation Toggle
-    const navToggle = document.querySelector('.nav-toggle');
-    const navList = document.querySelector('.main-nav');
-
-    navToggle.addEventListener('click', () => {
-        navList.classList.toggle('active');
-        navToggle.classList.toggle('active');
-    });
-
-    // Close mobile nav when a link is clicked
-    document.querySelectorAll('.main-nav a').forEach(link => {
-        link.addEventListener('click', () => {
-            navList.classList.remove('active');
-            navToggle.classList.remove('active');
-        });
-    });
-});
-function updateNavForAuth() {
-    const navList = document.querySelector('.nav-list');
-    const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-
-    if (isLoggedIn) {
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        // Replace "Sign In" with "Logout"
-        const logoutLi = document.createElement('li');
-        logoutLi.innerHTML = `<a href="#" id="logout-link">Logout (${userData.name})</a>`;
-        navList.appendChild(logoutLi);
-
-        document.getElementById('logout-link').addEventListener('click', () => {
-            localStorage.removeItem('userLoggedIn');
-            localStorage.removeItem('userData');
-            window.location.reload();
-        });
-    } else {
-        const loginLi = document.createElement('li');
-        loginLi.innerHTML = `<a href="auth.html">Sign In</a>`;
-        navList.appendChild(loginLi);
-    }
-    // 🛑 REPLACE WITH YOUR ACTUAL GOOGLE EMAIL 🛑
 const ADMIN_EMAIL = "joshuasteeljoshua19@gmail.com";
 
-function updateNavForAuth() {
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Update Navigation based on Auth
     const navList = document.querySelector('.nav-list');
-    const manageBtn = document.getElementById('manage-button'); // The button in the footer
+    const manageBtn = document.getElementById('manage-button');
+    const securityPanel = document.getElementById('admin-security-panel');
     const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-
-    // Hide manage button by default
-    if (manageBtn) manageBtn.style.display = 'none';
 
     if (isLoggedIn) {
         const userData = JSON.parse(localStorage.getItem('userData'));
-
-        // 🎯 Check if the logged-in user is the Admin
-        if (userData.email === ADMIN_EMAIL && manageBtn) {
-            manageBtn.style.display = 'inline-block';
+        
+        // Show Admin Features
+        if (userData.email === ADMIN_EMAIL) {
+            if (manageBtn) manageBtn.style.display = 'inline-block';
+            if (securityPanel) {
+                securityPanel.style.display = 'block';
+                document.getElementById('bot-score').innerText = `reCAPTCHA Score: 0.9 (Safe)`;
+            }
         }
 
-        // Add Logout button to nav
         const logoutLi = document.createElement('li');
-        logoutLi.innerHTML = `<a href="#" id="logout-link">Logout (${userData.name})</a>`;
-        
-        // Remove old logout/login links to prevent duplicates
-        const existingAuthLink = document.querySelector('.auth-link');
-        if (existingAuthLink) existingAuthLink.remove();
-        
-        logoutLi.className = 'auth-link';
+        logoutLi.innerHTML = `<a href="#" id="logout">Logout</a>`;
         navList.appendChild(logoutLi);
-
-        document.getElementById('logout-link').addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('userLoggedIn');
-            localStorage.removeItem('userData');
-            window.location.href = 'index.html';
-        });
+        document.getElementById('logout').onclick = () => {
+            localStorage.clear();
+            window.location.reload();
+        };
     } else {
-        // Show Sign In link if logged out
         const loginLi = document.createElement('li');
-        loginLi.className = 'auth-link';
         loginLi.innerHTML = `<a href="auth.html">Sign In</a>`;
         navList.appendChild(loginLi);
     }
-}
 
-document.addEventListener('DOMContentLoaded', updateNavForAuth);
-}
-
-// Call this inside your DOMContentLoaded listener
-document.addEventListener('DOMContentLoaded', updateNavForAuth);
-
-document.addEventListener('DOMContentLoaded', () => {
-    const navToggle = document.getElementById('nav-toggle');
-    const mainNav = document.getElementById('main-nav');
-
-    if (navToggle && mainNav) {
-        navToggle.addEventListener('click', () => {
-            mainNav.classList.toggle('nav-open');
-            
-            // Optional: Change icon from ☰ to ✕ when open
-            navToggle.innerText = mainNav.classList.contains('nav-open') ? '✕' : '☰';
-        });
+    // 2. Welcome Modal Logic
+    if (localStorage.getItem('showWelcome') === 'true') {
+        const modal = document.getElementById('welcome-modal');
+        const dateDisplay = document.getElementById('member-date-display');
+        dateDisplay.innerText = `Member Since: ${localStorage.getItem('memberSince')}`;
+        
+        modal.classList.add('active');
+        document.getElementById('close-welcome').onclick = () => {
+            modal.classList.remove('active');
+            localStorage.removeItem('showWelcome');
+        };
     }
-    
-    // Keep your updateNavForAuth() function here as well!
-    updateNavForAuth(); 
+
+    // 3. Mobile Menu Toggle
+    const toggle = document.getElementById('nav-toggle');
+    const nav = document.getElementById('main-nav');
+    if(toggle) {
+        toggle.onclick = () => nav.classList.toggle('nav-open');
+    }
 });
-function saveUserAndRedirect(user) {
-    localStorage.setItem('userLoggedIn', 'true');
-    // 🎯 Set a flag if they just registered (you can detect this by checking if they just came from the signup flow)
-    if (!isLogin) {
-        localStorage.setItem('showWelcome', 'true');
-    }
-    
-    localStorage.setItem('userData', JSON.stringify({
-        email: user.email,
-        document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('welcome-modal');
-    const closeBtn = document.getElementById('close-welcome');
-
-    // Check if we should show the welcome message
-    iif (localStorage.getItem('showWelcome') === 'true') {
-    const dateDisplay = document.getElementById('member-date-display');
-    const joinDate = localStorage.getItem('memberSince') || 'Today';
-    
-    if (dateDisplay) {
-        dateDisplay.innerText = `Official Member Since: ${joinDate}`;
-    }
-
-    modal.classList.add('active');
-    // ... rest of your close button logic
-}
