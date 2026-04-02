@@ -3,136 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Dealers Inc.</title>
+    <title>Card Dealers Inc. | Premium Access</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script src="nav.js" defer></script>
-    <script src="manage.js" defer></script>
 </head>
 <body>
-
     <header class="site-header">
-    <div class="container">
-        <div class="logo"><a href="index.html">Card Dealers Inc.</a></div>
-        
-        <button class="nav-toggle" id="nav-toggle" aria-label="open menu">
-            ☰
-        </button>
-
-        <nav class="main-nav" id="main-nav">
-            <ul class="nav-list">
-                <li><a href="ads.html">Ads</a></li>
-                <li><a href="shop.html">Shop</a></li>
-                <li><a href="games.html">Games</a></li>
+        <div class="container">
+            <div class="logo"><a href="index.html">Card Dealers Inc.</a></div>
+            <button class="nav-toggle" id="nav-toggle">☰</button>
+            <nav class="main-nav" id="main-nav">
+                <ul class="nav-list">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="games.html">Games</a></li>
+                    <li><a href="shop.html">Shop</a></li>
+                    <!-- Auth links injected by nav.js -->
                 </ul>
-        </nav>
+            </nav>
+        </div>
+    </header>
+
+    <main class="hero">
+        <h1>High Stakes Coding</h1>
+        <p>The house always wins, but our members win bigger.</p>
+    </main>
+
+    <!-- Welcome Modal (Hidden by default) -->
+    <div class="modal-overlay" id="welcome-modal">
+        <div class="welcome-card">
+            <div style="font-size: 3rem;">♠️</div>
+            <h2>Welcome to the Club!</h2>
+            <p>Your email is verified. Enjoy full access.</p>
+            <p id="member-date-display" style="font-size: 0.85rem; color: #d4af37;"></p>
+            <button class="cta-button" id="close-welcome">Let's Play</button>
+        </div>
     </div>
-</header>
-    
-    <section id="home" class="hero-section">
-        <div class="container">
-            <h1>Welcome to the Card Dealer website.</h1>
-            <p>please scroll down if you want to see our services.</p>
-            <a href="ads.html" class="cta-button">View Our Ads</a>
-        </div>
-    </section>
-
-    <section id="about" class="about-section">
-        <div class="container">
-            <h2>About Card Dealers Inc.</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <p>We are a small bussiness made in east victoria and we work for free</p>
-                    <p>og workers owner: vidhaan sharma, techguy/ceo/bussness stuff:joshua steel, guy who works here1:aidan kiraly, guy who works here2:thomas rodgers, owner assistent:evan bong</p>
-                </div>
-                <div class="about-image">
-                    <img src="https://via.placeholder.com/400x300.png?text=Professional+Dealer" alt="Professional Card Dealer">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="services" class="services-section">
-        <div class="container">
-            <h2>Our Services</h2>
-            <div class="services-grid">
-                <div class="service-card">
-                    <h3>Games we teach</h3>
-                    <p>We teach games such as chess,checkers and our own special custom made games.</p>
-                </div>
-                <div class="service-card">
-                    <h3>custom card making</h3>
-                    <p>get your own custom cards</p>
-                </div>
-                <div class="service-card">
-                    <h3>Refunds</h3>
-                    <p>We will only refund your card if there is a mistake with the production of 
-                    the card
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="portfolio" class="portfolio-section">
-        <div class="container">
-            <h2>Our Portfolio</h2>
-            <p>A look at some of the events and clients we've had the pleasure of working with.</p>
-            <div class="gallery-grid">
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300.png?text=Event+1" alt="Card Dealers Inc. event photo">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300.png?text=Event+2" alt="Card Dealers Inc. event photo">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300.png?text=Event+3" alt="Card Dealers Inc. event photo">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300.png?text=Event+4" alt="Card Dealers Inc. event photo">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300.png?text=Event+5" alt="Card Dealers Inc. event photo">
-                </div>
-                <div class="gallery-item">
-                    <img src="https://via.placeholder.com/300.png?text=Event+6" alt="Card Dealers Inc. event photo">
-                </div>
-            </div>
-        </div>
-    </section>
 
     <footer class="site-footer">
-        <div class="container">
-             <p>&copy; branding Card Dealers Inc. All Rights Reserved. |code owned by 8493834/inccard <a href="mailto:joshuasteeljoshua19@gmail.com">contact me</a>  <a href="terms.html" style="color: var(--secondary-color); text-decoration: none;">Terms & Conditions</a></p>
-            <div class="social-links">
-                <a href="#">Facebook</a>
-                <a href="#">Twitter</a>
-                <a href="#">LinkedIn</a>
-            </div>
-            <a href="manage.html" id="manage-button" class="management-button">Manage Content</a>
+        <p>&copy; 2026 Card Dealers Inc.</p>
+        <a href="manage.html" class="management-button" id="manage-button">Manage Content</a>
+        
+        <!-- Admin-Only Security Score -->
+        <div id="admin-security-panel" style="display:none; font-family: monospace; margin-top: 10px;">
+            <span style="color: #4caf50;">🛡️ System Secure</span> | 
+            <span id="bot-score">reCAPTCHA Score: --</span>
         </div>
     </footer>
-<script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('Service Worker registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('Service Worker registration failed: ', registrationError);
-                    });
-            });
-        }
-    </script>
-    
+
+    <script src="nav.js"></script>
 </body>
 </html>
-<div class="modal-overlay" id="welcome-modal">
-   <div class="welcome-card">
-    <div class="welcome-icon" style="font-size: 3rem;">♠️</div>
-    <h2>Welcome to the Club!</h2>
-    <p>Your email has been verified.</p>
-    <p id="member-date-display" style="font-size: 0.8rem; color: var(--accent-color);"></p>
-    <button class="cta-button" id="close-welcome">Let's Play</button>
-</div>
