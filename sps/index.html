@@ -3,33 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPS & BPS | Protected by BOP</title>
+    <title>SPS & BPS | BOP HQ</title>
+    <!-- Pathing for subfolder /sps/ -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4CAF50">
+    <meta name="theme-color" content="#2e7d32">
     <style>
         :root {
             --primary: #2e7d32;
             --accent: #8bc34a;
             --light: #f1f8e9;
             --dark: #1b5e20;
+            --text: #333;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             margin: 0;
             background-color: var(--light);
-            color: #333;
+            color: var(--text);
+            line-height: 1.6;
         }
         header {
             background-color: var(--primary);
             color: white;
-            padding: 1rem;
+            padding: 2rem 1rem;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         nav {
             display: flex;
             justify-content: center;
             background: var(--dark);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         nav button {
             background: none;
@@ -37,64 +43,67 @@
             color: white;
             padding: 1rem;
             cursor: pointer;
-            font-size: 1rem;
+            font-weight: bold;
+            transition: 0.3s;
         }
         nav button:hover { background: var(--accent); }
-        .container { padding: 20px; max-width: 800px; margin: auto; }
+        .container { padding: 20px; max-width: 900px; margin: auto; }
         .card {
             background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         .hidden { display: none; }
         .snail-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
         }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: var(--light); }
     </style>
 </head>
 <body>
 
 <header>
     <h1>Snail Protective Services (SPS)</h1>
-    <p>Bug Protection Services (BPS) | Operated by BOP</p>
+    <p>Bug Protection Services (BPS) | <strong>BOP Operated</strong></p>
 </header>
 
 <nav>
     <button onclick="showPage('home')">Home</button>
-   <button onclick="showPage('report')">Report Discovery</button>
     <button onclick="showPage('snails')">Our Snails</button>
+    <button onclick="showPage('report')">Report Discovery</button>
+    <button onclick="showPage('admin')">BOP Console</button>
 </nav>
 
 <div class="container">
     <!-- Home Page -->
-
-    <!-- Report Page -->
-<section id="report" class="hidden">
-    <div class="card">
-        <h2>Report a Bug or Snail</h2>
-        <form id="reportForm">
-            <label>What did you find?</label><br>
-            <input type="text" id="subject" placeholder="e.g. Rare Snail" required style="width:100%; padding:8px; margin:10px 0;"><br>
-            
-            <label>Location Details</label><br>
-            <textarea id="location" placeholder="e.g. Under the oak tree" style="width:100%; padding:8px; margin:10px 0;"></textarea><br>
-            
-            <button type="submit" style="background:var(--primary); color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer;">
-                Submit to BOP
-            </button>
-        </form>
-        <p id="feedback" style="color:var(--primary); font-weight:bold;"></p>
-    </div>
-</section>
-    
     <section id="home">
         <div class="card">
             <h2>Our Mission</h2>
-            <p>Owned and operated by <strong>The Bug Observation Project (BOP)</strong>, we are dedicated to the safety, rehabilitation, and study of gastropods and insects.</p>
+            <p>Welcome to the digital headquarters of <strong>The Bug Observation Project (BOP)</strong>. Our task is simple: Protect the gastropods and insects that keep our world spinning.</p>
+            <p>Use this PWA to log findings in the field, even when offline.</p>
         </div>
     </section>
 
@@ -103,93 +112,65 @@
         <h2>Current Residents</h2>
         <div id="snail-list" class="snail-grid"></div>
     </section>
+
+    <!-- Report Page -->
+    <section id="report" class="hidden">
+        <div class="card">
+            <h2>Field Discovery Report</h2>
+            <form id="reportForm">
+                <input type="text" id="subject" placeholder="What did you find? (e.g. Snail, Beetle)" required>
+                
+                <div style="margin: 15px 0;">
+                    <button type="button" onclick="getLocation()" id="geoBtn" style="background:#0277bd; color:white; border:none; padding:10px; border-radius:4px; cursor:pointer;">
+                        📍 Pinpoint GPS Location
+                    </button>
+                    <span id="locationStatus" style="margin-left:10px; font-size:0.9rem;"></span>
+                </div>
+
+                <input type="hidden" id="lat">
+                <input type="hidden" id="lon">
+                
+                <textarea id="notes" placeholder="Notes (e.g. status of shell, weather conditions)"></textarea>
+                <button type="submit" class="btn-main">Transmit to HQ</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Admin Console -->
+    <section id="admin" class="hidden">
+        <div class="card">
+            <h2>BOP Command Center</h2>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>GPS Coords</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportData"></tbody>
+                </table>
+            </div>
+            <br>
+            <button onclick="clearReports()" style="background:#c62828; color:white; border:none; padding:8px; border-radius:4px; cursor:pointer;">Clear All Logs</button>
+        </div>
+    </section>
 </div>
 
 <script>
-
-    // Add 'report' to the navigation logic
-function showPage(pageId) {
-    const pages = ['home', 'snails', 'report'];
-    pages.forEach(p => {
-        document.getElementById(p).classList.add('hidden');
-    });
-    document.getElementById(pageId).classList.remove('hidden');
-}
-
-// Form Submission Logic
-document.getElementById('reportForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const reportData = {
-        item: document.getElementById('subject').value,
-        location: document.getElementById('location').value,
-        timestamp: new Date().toISOString()
-    };
-
-    // Logging to console (simulate database entry)
-    console.log("New BOP Report:", reportData);
-
-    // Feedback for the user
-    const feedback = document.getElementById('feedback');
-    feedback.innerText = "Report transmitted to BOP HQ! Stay vigilant.";
-    
-    // Reset form
-    this.reset();
-});
-    
-    // Navigation Logic
+    // --- Navigation Logic ---
     function showPage(pageId) {
-        document.getElementById('home').classList.add('hidden');
-        document.getElementById('snails').classList.add('hidden');
+        const pages = ['home', 'snails', 'report', 'admin'];
+        pages.forEach(p => document.getElementById(p).classList.add('hidden'));
         document.getElementById(pageId).classList.remove('hidden');
+        if(pageId === 'admin') loadReports();
     }
 
-<!-- Add this to your Navigation -->
-<button onclick="showPage('admin')">BOP Console</button>
-
-<!-- Update your Report Section -->
-<section id="report" class="hidden">
-    <div class="card">
-        <h2>Report a Discovery</h2>
-        <form id="reportForm">
-            <input type="text" id="subject" placeholder="Snail/Bug Name" required><br><br>
-            
-            <button type="button" onclick="getLocation()" id="geoBtn" style="background:#0277bd; color:white; border:none; padding:8px; cursor:pointer;">
-                📍 Pinpoint Location
-            </button>
-            <p id="locationStatus" style="font-size: 0.8rem; color: #666;"></p>
-            
-            <input type="hidden" id="lat">
-            <input type="hidden" id="lon">
-            
-            <textarea id="location" placeholder="Additional notes..."></textarea><br>
-            <button type="submit" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
-                Submit to HQ
-            </button>
-        </form>
-    </div>
-</section>
-
-<!-- New Admin Console Section -->
-<section id="admin" class="hidden">
-    <h2>BOP Command Center</h2>
-    <div class="card" style="overflow-x:auto;">
-        <table id="reportTable" style="width:100%; text-align:left; border-collapse: collapse;">
-            <thead>
-                <tr style="background:var(--dark); color:white;">
-                    <th style="padding:10px;">Subject</th>
-                    <th>Coords</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="reportData"></tbody>
-        </table>
-    </div>
-</section>
-    // Snail Data
+    // --- Snail Directory Data ---
     const snails = [
-        { name: "Shelly", species: "Garden Snail", status: "Active" },
+        { name: "Shelly", species: "Garden Snail", status: "Healthy" },
         { name: "Turbo", species: "Roman Snail", status: "In Rehab" },
         { name: "Gary", species: "Sea Snail", status: "Observing" }
     ];
@@ -198,107 +179,75 @@ document.getElementById('reportForm').addEventListener('submit', function(e) {
     snails.forEach(s => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `<h3>${s.name}</h3><p>${s.species}</p><small>Status: ${s.status}</small>`;
+        card.innerHTML = `<h3>${s.name}</h3><p><strong>Species:</strong> ${s.species}</p><small>Status: ${s.status}</small>`;
         list.appendChild(card);
     });
 
-// --- GEOLOCATION TRACKING ---
-function getLocation() {
-    const status = document.getElementById('locationStatus');
-    const geoBtn = document.getElementById('geoBtn');
-
-    if (!navigator.geolocation) {
-        status.innerText = "Geolocation not supported by your browser.";
-        return;
+    // --- Geolocation Tracking ---
+    function getLocation() {
+        const status = document.getElementById('locationStatus');
+        const geoBtn = document.getElementById('geoBtn');
+        if (!navigator.geolocation) {
+            status.innerText = "Geolocation not supported.";
+            return;
+        }
+        status.innerText = "Tracking...";
+        navigator.geolocation.getCurrentPosition((pos) => {
+            document.getElementById('lat').value = pos.coords.latitude;
+            document.getElementById('lon').value = pos.coords.longitude;
+            status.innerText = "✅ GPS Locked";
+            geoBtn.style.background = "#4caf50";
+        }, () => {
+            status.innerText = "❌ Location denied.";
+        });
     }
 
-    status.innerText = "Locating...";
-    geoBtn.disabled = true;
-
-    navigator.geolocation.getCurrentPosition((position) => {
-        document.getElementById('lat').value = position.coords.latitude;
-        document.getElementById('lon').value = position.coords.longitude;
-        status.innerText = `📍 Locked: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
-        geoBtn.style.background = "#4caf50";
-        geoBtn.innerText = "Location Captured";
-    }, () => {
-        status.innerText = "Unable to retrieve location. Check permissions.";
-        geoBtn.disabled = false;
+    // --- Data Management ---
+    document.getElementById('reportForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const report = {
+            subject: document.getElementById('subject').value,
+            coords: `${document.getElementById('lat').value}, ${document.getElementById('lon').value}`,
+            time: new Date().toLocaleString(),
+        };
+        let logs = JSON.parse(localStorage.getItem('bop_logs')) || [];
+        logs.push(report);
+        localStorage.setItem('bop_logs', JSON.stringify(logs));
+        alert("BOP Discovery Logged!");
+        this.reset();
+        document.getElementById('locationStatus').innerText = "";
     });
-}
 
-// --- REPORT SUBMISSION ---
-document.getElementById('reportForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const newReport = {
-        subject: document.getElementById('subject').value,
-        lat: document.getElementById('lat').value || "N/A",
-        lon: document.getElementById('lon').value || "N/A",
-        time: new Date().toLocaleTimeString(),
-        note: document.getElementById('location').value
-    };
+    function loadReports() {
+        const table = document.getElementById('reportData');
+        const logs = JSON.parse(localStorage.getItem('bop_logs')) || [];
+        table.innerHTML = logs.map(l => `
+            <tr>
+                <td>${l.subject}</td>
+                <td><a href="https://www.google.com/maps?q=${l.coords}" target="_blank">View Map</a></td>
+                <td>${l.time}</td>
+                <td><span style="color:green">Logged</span></td>
+            </tr>
+        `).join('');
+    }
 
-    // Save to LocalStorage (Your local BOP Database)
-    let allReports = JSON.parse(localStorage.getItem('bop_reports')) || [];
-    allReports.push(newReport);
-    localStorage.setItem('bop_reports', JSON.stringify(allReports));
+    function clearReports() {
+        if(confirm("Wipe all BOP Command Center logs?")) {
+            localStorage.removeItem('bop_logs');
+            loadReports();
+        }
+    }
 
-    alert("Report Sent to BOP!");
-    this.reset();
-    document.getElementById('locationStatus').innerText = "";
-    loadReports(); // Refresh the console
-});
-
-// --- ADMIN CONSOLE LOADER ---
-function loadReports() {
-    const tableBody = document.getElementById('reportData');
-    const allReports = JSON.parse(localStorage.getItem('bop_reports')) || [];
-    
-    tableBody.innerHTML = ""; // Clear old data
-
-    allReports.reverse().forEach(report => {
-        const row = `
-            <tr style="border-bottom: 1px solid #ddd;">
-                <td style="padding:10px;">${report.subject}</td>
-                <td>${report.lat}, ${report.lon}</td>
-                <td>${report.time}</td>
-                <td style="color:green;">Secure</td>
-            </tr>`;
-        tableBody.innerHTML += row;
-    });
-}
-
-// Ensure the table loads when you open the Admin page
-function showPage(pageId) {
-    const pages = ['home', 'snails', 'report', 'admin'];
-    pages.forEach(p => document.getElementById(p).classList.add('hidden'));
-    document.getElementById(pageId).classList.remove('hidden');
-    
-    if(pageId === 'admin') loadReports();
-}
-    
+    // --- PWA Service Worker Registration ---
     if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // We point specifically to the file in your subfolder
-    navigator.serviceWorker.register('/sps/sw.js', { scope: '/sps/' })
-      .then(reg => {
-        console.log('SPS/BPS Service Worker registered for subfolder!', reg.scope);
-      })
-      .catch(err => {
-        console.error('BOP Headquarters Connection Failed:', err);
-      });
-  });
-}
+        window.addEventListener('load', () => {
+            // Updated for your specific subfolder path
+            navigator.serviceWorker.register('/sps/sw.js', { scope: '/sps/' })
+            .then(reg => console.log('BOP Service Worker Online', reg.scope))
+            .catch(err => console.log('BOP Worker Failed', err));
+        });
+    }
 </script>
-
-    <a href="https://8493834.github.io/sps/?utm_source=chromebook_badge&utm_campaign=launch_2026">
-  <picture>
-    <source srcset="https://chromeos.dev/badges/en/dark.svg" media="(prefers-color-scheme: dark)">
-    <img src="https://chromeos.dev/badges/en/secondary.svg" alt="Add to Chromebook"/>
-  </picture>
-</a>
-
 
 </body>
 </html>
