@@ -65,12 +65,32 @@
 
 <nav>
     <button onclick="showPage('home')">Home</button>
+   <button onclick="showPage('report')">Report Discovery</button>
     <button onclick="showPage('snails')">Our Snails</button>
-    <button onclick="showPage('report')">Report Discovery</button>
 </nav>
 
 <div class="container">
     <!-- Home Page -->
+
+    <!-- Report Page -->
+<section id="report" class="hidden">
+    <div class="card">
+        <h2>Report a Bug or Snail</h2>
+        <form id="reportForm">
+            <label>What did you find?</label><br>
+            <input type="text" id="subject" placeholder="e.g. Rare Snail" required style="width:100%; padding:8px; margin:10px 0;"><br>
+            
+            <label>Location Details</label><br>
+            <textarea id="location" placeholder="e.g. Under the oak tree" style="width:100%; padding:8px; margin:10px 0;"></textarea><br>
+            
+            <button type="submit" style="background:var(--primary); color:white; padding:10px 20px; border:none; border-radius:4px; cursor:pointer;">
+                Submit to BOP
+            </button>
+        </form>
+        <p id="feedback" style="color:var(--primary); font-weight:bold;"></p>
+    </div>
+</section>
+    
     <section id="home">
         <div class="card">
             <h2>Our Mission</h2>
@@ -86,6 +106,37 @@
 </div>
 
 <script>
+
+    // Add 'report' to the navigation logic
+function showPage(pageId) {
+    const pages = ['home', 'snails', 'report'];
+    pages.forEach(p => {
+        document.getElementById(p).classList.add('hidden');
+    });
+    document.getElementById(pageId).classList.remove('hidden');
+}
+
+// Form Submission Logic
+document.getElementById('reportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const reportData = {
+        item: document.getElementById('subject').value,
+        location: document.getElementById('location').value,
+        timestamp: new Date().toISOString()
+    };
+
+    // Logging to console (simulate database entry)
+    console.log("New BOP Report:", reportData);
+
+    // Feedback for the user
+    const feedback = document.getElementById('feedback');
+    feedback.innerText = "Report transmitted to BOP HQ! Stay vigilant.";
+    
+    // Reset form
+    this.reset();
+});
+    
     // Navigation Logic
     function showPage(pageId) {
         document.getElementById('home').classList.add('hidden');
@@ -111,7 +162,7 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').then(reg => {
+            navigator.serviceWorker.register('file:///home/chronos/u-2e4e11cb78c6df6b3457cf3f306bce81d2892d29/MyFiles/Downloads/hi/sw.js').then(reg => {
                 console.log('SPS Worker registered!', reg.scope);
             });
         });
