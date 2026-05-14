@@ -159,14 +159,16 @@ document.getElementById('reportForm').addEventListener('submit', function(e) {
         list.appendChild(card);
     });
 
-    // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('file:///home/chronos/u-2e4e11cb78c6df6b3457cf3f306bce81d2892d29/MyFiles/Downloads/hi/sw.js').then(reg => {
-                console.log('SPS Worker registered!', reg.scope);
-            });
-        });
-    }
+    // We use './sw.js' to make sure it looks inside the /sps/ folder
+    navigator.serviceWorker.register('./sw.js')
+    .then(reg => {
+        console.log('BOP Service Worker registered for scope:', reg.scope);
+    })
+    .catch(err => {
+        console.error('SPS Registration failed:', err);
+    });
+}  }
 </script>
 
     <a href="https://8493834.github.io/sps/?utm_source=chromebook_badge&utm_campaign=launch_2026">
