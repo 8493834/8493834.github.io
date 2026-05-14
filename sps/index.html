@@ -202,6 +202,82 @@ document.getElementById('reportForm').addEventListener('submit', function(e) {
         list.appendChild(card);
     });
 
+// --- GEOLOCATION TRACKING ---
+function getLocation() {
+    const status = document.getElementById('locationStatus');
+    const geoBtn = document.getElementById('geoBtn');
+
+    if (!navigator.geolocation) {
+        status.innerText = "Geolocation not supported by your browser.";
+        return;
+    }
+
+    status.innerText = "Locating...";
+    geoBtn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition((position) => {
+        document.getElementById('lat').value = position.coords.latitude;
+        document.getElementById('lon').value = position.coords.longitude;
+        status.innerText = `📍 Locked: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
+        geoBtn.style.background = "#4caf50";
+        geoBtn.innerText = "Location Captured";
+    }, () => {
+        status.innerText = "Unable to retrieve location. Check permissions.";
+        geoBtn.disabled = false;
+    });
+}
+
+// --- REPORT SUBMISSION ---
+document.getElementById('reportForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const newReport = {
+        subject: document.getElementById('subject').value,
+        lat: document.getElementById('lat').value || "N/A",
+        lon: document.getElementById('lon').value || "N/A",
+        time: new Date().toLocaleTimeString(),
+        note: document.getElementById('location').value
+    };
+
+    // Save to LocalStorage (Your local BOP Database)
+    let allReports = JSON.parse(localStorage.getItem('bop_reports')) || [];
+    allReports.push(newReport);
+    localStorage.setItem('bop_reports', JSON.stringify(allReports));
+
+    alert("Report Sent to BOP!");
+    this.reset();
+    document.getElementById('locationStatus').innerText = "";
+    loadReports(); // Refresh the console
+});
+
+// --- ADMIN CONSOLE LOADER ---
+function loadReports() {
+    const tableBody = document.getElementById('reportData');
+    const allReports = JSON.parse(localStorage.getItem('bop_reports')) || [];
+    
+    tableBody.innerHTML = ""; // Clear old data
+
+    allReports.reverse().forEach(report => {
+        const row = `
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding:10px;">${report.subject}</td>
+                <td>${report.lat}, ${report.lon}</td>
+                <td>${report.time}</td>
+                <td style="color:green;">Secure</td>
+            </tr>`;
+        tableBody.innerHTML += row;
+    });
+}
+
+// Ensure the table loads when you open the Admin page
+function showPage(pageId) {
+    const pages = ['home', 'snails', 'report', 'admin'];
+    pages.forEach(p => document.getElementById(p).classList.add('hidden'));
+    document.getElementById(pageId).classList.remove('hidden');
+    
+    if(pageId === 'admin') loadReports();
+}
+    
     if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // We point specifically to the file in your subfolder
