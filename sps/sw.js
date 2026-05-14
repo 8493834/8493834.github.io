@@ -5,11 +5,14 @@ const assets = [
   'https://via.placeholder.com/192'
 ];
 
-// Install Event
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(cacheName).then(cache => {
-      cache.addAll(assets);
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(res => {
+      // Return cached file OR try to fetch from internet
+      return res || fetch(e.request).catch(() => {
+        // If both fail, this prevents the error you saw
+        console.log("BOP Offline: Resource not found");
+      });
     })
   );
 });
