@@ -144,6 +144,49 @@ document.getElementById('reportForm').addEventListener('submit', function(e) {
         document.getElementById(pageId).classList.remove('hidden');
     }
 
+<!-- Add this to your Navigation -->
+<button onclick="showPage('admin')">BOP Console</button>
+
+<!-- Update your Report Section -->
+<section id="report" class="hidden">
+    <div class="card">
+        <h2>Report a Discovery</h2>
+        <form id="reportForm">
+            <input type="text" id="subject" placeholder="Snail/Bug Name" required><br><br>
+            
+            <button type="button" onclick="getLocation()" id="geoBtn" style="background:#0277bd; color:white; border:none; padding:8px; cursor:pointer;">
+                📍 Pinpoint Location
+            </button>
+            <p id="locationStatus" style="font-size: 0.8rem; color: #666;"></p>
+            
+            <input type="hidden" id="lat">
+            <input type="hidden" id="lon">
+            
+            <textarea id="location" placeholder="Additional notes..."></textarea><br>
+            <button type="submit" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
+                Submit to HQ
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- New Admin Console Section -->
+<section id="admin" class="hidden">
+    <h2>BOP Command Center</h2>
+    <div class="card" style="overflow-x:auto;">
+        <table id="reportTable" style="width:100%; text-align:left; border-collapse: collapse;">
+            <thead>
+                <tr style="background:var(--dark); color:white;">
+                    <th style="padding:10px;">Subject</th>
+                    <th>Coords</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="reportData"></tbody>
+        </table>
+    </div>
+</section>
     // Snail Data
     const snails = [
         { name: "Shelly", species: "Garden Snail", status: "Active" },
