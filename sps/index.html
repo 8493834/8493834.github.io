@@ -159,8 +159,11 @@
     </section>
 </div>
 
-<script>
-    // --- Navigation Logic ---
+<script>    
+const BIN_ID = "6a0d6bca6610dd3ae8753b6c";
+const API_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+    
     function showPage(pageId) {
         const pages = ['home', 'snails', 'report', 'admin'];
         pages.forEach(p => document.getElementById(p).classList.add('hidden'));
@@ -172,7 +175,7 @@
     const snails = [
         { name: "Shelly", species: "Garden Snail", status: "Healthy" },
         { name: "Turbo", species: "Roman Snail", status: "In Rehab" },
-        { name: "Gary", species: "Sea Snail", status: "Observing" }
+        { name: "Gary", species: "garden snail", status: "having birth" }
     ];
 
     const list = document.getElementById('snail-list');
