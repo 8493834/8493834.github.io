@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPS & BPS | BOP HQ</title>
-    <!-- Pathing for subfolder /sps/ -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2e7d32">
     <style>
@@ -221,25 +220,106 @@ const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
         document.getElementById('locationStatus').innerText = "";
     });
 
-    function loadReports() {
-        const table = document.getElementById('reportData');
-        const logs = JSON.parse(localStorage.getItem('bop_logs')) || [];
-        table.innerHTML = logs.map(l => `
+   // --- TRANSMIT TO CLOUD ---
+document.getElementById('reportForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitButton = this.querySelector('button[type="submit"]');
+    submitButton.innerText = "Transmitting...";
+    submitButton.disabled = true;
+
+    const newReport = {
+        id: Date.now().toString(), // Unique ID for deletion later
+        subject: document.getElementById('subject').value,
+        coords: `${document.getElementById('lat').value || "0"}, ${document.getElementById('lon').value || "0"}`,
+        time: new Date().toLocaleString(),
+    };
+
+    try {
+        // 1. Download current logs from the cloud
+        const response = await fetch(JSONBIN_URL, {
+            method: 'GET',
+            headers: { 'X-Master-Key': API_KEY }
+        });
+        const data = await response.json();
+        let logs = data.record || [];
+
+        // 2. Add our new report to the list
+        logs.push(newReport);
+
+        // 3. Upload the updated list back to the cloud
+        await fetch(JSONBIN_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
+            },
+            body: JSON.stringify(logs)
+        });
+
+        alert("BOP Discovery Securely Transmitted to Cloud!");
+        this.reset();
+        document.getElementById('locationStatus').innerText = "";
+    } catch (err) {
+        console.error("Transmission Failure:", err);
+        alert("Database connection failed. Check your API credentials.");
+    } finally {
+        submitButton.innerText = "Transmit to HQ";
+        submitButton.disabled = false;
+    }
+});
+
+// --- FETCH FROM CLOUD ---
+async function loadReports() {
+    const table = document.getElementById('reportData');
+    table.innerHTML = `<tr><td colspan="4" style="text-align:center;">Connecting to BOP Central Database...</td></tr>`;
+
+    try {
+        const response = await fetch(JSONBIN_URL, {
+            method: 'GET',
+            headers: { 'X-Master-Key': API_KEY }
+        });
+        const data = await response.json();
+        const logs = data.record || [];
+
+        if (logs.length === 0) {
+            table.innerHTML = `<tr><td colspan="4" style="text-align:center;">No field reports found. Zone is quiet.</td></tr>`;
+            return;
+        }
+
+        // Display logs (newest first)
+        table.innerHTML = logs.slice().reverse().map(l => `
             <tr>
                 <td>${l.subject}</td>
                 <td><a href="https://www.google.com/maps?q=${l.coords}" target="_blank">View Map</a></td>
                 <td>${l.time}</td>
-                <td><span style="color:green">Logged</span></td>
+                <td><span style="color:green; font-weight:bold;">📡 Live</span></td>
             </tr>
         `).join('');
+    } catch (err) {
+        table.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Error syncing with BOP HQ.</td></tr>`;
     }
+}
 
-    function clearReports() {
-        if(confirm("Wipe all BOP Command Center logs?")) {
-            localStorage.removeItem('bop_logs');
-            loadReports();
-        }
+// --- WIPE CLOUD DATABASE ---
+async function clearReports() {
+    if (!confirm("Are you sure you want to completely clear the BOP Global database?")) return;
+
+    try {
+        await fetch(JSONBIN_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
+            },
+            body: JSON.stringify([]) // Sends an empty array to reset the file
+        });
+        alert("Global database cleared.");
+        loadReports();
+    } catch (err) {
+        alert("Failed to clear database.");
     }
+}
 
     // --- PWA Service Worker Registration ---
     if ('serviceWorker' in navigator) {
