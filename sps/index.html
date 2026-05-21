@@ -158,32 +158,29 @@
     </section>
 </div>
 
-<script>    
-const BIN_ID = "6a0d6bca6610dd3ae8753b6c";
-const API_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
-const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-    
-// --- Navigation Logic (With Auto-Sync Trigger) ---
-function showPage(pageId) {
-    const pages = ['home', 'snails', 'report', 'admin'];
-    pages.forEach(p => document.getElementById(p).classList.add('hidden'));
-    document.getElementById(pageId).classList.remove('hidden');
-    
-    // Run the background sync checklist whenever you navigate!
-    syncOfflineReports().then(() => {
-        if(pageId === 'admin') loadReports();
-    });
-}
+<script>
+    // --- Navigation Logic (With Auto-Sync Trigger) ---
+    function showPage(pageId) {
+        const pages = ['home', 'snails', 'report', 'admin'];
+        pages.forEach(p => document.getElementById(p).classList.add('hidden'));
+        document.getElementById(pageId).classList.remove('hidden');
+        
+        // Run the background sync checklist whenever you navigate!
+        syncOfflineReports().then(() => {
+            if(pageId === 'admin') loadReports();
+        });
+    }
 
-// Also try to sync the second the web page finishes loading up
-window.addEventListener('load', () => {
-    syncOfflineReports();
-});
+    // Also try to sync the second the web page finishes loading up
+    window.addEventListener('load', () => {
+        syncOfflineReports();
+    });
+
     // --- Snail Directory Data ---
     const snails = [
         { name: "Shelly", species: "Garden Snail", status: "Healthy" },
         { name: "Turbo", species: "Roman Snail", status: "In Rehab" },
-        { name: "Gary", species: "garden snail", status: "having birth" }
+        { name: "Gary", species: "Sea Snail", status: "pregnant" }
     ];
 
     const list = document.getElementById('snail-list');
@@ -191,7 +188,7 @@ window.addEventListener('load', () => {
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `<h3>${s.name}</h3><p><strong>Species:</strong> ${s.species}</p><small>Status: ${s.status}</small>`;
-        list.appendChild(card);
+        if(list) list.appendChild(card); // Safety check if element exists
     });
 
     // --- Geolocation Tracking ---
@@ -213,218 +210,197 @@ window.addEventListener('load', () => {
         });
     }
 
-    // --- TRANSMIT TO CLOUD WITH OFFLINE FALLBACK ---
-document.getElementById('reportForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const submitButton = this.querySelector('button[type="submit"]');
-    submitButton.innerText = "Transmitting...";
-    submitButton.disabled = true;
 
-    const newReport = {
-        id: Date.now().toString(),
-        subject: document.getElementById('subject').value,
-        coords: `${document.getElementById('lat').value || "0"}, ${document.getElementById('lon').value || "0"}`,
-        time: new Date().toLocaleString(),
-    };
 
-    try {
-        // Try to reach the cloud
-        const response = await fetch(JSONBIN_URL, {
-            method: 'GET',
-            headers: { 'X-Master-Key': API_KEY }
-        });
-        
-        if (!response.ok) throw new Error("Server error response");
-        
-        const data = await response.json();
-        let logs = data.record || [];
 
-        logs.push(newReport);
+    // --- BOP Cloud Configurations ---
+    const BIN_ID = "6a0d6bca6610dd3ae8753b6c";
+    const API_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
+    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-        await fetch(JSONBIN_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': API_KEY
-            },
-            body: JSON.stringify(logs)
-        });
+    // --- NEW BACKUP NODE (kvdb.io) ---
+    const KVDB_BUCKET_ID = "DDp2V1oNn6NzaHQ9bmj7gD"; 
+    const BACKUP_URL = `https://kvdb.io/${KVDB_BUCKET_ID}/bop_logs`;
 
-        alert("📡 BOP Discovery Securely Transmitted to Cloud!");
-        this.reset();
-        document.getElementById('locationStatus').innerText = "";
+    // --- HELPER: MASTER CLOUD FETCH ---
+    async function fetchFromCloud() {
+        // 1. Try Primary (jsonbin.io)
+        try {
+            const res = await fetch(JSONBIN_URL, {
+                method: 'GET',
+                headers: { 'X-Master-Key': API_KEY }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                return { source: 'primary', logs: data.record || [] };
+            }
+        } catch (e) { console.warn("Primary database unreachable. Swapping to backup node...", e); }
 
-    } catch (err) {
-        // FALLBACK TRIGGERED: Cloud failed, save locally instead!
-        console.warn("Cloud unreachable. Triggering local backup queue...", err);
-        
-        let offlineLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
-        offlineLogs.push(newReport);
-        localStorage.setItem('bop_offline_logs', JSON.stringify(offlineLogs));
+        // 2. Try Backup (kvdb.io)
+        try {
+            const res = await fetch(BACKUP_URL);
+            if (res.ok) {
+                const data = await res.json();
+                return { source: 'backup', logs: data || [] };
+            } else if (res.status === 404) {
+                return { source: 'backup', logs: [] };
+            }
+        } catch (e) { console.error("Backup node also failed. Network is fully dark.", e); }
 
-        alert("⚠️ Cloud Offline! Report saved safely to local device storage. It will show up in your console.");
-        this.reset();
-        document.getElementById('locationStatus').innerText = "";
-    } finally {
-        submitButton.innerText = "Transmit to HQ";
-        submitButton.disabled = false;
+        throw new Error("All cloud databases unreachable.");
     }
-});
 
-// --- FETCH FROM CLOUD + MERGE LOCAL FALLBACK DATA ---
-// --- AUTOMATIC CLOUD SYNC ---
-async function syncOfflineReports() {
-    let localLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
-    
-    // If there's nothing stored offline, don't do anything
-    if (localLogs.length === 0) return;
-
-    console.log(`📡 BOP Sync: Found ${localLogs.length} offline report(s). Attempting upload...`);
-
-    try {
-        // 1. Download current live data from cloud
-        const response = await fetch(JSONBIN_URL, {
-            method: 'GET',
-            headers: { 'X-Master-Key': API_KEY }
-        });
-        
-        if (!response.ok) throw new Error("Sync failed: Cloud unreachable.");
-        
-        const data = await response.json();
-        let cloudLogs = data.record || [];
-
-        // 2. Merge our offline reports into the cloud array
-        cloudLogs = cloudLogs.concat(localLogs);
-
-        // 3. Upload the combined list back to jsonbin.io
-        const updateResponse = await fetch(JSONBIN_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': API_KEY
-            },
-            body: JSON.stringify(cloudLogs)
-        });
-
-        if (updateResponse.ok) {
-            console.log("✅ BOP Sync Complete! Local queue uploaded to cloud.");
-            // 4. Wipe the offline queue since it's now safe in the cloud
-            localStorage.removeItem('bop_offline_logs');
+    // --- HELPER: MASTER CLOUD UPLOAD ---
+    async function uploadToCloud(combinedLogs, targetSource) {
+        if (targetSource === 'primary') {
+            await fetch(JSONBIN_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                body: JSON.stringify(combinedLogs)
+            });
+        } else if (targetSource === 'backup') {
+            await fetch(BACKUP_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(combinedLogs)
+            });
         }
-    } catch (err) {
-        console.warn("📡 BOP Sync paused: Still offline or credentials incorrect.", err);
     }
-}
-       async function loadReports() {
-    const table = document.getElementById('reportData');
-    table.innerHTML = `<tr><td colspan="4" style="text-align:center;">Syncing with BOP Central Database...</td></tr>`;
 
-    let cloudLogs = [];
-    let cloudOffline = false;
+    // --- TRANSMIT REPORT WITH TRIPLE REDUNDANCY ---
+    document.getElementById('reportForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.innerText = "Transmitting...";
+        submitButton.disabled = true;
 
-    // 1. Try to fetch cloud data
-    try {
-        const response = await fetch(JSONBIN_URL, {
-            method: 'GET',
-            headers: { 'X-Master-Key': API_KEY }
-        });
-        if (response.ok) {
-            const data = await response.json();
-            cloudLogs = data.record || [];
-        } else {
+        const newReport = {
+            id: Date.now().toString(),
+            subject: document.getElementById('subject').value,
+            coords: `${document.getElementById('lat').value || "0"}, ${document.getElementById('lon').value || "0"}`,
+            time: new Date().toLocaleString(),
+        };
+
+        try {
+            const cloudData = await fetchFromCloud();
+            let logs = cloudData.logs;
+            logs.push(newReport);
+
+            await uploadToCloud(logs, cloudData.source);
+            alert(`📡 BOP Discovery Securely Transmitted to Cloud (${cloudData.source === 'primary' ? 'Primary Server' : 'Backup Node'})!`);
+            this.reset();
+            document.getElementById('locationStatus').innerText = "";
+        } catch (err) {
+            let offlineLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
+            offlineLogs.push(newReport);
+            localStorage.setItem('bop_offline_logs', JSON.stringify(offlineLogs));
+
+            alert("⚠️ All Cloud Nodes Offline! Report securely cached in local storage.");
+            this.reset();
+            document.getElementById('locationStatus').innerText = "";
+        } finally {
+            submitButton.innerText = "Transmit to HQ";
+            submitButton.disabled = false;
+        }
+    });
+
+    // --- FETCH AND CONSOLIDATE FOR CONSOLE ---
+    async function loadReports() {
+        const table = document.getElementById('reportData');
+        table.innerHTML = `<tr><td colspan="4" style="text-align:center;">Scanning global BOP server matrix...</td></tr>`;
+
+        let cloudLogs = [];
+        let serverStatusText = `<span style="color:green; font-weight:bold;">📡 Live Cloud</span>`;
+        let cloudOffline = false;
+
+        try {
+            const cloudData = await fetchFromCloud();
+            cloudLogs = cloudData.logs;
+            if (cloudData.source === 'backup') {
+                serverStatusText = `<span style="color:#d32f2f; font-weight:bold;">🚨 Backup Node Active</span>`;
+            }
+        } catch (err) {
             cloudOffline = true;
         }
-    } catch (err) {
-        cloudOffline = true;
-    }
 
-    // 2. Fetch local offline data regardless (if any exists)
-    let localLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
+        let localLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
+        table.innerHTML = "";
 
-    // 3. Render the combined data
-    table.innerHTML = "";
+        if (cloudOffline) {
+            table.innerHTML += `<tr><td colspan="4" style="text-align:center; background:#fff3e0; color:#b71c1c; font-weight:bold;">⚠️ COMPLETE CLOUD BLACKOUT. Displaying Device Storage Only.</td></tr>`;
+        }
 
-    // Show a warning banner inside the console if the cloud is completely down
-    if (cloudOffline) {
-        table.innerHTML += `<tr><td colspan="4" style="text-align:center; background:#fff3e0; color:#b71c1c; font-weight:bold;">⚠️ BOP Cloud Server Down. Displaying Local Device Logs Only.</td></tr>`;
-    }
-
-    // Display local unsynced reports first with an orange badge
-    localLogs.slice().reverse().forEach(l => {
-        table.innerHTML += `
-            <tr style="background: #fff8e1;">
-                <td>${l.subject}</td>
-                <td><a href="https://www.google.com/maps?q=${l.coords}" target="_blank">View Map</a></td>
-                <td>${l.time}</td>
-                <td><span style="color:#ef6c00; font-weight:bold;">💾 Offline Queue</span></td>
-            </tr>`;
-    });
-
-    // Display live cloud reports next with a green badge
-    cloudLogs.slice().reverse().forEach(l => {
-        table.innerHTML += `
-            <tr>
-                <td>${l.subject}</td>
-                <td><a href="https://www.google.com/maps?q=${l.coords}" target="_blank">View Map</a></td>
-                <td>${l.time}</td>
-                <td><span style="color:green; font-weight:bold;">📡 Live Cloud</span></td>
-            </tr>`;
-    });
-
-    if (localLogs.length === 0 && cloudLogs.length === 0) {
-        table.innerHTML = `<tr><td colspan="4" style="text-align:center;">No field reports found. Zone is quiet.</td></tr>`;
-    }
-}
-
-// --- WIPE DATABASE AND LOCAL QUEUE ---
-async function clearReports() {
-    if (!confirm("Wipe all logs? This clears both Cloud and Local caches.")) return;
-
-    // Clear local storage queue
-    localStorage.removeItem('bop_offline_logs');
-
-    // Try to clear cloud
-    try {
-        await fetch(JSONBIN_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': API_KEY
-            },
-            body: JSON.stringify([])
+        localLogs.slice().reverse().forEach(l => {
+            table.innerHTML += `
+                <tr style="background: #fff8e1;">
+                    <td>${l.subject}</td>
+                    <td><a href="https://www.google.com/maps?q=${l.coords}" target="_blank">View Map</a></td>
+                    <td>${l.time}</td>
+                    <td><span style="color:#ef6c00; font-weight:bold;">💾 Offline Queue</span></td>
+                </tr>`;
         });
-    } catch (err) {
-        console.log("Could not clear cloud server, it might be down.");
-    }
-    
-    alert("Logs cleared.");
-    loadReports();
-}
-// --- WIPE CLOUD DATABASE ---
-async function clearReports() {
-    if (!confirm("Are you sure you want to completely clear the BOP Global database?")) return;
 
-    try {
-        await fetch(JSONBIN_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': API_KEY
-            },
-            body: JSON.stringify([]) // Sends an empty array to reset the file
+        cloudLogs.slice().reverse().forEach(l => {
+            table.innerHTML += `
+                <tr>
+                    <td>${l.subject}</td>
+                    <td><a href="https://www.google.com/maps?q=${l.coords}" target="_blank">View Map</a></td>
+                    <td>${l.time}</td>
+                    <td>${serverStatusText}</td>
+                </tr>`;
         });
-        alert("Global database cleared.");
+
+        if (localLogs.length === 0 && cloudLogs.length === 0) {
+            table.innerHTML = `<tr><td colspan="4" style="text-align:center;">No data found. Matrix is quiet.</td></tr>`;
+        }
+    }
+
+    // --- AUTOMATIC SYNC PROCESS ---
+    async function syncOfflineReports() {
+        let localLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
+        if (localLogs.length === 0) return;
+
+        try {
+            const cloudData = await fetchFromCloud();
+            let combinedLogs = cloudData.logs.concat(localLogs);
+            
+            await uploadToCloud(combinedLogs, cloudData.source);
+            localStorage.removeItem('bop_offline_logs');
+            console.log(`✅ BOP Sync Complete via ${cloudData.source} network!`);
+        } catch (err) {
+            console.warn("📡 BOP Sync paused: Entire grid is down.", err);
+        }
+    }
+
+    // --- WIPE DATABASE AND LOCAL QUEUE ---
+    async function clearReports() {
+        if (!confirm("Wipe all logs? This clears both Cloud and Local caches.")) return;
+
+        localStorage.removeItem('bop_offline_logs');
+
+        try {
+            await fetch(JSONBIN_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                body: JSON.stringify([])
+            });
+        } catch (err) { console.log("Primary down during wipe."); }
+
+        try {
+            await fetch(BACKUP_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify([])
+            });
+        } catch (err) { console.log("Backup down during wipe."); }
+        
+        alert("Logs cleared.");
         loadReports();
-    } catch (err) {
-        alert("Failed to clear database.");
     }
-}
 
     // --- PWA Service Worker Registration ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            // Updated for your specific subfolder path
             navigator.serviceWorker.register('/sps/sw.js', { scope: '/sps/' })
             .then(reg => console.log('BOP Service Worker Online', reg.scope))
             .catch(err => console.log('BOP Worker Failed', err));
