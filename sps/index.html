@@ -163,13 +163,22 @@ const BIN_ID = "6a0d6bca6610dd3ae8753b6c";
 const API_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
 const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
     
-    function showPage(pageId) {
-        const pages = ['home', 'snails', 'report', 'admin'];
-        pages.forEach(p => document.getElementById(p).classList.add('hidden'));
-        document.getElementById(pageId).classList.remove('hidden');
+// --- Navigation Logic (With Auto-Sync Trigger) ---
+function showPage(pageId) {
+    const pages = ['home', 'snails', 'report', 'admin'];
+    pages.forEach(p => document.getElementById(p).classList.add('hidden'));
+    document.getElementById(pageId).classList.remove('hidden');
+    
+    // Run the background sync checklist whenever you navigate!
+    syncOfflineReports().then(() => {
         if(pageId === 'admin') loadReports();
-    }
+    });
+}
 
+// Also try to sync the second the web page finishes loading up
+window.addEventListener('load', () => {
+    syncOfflineReports();
+});
     // --- Snail Directory Data ---
     const snails = [
         { name: "Shelly", species: "Garden Snail", status: "Healthy" },
@@ -264,7 +273,50 @@ document.getElementById('reportForm').addEventListener('submit', async function(
 });
 
 // --- FETCH FROM CLOUD + MERGE LOCAL FALLBACK DATA ---
-async function loadReports() {
+// --- AUTOMATIC CLOUD SYNC ---
+async function syncOfflineReports() {
+    let localLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
+    
+    // If there's nothing stored offline, don't do anything
+    if (localLogs.length === 0) return;
+
+    console.log(`📡 BOP Sync: Found ${localLogs.length} offline report(s). Attempting upload...`);
+
+    try {
+        // 1. Download current live data from cloud
+        const response = await fetch(JSONBIN_URL, {
+            method: 'GET',
+            headers: { 'X-Master-Key': API_KEY }
+        });
+        
+        if (!response.ok) throw new Error("Sync failed: Cloud unreachable.");
+        
+        const data = await response.json();
+        let cloudLogs = data.record || [];
+
+        // 2. Merge our offline reports into the cloud array
+        cloudLogs = cloudLogs.concat(localLogs);
+
+        // 3. Upload the combined list back to jsonbin.io
+        const updateResponse = await fetch(JSONBIN_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
+            },
+            body: JSON.stringify(cloudLogs)
+        });
+
+        if (updateResponse.ok) {
+            console.log("✅ BOP Sync Complete! Local queue uploaded to cloud.");
+            // 4. Wipe the offline queue since it's now safe in the cloud
+            localStorage.removeItem('bop_offline_logs');
+        }
+    } catch (err) {
+        console.warn("📡 BOP Sync paused: Still offline or credentials incorrect.", err);
+    }
+}
+       async function loadReports() {
     const table = document.getElementById('reportData');
     table.innerHTML = `<tr><td colspan="4" style="text-align:center;">Syncing with BOP Central Database...</td></tr>`;
 
