@@ -107,6 +107,7 @@
         .chat-msg { margin-bottom: 10px; padding: 8px; border-radius: 6px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .chat-user { font-weight: bold; color: var(--dark); }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -187,10 +188,10 @@
             <h2>BOP Global Passport</h2>
             <p>Sign in to sync your profile, customize your identity card, and add field partners.</p>
             
-            <button class="btn-auth" style="background: #ea4335; color: white;">Sign in with Google</button>
+            <button onclick="signInWithGoogle()" class="btn-auth" style="background: #ea4335; color: white;">Sign in with Google</button>
             <button class="btn-auth" style="background: #000000; color: white;">Sign in with Apple</button>
             <button class="btn-auth" style="background: #00a4ef; color: white;">Sign in with Microsoft</button>
-            <button class="btn-auth" style="background: #24292e; color: white;">Sign in with GitHub</button>
+            <button onclick="signInWithGitHub()" class="btn-auth" style="background: #24292e; color: white;">Sign in with GitHub</button>
             
             <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
             
@@ -521,7 +522,47 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             .then(reg => console.log('BOP Service Worker Online', reg.scope))
             .catch(err => console.log('BOP Worker Failed', err));
         });
-    }
+   }
+    
+    async function signInWithGoogle() {
+    await supabase.auth.signInWithOAuth({ provider: 'google' });
+}
+async function signInWithGitHub() {
+    await supabase.auth.signInWithOAuth({ provider: 'github' });
+}
+
+    async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const user = supabase.auth.user();
+    
+    if(!user) { alert("You must be logged in to broadcast!"); return; }
+
+    await supabase.from('chat_messages').insert([
+        { user_id: user.id, username: user.email, message: input.value }
+    ]);
+    input.value = "";
+}
+async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const user = supabase.auth.user();
+    
+    if(!user) { alert("You must be logged in to broadcast!"); return; }
+
+    await supabase.from('chat_messages').insert([
+        { user_id: user.id, username: user.email, message: input.value }
+    ]);
+    input.value = "";
+}
+
+// Listen for live messages natively in real-time!
+supabase
+  .channel('public:chat_messages')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
+      const box = document.getElementById('chatDisplay');
+      box.innerHTML += `<div class="chat-msg"><span class="chat-user">${payload.new.username}:</span> ${payload.new.message}</div>`;
+  })
+  .subscribe();
+    
 </script>
 </body>
 </html>
