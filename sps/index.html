@@ -254,10 +254,14 @@
 <script>
     // --- Navigation Logic (With Auto-Sync Trigger) ---
     function showPage(pageId) {
-        // Updated to include our 3 brand new screens!
         const pages = ['home', 'snails', 'report', 'admin', 'account', 'chat', 'feedback'];
-        pages.forEach(p => document.getElementById(p).classList.add('hidden'));
-        document.getElementById(pageId).classList.remove('hidden');
+        pages.forEach(p => {
+            const page = document.getElementById(p);
+            if (page) page.classList.add('hidden');
+        });
+        
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) targetPage.classList.remove('hidden');
         
         syncOfflineReports().then(() => {
             if(pageId === 'admin') loadReports();
@@ -271,17 +275,20 @@
     // --- Snail Directory Data ---
     const snails = [
         { name: "Shelly", species: "Garden Snail", status: "Healthy" },
-        { name: "Turbo", species: "Roman Snail", status: "In Rehab" },
-        { name: "Gary", species: "Sea Snail", status: "Observing" }
+        { name: "timmy", species: "garnden Snail", status: "may also be giving birth" },
+        { name: "Gary", species: "garden Snail", status: "giving birth" }
     ];
 
     const list = document.getElementById('snail-list');
-    snails.forEach(s => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `<h3>${s.name}</h3><p><strong>Species:</strong> ${s.species}</p><small>Status: ${s.status}</small>`;
-        if(list) list.appendChild(card);
-    });
+    if (list) {
+        list.innerHTML = ''; // Clear previous entries
+        snails.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>${s.name}</h3><p><strong>Species:</strong> ${s.species}</p><small>Status: ${s.status}</small>`;
+            list.appendChild(card);
+        });
+    }
 
     // --- Geolocation Tracking ---
     function getLocation() {
@@ -303,7 +310,7 @@
     }
 
     // =========================================================
-    //   YOUR ROCK-SOLID DATABASES LOGIC (RETAINED EXACTLY)
+    //   YOUR ROCK-SOLID DATABASES LOGIC (FIXED & RETAINED)
     // =========================================================
 
     // --- BOP Cloud Configurations ---
@@ -311,9 +318,8 @@
     const API_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
     const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-    // --- NEW BACKUP NODE (kvdb.io) ---
-    const KVDB_BUCKET_ID = "DDp2V1oNn6NzaHQ9bmj7gD
-"; 
+    // --- BACKUP NODE (kvdb.io) ---
+    const KVDB_BUCKET_ID = "DDp2V1oNn6NzaHQ9bmj7gD"; 
     const BACKUP_URL = `https://kvdb.io/${KVDB_BUCKET_ID}/bop_logs`;
 
     // --- HELPER: MASTER CLOUD FETCH ---
@@ -360,45 +366,50 @@
     }
 
     // --- TRANSMIT REPORT WITH TRIPLE REDUNDANCY ---
-    document.getElementById('reportForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const submitButton = this.querySelector('button[type="submit"]');
-        submitButton.innerText = "Transmitting...";
-        submitButton.disabled = true;
+    const reportForm = document.getElementById('reportForm');
+    if (reportForm) {
+        reportForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.innerText = "Transmitting...";
+            submitButton.disabled = true;
 
-        const newReport = {
-            id: Date.now().toString(),
-            subject: document.getElementById('subject').value,
-            coords: `${document.getElementById('lat').value || "0"}, ${document.getElementById('lon').value || "0"}`,
-            time: new Date().toLocaleString(),
-        };
+            const newReport = {
+                id: Date.now().toString(),
+                subject: document.getElementById('subject').value,
+                coords: `${document.getElementById('lat').value || "0"}, ${document.getElementById('lon').value || "0"}`,
+                time: new Date().toLocaleString(),
+            };
 
-        try {
-            const cloudData = await fetchFromCloud();
-            let logs = cloudData.logs;
-            logs.push(newReport);
+            try {
+                const cloudData = await fetchFromCloud();
+                let logs = cloudData.logs;
+                logs.push(newReport);
 
-            await uploadToCloud(logs, cloudData.source);
-            alert(`📡 BOP Discovery Securely Transmitted to Cloud (${cloudData.source === 'primary' ? 'Primary Server' : 'Backup Node'})!`);
-            this.reset();
-            document.getElementById('locationStatus').innerText = "";
-        } catch (err) {
-            let offlineLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
-            offlineLogs.push(newReport);
-            localStorage.setItem('bop_offline_logs', JSON.stringify(offlineLogs));
+                await uploadToCloud(logs, cloudData.source);
+                alert(`📡 BOP Discovery Securely Transmitted to Cloud (${cloudData.source === 'primary' ? 'Primary Server' : 'Backup Node'})!`);
+                this.reset();
+                document.getElementById('locationStatus').innerText = "";
+            } catch (err) {
+                let offlineLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
+                offlineLogs.push(newReport);
+                localStorage.setItem('bop_offline_logs', JSON.stringify(offlineLogs));
 
-            alert("⚠️ All Cloud Nodes Offline! Report securely cached in local storage.");
-            this.reset();
-            document.getElementById('locationStatus').innerText = "";
-        } finally {
-            submitButton.innerText = "Transmit to HQ";
-            submitButton.disabled = false;
-        }
-    });
+                alert("⚠️ All Cloud Nodes Offline! Report securely cached in local storage.");
+                this.reset();
+                document.getElementById('locationStatus').innerText = "";
+            } finally {
+                submitButton.innerText = "Transmit to HQ";
+                submitButton.disabled = false;
+            }
+        });
+    }
 
     // --- FETCH AND CONSOLIDATE FOR CONSOLE ---
     async function loadReports() {
         const table = document.getElementById('reportData');
+        if (!table) return;
+        
         table.innerHTML = `<tr><td colspan="4" style="text-align:center;">Scanning global BOP server matrix...</td></tr>`;
 
         let cloudLogs = [];
@@ -426,7 +437,7 @@
             table.innerHTML += `
                 <tr style="background: #fff8e1;">
                     <td>${l.subject}</td>
-                    <td><a href="https://www.google.com/maps?q=${l.coords}" target="_blank">View Map</a></td>
+                    <td><a href="https://maps.google.com/?q=${l.coords}" target="_blank">View Map</a></td>
                     <td>${l.time}</td>
                     <td><span style="color:#ef6c00; font-weight:bold;">💾 Offline Queue</span></td>
                 </tr>`;
@@ -436,7 +447,7 @@
             table.innerHTML += `
                 <tr>
                     <td>${l.subject}</td>
-                    <td><a href="https://www.google.com/maps?q=${l.coords}" target="_blank">View Map</a></td>
+                    <td><a href="https://maps.google.com/?q=${l.coords}" target="_blank">View Map</a></td>
                     <td>${l.time}</td>
                     <td>${serverStatusText}</td>
                 </tr>`;
@@ -474,14 +485,7 @@
             await fetch(JSONBIN_URL, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-                body: JSON.stringify([
- {
-    "id": "000",
-    "subject": "System Initialization",
-    "coords": "0,0",
-    "time": "BOP HQ Online"
-  }
-])
+                body: JSON.stringify([])
             });
         } catch (err) { console.log("Primary down during wipe."); }
 
@@ -489,7 +493,14 @@
             await fetch(BACKUP_URL, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify([])
+                body: JSON.stringify([
+  {
+    "id": "000",
+    "subject": "System Initialization",
+    "coords": "0,0",
+    "time": "BOP HQ Online"
+  }
+])
             });
         } catch (err) { console.log("Backup down during wipe."); }
         
