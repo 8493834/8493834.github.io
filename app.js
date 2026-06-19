@@ -78,42 +78,44 @@ if (grid) {
     });
 }
 
-// 2. Contact Form Submission
+// ==========================================
+// 🌐 PUBLIC HOMEPAGE LOGIC (index.html)
+// ==========================================
+
+// ... (Portfolio rendering logic stays up here) ...
+
+// 2. Contact Form Submission (With reCAPTCHA Protection)
 const contactForm = document.getElementById('contact-form');
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        await addDoc(collection(db, "messages"), {
-            name: document.getElementById('client-name').value,
-            email: document.getElementById('client-email').value,
-            details: document.getElementById('client-project').value,
-            timestamp: new Date()
-        });
-        alert('Proposal sent straight to my console! I will talk to you soon.');
-        contactForm.reset();
-    });
-}
 
-// 3. Authenticated Client Progress Tracker
-async function loadClientProject(email) {
-    if (!trackerSection) return;
-    const q = query(collection(db, "projects"), where("clientEmail", "==", email));
-    const snapshot = await getDocs(q);
-    
-    if (!snapshot.empty) {
-        trackerSection.classList.remove('hidden');
-        const card = document.getElementById('tracker-card');
-        card.innerHTML = '';
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            card.innerHTML += `
-                <div class="card">
-                    <h3>${data.title}</h3>
-                    <p>Status: <strong>${data.isInProgress ? '⚙️ We are actively building more features!' : '✅ Finished & Live'}</strong></p>
-                </div>
-            `;
-        });
-    }
+        // 🤖 Check if the reCAPTCHA checkbox has been resolved
+        const recaptchaResponse = grecaptcha.getResponse();
+        if (!recaptchaResponse) {
+            alert('Please check the "I\'m not a robot" box before sending your proposal!');
+            return; // Stops the execution right here so bots can't write to Firestore
+        }
+
+        // If verified, proceed to send data to Firebase Console
+        try {
+            await addDoc(collection(db, "messages"), {
+                name: document.getElementById('client-name').value,
+                email: document.getElementById('client-email').value,
+                details: document.getElementById('client-project').value,
+                timestamp: new Date()
+            });
+            alert('Proposal sent straight to my console! I will talk to you soon.');
+            
+            // Reset both the form fields and the reCAPTCHA widget visual state
+            contactForm.reset();
+            grecaptcha.reset(); 
+            
+        } catch (error) {
+            console.error("Error submitting message: ", error);
+            alert("Something went wrong. Please try again.");
+        }
+    });
 }
 
 // ==========================================
