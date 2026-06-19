@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Portfolio & Client Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>My Dev Shop</h1>
+        <nav>
+            <button id="login-btn">Client Login</button>
+            <button id="logout-btn" class="hidden">Logout</button>
+        </nav>
+    </header>
+
+    <section id="client-tracker" class="hidden">
+        <h2>Your Project Status</h2>
+        <div id="tracker-card"></div>
+    </section>
+
+    <section>
+        <h2>My Work</h2>
+        <div id="portfolio-grid" class="grid"></div>
+    </section>
+
+    <section>
+        <h2>Hire Me</h2>
+        <form id="contact-form">
+            <input type="text" id="client-name" placeholder="Your Name" required>
+            <input type="email" id="client-email" placeholder="Your Email" required>
+            <textarea id="client-project" placeholder="Describe your project..." required></textarea>
+            <button type="submit">Send Proposal</button>
+        </form>
+    </section>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
