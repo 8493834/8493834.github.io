@@ -17,11 +17,15 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
+// 👑 ADMIN CONFIGURATION
+const ADMIN_EMAILS = ["joshuasteeljoshua19@gmail.com"]; 
+
 // ==========================================
-// 🔐 AUTHENTICATION LAYER (Google/Apple)
+// 🔐 AUTHENTICATION LAYER WITH ROLES
 // ==========================================
 const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
+const adminBtn = document.getElementById('admin-btn');
 const trackerSection = document.getElementById('client-tracker');
 
 if (loginBtn) {
@@ -33,10 +37,19 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         loginBtn?.classList.add('hidden');
         logoutBtn?.classList.remove('hidden');
-        loadClientProject(user.email);
+
+        // Check if the logged-in user is the Admin
+        if (ADMIN_EMAILS.includes(user.email)) {
+            adminBtn?.classList.remove('hidden');   // Show Console Link
+            trackerSection?.classList.add('hidden'); // Hide client tracker for admin
+        } else {
+            adminBtn?.classList.add('hidden');      // Hide Console Link from clients
+            loadClientProject(user.email);          // Load client's dashboard
+        }
     } else {
         loginBtn?.classList.remove('hidden');
         logoutBtn?.classList.add('hidden');
+        adminBtn?.classList.add('hidden');
         trackerSection?.classList.add('hidden');
     }
 });
@@ -65,7 +78,7 @@ if (grid) {
     });
 }
 
-// 2. Contact Form Submission (Sends straight to Admin Console)
+// 2. Contact Form Submission
 const contactForm = document.getElementById('contact-form');
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
@@ -108,6 +121,15 @@ async function loadClientProject(email) {
 // ==========================================
 const portfolioForm = document.getElementById('portfolio-form');
 if (portfolioForm) {
+    
+    // Security Guard: Boot users out of console.html if they aren't the admin
+    onAuthStateChanged(auth, (user) => {
+        if (!user || !ADMIN_EMAILS.includes(user.email)) {
+            alert("Unauthorized access! Booting back to homepage.");
+            window.location.href = "index.html";
+        }
+    });
+
     // 1. Add New Project to Portfolio
     portfolioForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -115,10 +137,10 @@ if (portfolioForm) {
             title: document.getElementById('proj-title').value,
             link: document.getElementById('proj-link').value,
             isInProgress: document.getElementById('proj-status').checked,
-            clientEmail: "" // Pro-tip: Put a client's email here to map it to their login dashboard
+            clientEmail: "" // Put your client's email here so they can track it when they log in!
         });
         alert('Project added seamlessly!');
-        window.location.reload(); // Refresh to show changes
+        window.location.reload(); 
     });
 
     // 2. Load Inbound Client Messages with Delete Capabilities
@@ -151,15 +173,12 @@ document.addEventListener('click', async (e) => {
         const docId = e.target.getAttribute('data-id');
         const collectionName = e.target.getAttribute('data-collection');
         
-        if (confirm('Are you sure you want to delete this permanently from the database?')) {
+        if (confirm('Are you sure you want to delete this permanently?')) {
             try {
-                // Delete directly from Firestore
                 await deleteDoc(doc(db, collectionName, docId));
-                // Instantly erase element from the user interface
                 e.target.parentElement.remove();
             } catch (error) {
                 console.error("Error executing deletion: ", error);
-                alert("Failed to delete item. Check console logs.");
             }
         }
     }
