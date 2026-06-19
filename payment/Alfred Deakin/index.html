@@ -4,8 +4,9 @@
     <title> payment page</title>
 </head>
 <body>
-    <form action="/process-payment" method="POST" id="payment-form">
+   <form action="/process-payment" method="POST" id="payment-form">
   
+  <!-- Cardholder Name -->
   <div class="form-group">
     <label for="cardholder-name">Cardholder Name</label>
     <input 
@@ -17,6 +18,7 @@
       placeholder="Jane Doe">
   </div>
 
+  <!-- Card Number -->
   <div class="form-group">
     <label for="card-number">Card Number</label>
     <input 
@@ -30,6 +32,7 @@
       placeholder="xxxx xxxx xxxx xxxx">
   </div>
 
+  <!-- Expiration Date & CVV -->
   <div class="form-row">
     <div class="form-group">
       <label for="card-expiry">Expiry Date</label>
@@ -58,9 +61,52 @@
     </div>
   </div>
 
+  <!-- Status Message Container -->
+  <div id="payment-status" style="margin: 15px 0; font-weight: bold; min-height: 24px;"></div>
+
+  <!-- Submit Button -->
   <button type="submit" id="submit-payment">Pay Now</button>
 
 </form>
+
+<script>
+document.getElementById('payment-form').addEventListener('submit', function(event) {
+  // Prevent the default form submission so we can show the animations
+  event.preventDefault();
+
+  const statusDiv = document.getElementById('payment-status');
+  const submitBtn = document.getElementById('submit-payment');
+  
+  // Disable the button to prevent double-clicking
+  submitBtn.disabled = true;
+
+  let step = 0;
+  
+  // Interval loops every 600ms to handle the dot animations smoothly
+  const paymentInterval = setInterval(() => {
+    step++;
+
+    if (step === 1) {
+      statusDiv.textContent = "Processing.";
+    } else if (step === 2) {
+      statusDiv.textContent = "Processing..";
+    } else if (step === 3) {
+      statusDiv.textContent = "Processing...";
+    } else if (step === 4) {
+      statusDiv.textContent = "Payment successful now redirecting.";
+    } else if (step === 5) {
+      statusDiv.textContent = "Redirecting..";
+    } else if (step === 6) {
+      statusDiv.textContent = "Redirecting...";
+    } else if (step >= 7) {
+      clearInterval(paymentInterval);
+      
+      // Replace URL with your actual success page
+      window.location.href = "https://docs.google.com/presentation/d/1O3OYAU9jLZW0aqadzA-icSdGXxZgJ_yTY46fyLRo3Ic/edit?slide=id.g3f1694d0966_0_81#slide=id.g3f1694d0966_0_81"; 
+    }
+  }, 600); 
+});
+</script>
 </body>
 
 
