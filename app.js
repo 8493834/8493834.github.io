@@ -12,13 +12,15 @@ const firebaseConfig = {
     appId: "1:753448833597:web:c309e5ff4663064e0f5054"
 };
 
-// Initialize Firebase
+// Initialize Firebase Services
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// --- AUTHENTICATION LAYER ---
+// ==========================================
+// 🔐 AUTHENTICATION LAYER (Google/Apple)
+// ==========================================
 const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const trackerSection = document.getElementById('client-tracker');
@@ -40,9 +42,14 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// --- PUBLIC PORTFOLIO LOAD ---
+// ==========================================
+// 🌐 PUBLIC HOMEPAGE LOGIC (index.html)
+// ==========================================
+
+// 1. Fetch and Display Portfolio Items
 const grid = document.getElementById('portfolio-grid');
 if (grid) {
+    grid.innerHTML = ''; 
     const querySnapshot = await getDocs(collection(db, "projects"));
     querySnapshot.forEach((doc) => {
         const data = doc.data();
@@ -59,7 +66,7 @@ if (grid) {
     });
 }
 
-// --- SUBMIT CONTACT FORM TO CONSOLE ---
+// 2. Contact Form Submission (Sends straight to Admin Console)
 const contactForm = document.getElementById('contact-form');
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
@@ -75,7 +82,7 @@ if (contactForm) {
     });
 }
 
-// --- CLIENT TRACKER DISPLAY ---
+// 3. Authenticated Client Progress Tracker
 async function loadClientProject(email) {
     if (!trackerSection) return;
     const q = query(collection(db, "projects"), where("clientEmail", "==", email));
@@ -84,9 +91,10 @@ async function loadClientProject(email) {
     if (!snapshot.empty) {
         trackerSection.classList.remove('hidden');
         const card = document.getElementById('tracker-card');
+        card.innerHTML = '';
         snapshot.forEach(doc => {
             const data = doc.data();
-            card.innerHTML = `
+            card.innerHTML += `
                 <div class="card">
                     <h3>${data.title}</h3>
                     <p>Status: <strong>${data.isInProgress ? '⚙️ We are actively building more features!' : '✅ Finished & Live'}</strong></p>
@@ -96,31 +104,64 @@ async function loadClientProject(email) {
     }
 }
 
-// --- ADMIN CONSOLE LOGIC ---
+// ==========================================
+// 🎛️ ADMIN CONSOLE LOGIC (console.html)
+// ==========================================
 const portfolioForm = document.getElementById('portfolio-form');
 if (portfolioForm) {
+    // 1. Add New Project to Portfolio
     portfolioForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         await addDoc(collection(db, "projects"), {
             title: document.getElementById('proj-title').value,
             link: document.getElementById('proj-link').value,
             isInProgress: document.getElementById('proj-status').checked,
-            clientEmail: "" // Add client email here if assigning it to a user account
+            clientEmail: "" // Pro-tip: Put a client's email here to map it to their login dashboard
         });
         alert('Project added seamlessly!');
-        portfolioForm.reset();
+        window.location.reload(); // Refresh to show changes
     });
 
-    // Load messages into console
+    // 2. Load Inbound Client Messages with Delete Capabilities
     const msgList = document.getElementById('messages-list');
-    const msgSnapshot = await getDocs(collection(db, "messages"));
-    msgSnapshot.forEach(doc => {
-        const data = doc.data();
-        msgList.innerHTML += `
-            <div class="card">
+    if (msgList) {
+        const msgSnapshot = await getDocs(collection(db, "messages"));
+        msgList.innerHTML = ''; 
+        
+        msgSnapshot.forEach(docSnapshot => {
+            const data = docSnapshot.data();
+            const docId = docSnapshot.id;
+            
+            const msgCard = document.createElement('div');
+            msgCard.className = 'card';
+            msgCard.innerHTML = `
                 <h4>From: ${data.name} (${data.email})</h4>
                 <p>${data.details}</p>
-            </div>
-        `;
-    });
+                <button class="delete-btn" data-id="${docId}" data-collection="messages" style="background: #ef4444; margin-top: 1rem;">Delete Message</button>
+            `;
+            msgList.appendChild(msgCard);
+        });
+    }
 }
+
+// ==========================================
+// 🗑️ GLOBAL DELETION ENGINE
+// ==========================================
+document.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('delete-btn')) {
+        const docId = e.target.getAttribute('data-id');
+        const collectionName = e.target.getAttribute('data-collection');
+        
+        if (confirm('Are you sure you want to delete this permanently from the database?')) {
+            try {
+                // Delete directly from Firestore
+                await deleteDoc(doc(db, collectionName, docId));
+                // Instantly erase element from the user interface
+                e.target.parentElement.remove();
+            } catch (error) {
+                console.error("Error executing deletion: ", error);
+                alert("Failed to delete item. Check console logs.");
+            }
+        }
+    }
+});
