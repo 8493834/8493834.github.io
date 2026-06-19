@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Command Center</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Admin Console</h1>
+    <a href="index.html">← Back to Main Site</a>
+
+    <div class="admin-grid">
+        <section>
+            <h2>Manage Portfolio</h2>
+            <form id="portfolio-form">
+                <input type="text" id="proj-title" placeholder="Project Title" required>
+                <input type="text" id="proj-link" placeholder="Project Link">
+                <label>
+                    <input type="checkbox" id="proj-status"> In Progress
+                </label>
+                <button type="submit">Save Project</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Inbound Client Messages</h2>
+            <div id="messages-list"></div>
+        </section>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
