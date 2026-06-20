@@ -5,40 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dev Portfolio & Client Portal</title>
     <link rel="stylesheet" href="style.css">
+    
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 
     <header>
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
         <h1>My Dev Shop</h1>
         <nav>
-    <button id="login-btn">Client Login</button>
-    <a id="admin-btn" href="console.html" class="hidden" style="color: var(--accent); text-decoration: none; font-weight: bold; margin-right: 1rem;">Admin Console</a>
-    <button id="logout-btn" class="hidden">Logout</button>
-    </nav>
+            <button id="login-btn">Client Login</button>
+            <a id="admin-btn" href="console.html" class="hidden" style="color: var(--accent); text-decoration: none; font-weight: bold; margin-right: 1rem;">Admin Console</a>
+            <button id="logout-btn" class="hidden">Logout</button>
+        </nav>
     </header>
 
     <section id="client-tracker" class="hidden">
-        <h2>Your Project Status</h2>
-        <div id="tracker-card"></div>
+        <h2>Your Project Dashboard</h2>
+        <div id="tracker-card">
+            </div>
     </section>
 
     <section>
-        <h2>My Work</h2>
-        <div id="portfolio-grid" class="grid"></div>
+        <h2>My Showcase</h2>
+        <div id="portfolio-grid" class="grid">
+            </div>
     </section>
 
     <section>
         <h2>Hire Me</h2>
-<form id="contact-form">
-    <input type="text" id="client-name" placeholder="Your Name" required>
-    <input type="email" id="client-email" placeholder="Your Email" required>
-    <textarea id="client-project" placeholder="Describe your project..." required></textarea>
-    
-    <div class="g-recaptcha" data-sitekey="6LfY9SctAAAAADqIyZm5Jc0cJTWkF9O3T7bOiHXp" style="margin-bottom: 1rem;"></div>
-    
-    <button type="submit">Send Proposal</button>
-</form>
+        <form id="contact-form">
+            <input type="text" id="client-name" placeholder="Your Name" required>
+            <input type="email" id="client-email" placeholder="Your Email" required>
+            <textarea id="client-project" placeholder="Describe your web project vision and timeline..." required></textarea>
+            
+            <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY" style="margin-bottom: 1rem;"></div>
+            
+            <button type="submit">Send Proposal</button>
+        </form>
     </section>
 
     <script type="module" src="app.js"></script>
