@@ -2,29 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Command Center</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Admin Console</h1>
-    <a href="index.html">← Back to Main Site</a>
+    <header>
+        <h1>Admin Console</h1>
+        <a href="index.html" style="color: var(--accent); text-decoration: none; font-weight: bold;">← Back to Main Site</a>
+    </header>
 
     <div class="admin-grid">
-        <section>
-            <h2>Manage Portfolio</h2>
+        <section class="card">
+            <h2>Manage Projects & Progress</h2>
             <form id="portfolio-form">
                 <input type="text" id="proj-title" placeholder="Project Title" required>
-                <input type="text" id="proj-link" placeholder="Project Link">
-                <label>
-                    <input type="checkbox" id="proj-status"> In Progress
+                <input type="text" id="proj-link" placeholder="Project Live Link (Optional)">
+                
+                <input type="number" id="proj-progress" min="0" max="100" placeholder="Progress Percentage (0-100)" required>
+                <textarea id="proj-proposal" placeholder="Paste Client's Approved Proposal / Scope of Work here..." rows="5" required></textarea>
+                <input type="email" id="proj-client-email" placeholder="Assign to Client Email (Must match their login email)" required>
+                
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;">
+                    <input type="checkbox" id="proj-status"> Mark as "In Progress"
                 </label>
-                <button type="submit">Save Project</button>
+                <button type="submit">Save & Synchronize Project</button>
             </form>
         </section>
 
         <section>
             <h2>Inbound Client Messages</h2>
-            <div id="messages-list"></div>
+            <div id="messages-list">
+                </div>
         </section>
     </div>
 
