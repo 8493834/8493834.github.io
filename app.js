@@ -20,6 +20,7 @@ const provider = new GoogleAuthProvider();
 // 👑 ADMIN CONFIGURATION
 const ADMIN_EMAILS = ["joshuasteeljoshua19@gmail.com"]; 
 
+
 // ==========================================
 // 🔐 AUTHENTICATION LAYER WITH ROLES
 // ==========================================
@@ -38,13 +39,13 @@ onAuthStateChanged(auth, (user) => {
         loginBtn?.classList.add('hidden');
         logoutBtn?.classList.remove('hidden');
 
-        // Check if the logged-in user is the Admin
+        // Check if the logged-in user is the Admin/Developer
         if (ADMIN_EMAILS.includes(user.email)) {
-            adminBtn?.classList.remove('hidden');   // Show Console Link
-            trackerSection?.classList.add('hidden'); // Hide client tracker for admin
+            adminBtn?.classList.remove('hidden');   // Show link to console.html
+            trackerSection?.classList.add('hidden'); // Admin doesn't need to see client tracker
         } else {
-            adminBtn?.classList.add('hidden');      // Hide Console Link from clients
-            loadClientProject(user.email);          // Load client's dashboard
+            adminBtn?.classList.add('hidden');      // Hide admin panel link from normal clients
+            loadClientProject(user.email.toLowerCase().trim()); // Load this specific client's progress
         }
     } else {
         loginBtn?.classList.remove('hidden');
@@ -58,7 +59,7 @@ onAuthStateChanged(auth, (user) => {
 // 🌐 PUBLIC HOMEPAGE LOGIC (index.html)
 // ==========================================
 
-// 1. Fetch and Display Portfolio Items
+// 1. Fetch and Display Public Portfolio Items
 const grid = document.getElementById('portfolio-grid');
 if (grid) {
     grid.innerHTML = ''; 
@@ -78,38 +79,30 @@ if (grid) {
     });
 }
 
-// ==========================================
-// 🌐 PUBLIC HOMEPAGE LOGIC (index.html)
-// ==========================================
-
-// ... (Portfolio rendering logic stays up here) ...
-
-// 2. Contact Form Submission (With reCAPTCHA Protection)
+// 2. Protected Contact Form Submission (with reCAPTCHA validation)
 const contactForm = document.getElementById('contact-form');
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // 🤖 Check if the reCAPTCHA checkbox has been resolved
+        // 🤖 Validate reCAPTCHA response state
         const recaptchaResponse = grecaptcha.getResponse();
         if (!recaptchaResponse) {
             alert('Please check the "I\'m not a robot" box before sending your proposal!');
-            return; // Stops the execution right here so bots can't write to Firestore
+            return; 
         }
 
-        // If verified, proceed to send data to Firebase Console
         try {
             await addDoc(collection(db, "messages"), {
                 name: document.getElementById('client-name').value,
-                email: document.getElementById('client-email').value,
+                email: document.getElementById('client-email').value.trim().toLowerCase(),
                 details: document.getElementById('client-project').value,
                 timestamp: new Date()
             });
             alert('Proposal sent straight to my console! I will talk to you soon.');
             
-            // Reset both the form fields and the reCAPTCHA widget visual state
             contactForm.reset();
-            grecaptcha.reset(); 
+            grecaptcha.reset(); // Clear reCAPTCHA visual state
             
         } catch (error) {
             console.error("Error submitting message: ", error);
@@ -118,34 +111,81 @@ if (contactForm) {
     });
 }
 
+// 3. Authenticated Client Progress Tracker Dashboard
+async function loadClientProject(email) {
+    if (!trackerSection) return;
+    const q = query(collection(db, "projects"), where("clientEmail", "==", email));
+    const snapshot = await getDocs(q);
+    
+    if (!snapshot.empty) {
+        trackerSection.classList.remove('hidden');
+        const card = document.getElementById('tracker-card');
+        card.innerHTML = '';
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const currentProgress = data.progress || 0;
+            
+            card.innerHTML += `
+                <div class="card" style="margin-top: 1rem; border-left: 5px solid var(--accent);">
+                    <h3>🚀 Project Profile: ${data.title}</h3>
+                    
+                    <div style="margin: 1.5rem 0;">
+                        <label><strong>Build Progress:</strong></label>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${currentProgress}%"></div>
+                            <div class="progress-text">${currentProgress}%</div>
+                        </div>
+                        <p style="font-size: 0.9rem; color: #94a3b8; margin-top: 0.5rem;">
+                            ${data.isInProgress ? '⚙️ Standby! I am actively writing code and adding more features.' : '✅ Project wrapped up and pushed to manufacturing!'}
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 6px;">
+                        <h4>📝 Your System Proposal & Scope:</h4>
+                        <p style="white-space: pre-wrap; font-style: italic; color: #cbd5e1;">"${data.proposal || 'No design parameters documented yet.'}"</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+}
+
 // ==========================================
 // 🎛️ ADMIN CONSOLE LOGIC (console.html)
 // ==========================================
 const portfolioForm = document.getElementById('portfolio-form');
 if (portfolioForm) {
     
-    // Security Guard: Boot users out of console.html if they aren't the admin
+    // Strict URL Route Security Guard
     onAuthStateChanged(auth, (user) => {
         if (!user || !ADMIN_EMAILS.includes(user.email)) {
-            alert("Unauthorized access! Booting back to homepage.");
+            alert("Unauthorized personnel detected. Relocating back to public spaces.");
             window.location.href = "index.html";
         }
     });
 
-    // 1. Add New Project to Portfolio
+    // 1. Write Brand New Project/Progress Framework to Firestore
     portfolioForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        await addDoc(collection(db, "projects"), {
-            title: document.getElementById('proj-title').value,
-            link: document.getElementById('proj-link').value,
-            isInProgress: document.getElementById('proj-status').checked,
-            clientEmail: "" // Put your client's email here so they can track it when they log in!
-        });
-        alert('Project added seamlessly!');
-        window.location.reload(); 
+        try {
+            await addDoc(collection(db, "projects"), {
+                title: document.getElementById('proj-title').value,
+                link: document.getElementById('proj-link').value,
+                isInProgress: document.getElementById('proj-status').checked,
+                progress: parseInt(document.getElementById('proj-progress').value, 10) || 0,
+                proposal: document.getElementById('proj-proposal').value,
+                clientEmail: document.getElementById('proj-client-email').value.trim().toLowerCase()
+            });
+            alert('Project database synchronized perfectly!');
+            window.location.reload(); 
+        } catch (error) {
+            console.error("Error creating project: ", error);
+            alert("Failed to save project execution framework.");
+        }
     });
 
-    // 2. Load Inbound Client Messages with Delete Capabilities
+    // 2. Fetch and Read Inbound Client Mail with Delete Capabilities
     const msgList = document.getElementById('messages-list');
     if (msgList) {
         const msgSnapshot = await getDocs(collection(db, "messages"));
@@ -159,7 +199,7 @@ if (portfolioForm) {
             msgCard.className = 'card';
             msgCard.innerHTML = `
                 <h4>From: ${data.name} (${data.email})</h4>
-                <p>${data.details}</p>
+                <p style="white-space: pre-wrap;">${data.details}</p>
                 <button class="delete-btn" data-id="${docId}" data-collection="messages" style="background: #ef4444; margin-top: 1rem;">Delete Message</button>
             `;
             msgList.appendChild(msgCard);
@@ -175,12 +215,13 @@ document.addEventListener('click', async (e) => {
         const docId = e.target.getAttribute('data-id');
         const collectionName = e.target.getAttribute('data-collection');
         
-        if (confirm('Are you sure you want to delete this permanently?')) {
+        if (confirm('Are you sure you want to permanently delete this document data?')) {
             try {
                 await deleteDoc(doc(db, collectionName, docId));
                 e.target.parentElement.remove();
             } catch (error) {
-                console.error("Error executing deletion: ", error);
+                console.error("Error executing deletion routine: ", error);
+                alert("Database mutation failure.");
             }
         }
     }
