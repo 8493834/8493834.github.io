@@ -14,11 +14,10 @@
 
     <div class="admin-grid">
         <section class="card">
-            <h2>Manage Projects & Progress</h2>
+            <h2>Add New Project</h2>
             <form id="portfolio-form">
                 <input type="text" id="proj-title" placeholder="Project Title" required>
                 <input type="text" id="proj-link" placeholder="Project Live Link (Optional)">
-                
                 <input type="number" id="proj-progress" min="0" max="100" placeholder="Progress Percentage (0-100)" required>
                 <textarea id="proj-proposal" placeholder="Paste Client's Approved Proposal / Scope of Work here..." rows="5" required></textarea>
                 <input type="email" id="proj-client-email" placeholder="Assign to Client Email (Must match their login email)" required>
@@ -30,7 +29,13 @@
             </form>
         </section>
 
-        <section>
+        <section class="card">
+            <h2>Active Projects Dashboard</h2>
+            <div id="admin-projects-list">
+                </div>
+        </section>
+
+        <section class="card">
             <h2>Inbound Client Messages</h2>
             <div id="messages-list">
                 </div>
