@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>  
-  <title> payment page</title>
+  <title>Payment Page</title>
 </head>
 <body>
-   <form action="/process-payment" method="POST" id="payment-form">
+
+<form action="/process-payment" method="POST" id="payment-form">
   
-  <!-- Cardholder Name -->
   <div class="form-group">
     <label for="cardholder-name">Cardholder Name</label>
     <input 
@@ -19,7 +21,6 @@
       placeholder="Jane Doe">
   </div>
 
-  <!-- Card Number -->
   <div class="form-group">
     <label for="card-number">Card Number</label>
     <input 
@@ -33,7 +34,6 @@
       placeholder="xxxx xxxx xxxx xxxx">
   </div>
 
-  <!-- Expiration Date & CVV -->
   <div class="form-row">
     <div class="form-group">
       <label for="card-expiry">Expiry Date</label>
@@ -62,11 +62,9 @@
     </div>
   </div>
 
-  <!-- Status Message Container -->
-  <div id="payment-status" style="margin: 15px 0; font-weight: bold; min-height: 24px;"></div>
+  <div class="g-recaptcha" data-sitekey="6LfOjywtAAAAAMtVrAsGW6EBAGBdX6eXYgQdo79n" style="margin: 15px 0;"></div>
 
-  <!-- Submit Button -->
-  <div class="g-recaptcha" data-sitekey="6LfOjywtAAAAAMtVrAsGW6EBAGBdX6eXYgQdo79n"></div>
+  <div id="payment-status" style="margin: 15px 0; font-weight: bold; min-height: 24px;"></div>
 
   <button type="submit" id="submit-payment">Pay Now</button>
 
@@ -74,11 +72,23 @@
 
 <script>
 document.getElementById('payment-form').addEventListener('submit', function(event) {
-  // Prevent the default form submission so we can show the animations
   event.preventDefault();
 
   const statusDiv = document.getElementById('payment-status');
   const submitBtn = document.getElementById('submit-payment');
+  
+  // 1. Check if reCAPTCHA has been completed
+  const recaptchaResponse = grecaptcha.getResponse();
+  
+  if (recaptchaResponse.length === 0) {
+    // If response is empty, the user didn't check the box
+    statusDiv.style.color = "red";
+    statusDiv.textContent = "Please complete the reCAPTCHA challenge.";
+    return; // Stop the script here
+  }
+
+  // Clear any previous error styles
+  statusDiv.style.color = "inherit";
   
   // Disable the button to prevent double-clicking
   submitBtn.disabled = true;
@@ -104,24 +114,11 @@ document.getElementById('payment-form').addEventListener('submit', function(even
     } else if (step >= 7) {
       clearInterval(paymentInterval);
       
-      // Replace URL with your actual success page
+      // Redirect to your slides link
       window.location.href = "https://docs.google.com/presentation/d/1O3OYAU9jLZW0aqadzA-icSdGXxZgJ_yTY46fyLRo3Ic/present#slide=id.g3f1694d0966_0_81"; 
     }
   }, 600); 
 });
 </script>
 </body>
-
-
-
-
-
-
-
-
-
-
-
-
-
 </html>
