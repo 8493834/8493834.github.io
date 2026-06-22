@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title> payment page</title>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>  
+  <title> payment page</title>
 </head>
 <body>
    <form action="/process-payment" method="POST" id="payment-form">
@@ -65,6 +66,8 @@
   <div id="payment-status" style="margin: 15px 0; font-weight: bold; min-height: 24px;"></div>
 
   <!-- Submit Button -->
+  <div class="g-recaptcha" data-sitekey="6LfOjywtAAAAAMtVrAsGW6EBAGBdX6eXYgQdo79n"></div>
+
   <button type="submit" id="submit-payment">Pay Now</button>
 
 </form>
