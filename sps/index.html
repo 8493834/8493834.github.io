@@ -11,7 +11,8 @@
     <title>SPS & BPS | BOP HQ</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2e7d32">
-    <style>
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script> 
+   <style>
         :root {
             --primary: #2e7d32;
             --accent: #8bc34a;
@@ -315,19 +316,14 @@
         });
     }
 
-    const BIN_ID = "6a0d6bca6610dd3ae8753b6c";
-    const API_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
-    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-
-  
-    const KVDB_BUCKET_ID = "DDp2V1oNn6NzaHQ9bmj7gD"; 
-    const BACKUP_URL = `https://kvdb.io/${KVDB_BUCKET_ID}/bop_logs`;
-
-
+    // --- Supabase Global Mainframe Config ---
 const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co/rest/v1/";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg";
 
-    if (typeof supabase === 'undefined' || !supabase.auth) {
+// Initialize the database client cleanly
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+   if (typeof supabase === 'undefined' || !supabase.auth) {
     var supabase = window['@supabase/supabase-js'].createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
     
@@ -525,11 +521,12 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         });
    }
     
-    async function signInWithGoogle() {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+ async function signInWithGoogle() {
+    await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
 }
+
 async function signInWithGitHub() {
-    await supabase.auth.signInWithOAuth({ provider: 'github' });
+    await supabaseClient.auth.signInWithOAuth({ provider: 'github' });
 }
 
     async function sendChatMessage() {
