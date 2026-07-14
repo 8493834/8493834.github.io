@@ -522,11 +522,22 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    }
     
  async function signInWithGoogle() {
-    await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+    await supabaseClient.auth.signInWithOAuth({ 
+        provider: 'google',
+        options: {
+            // window.location.href automatically grabs the exact page you are currently looking at!
+            redirectTo: window.location.href 
+        }
+    });
 }
 
 async function signInWithGitHub() {
-    await supabaseClient.auth.signInWithOAuth({ provider: 'github' });
+    await supabaseClient.auth.signInWithOAuth({ 
+        provider: 'github',
+        options: {
+            redirectTo: window.location.href
+        }
+    });
 }
 
     async function sendChatMessage() {
