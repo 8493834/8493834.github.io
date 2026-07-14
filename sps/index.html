@@ -571,7 +571,79 @@ supabase
       box.innerHTML += `<div class="chat-msg"><span class="chat-user">${payload.new.username}:</span> ${payload.new.message}</div>`;
   })
   .subscribe();
+
+// --- Check User Login Status and Update the Screen ---
+async function checkUserSession() {
+    // Get the current logged-in user session from Supabase
+    const { data: { session } } = await supabaseClient.auth.getSession();
     
+    if (session) {
+        const user = session.user;
+        
+        // 1. Swap login buttons with a welcome message
+        const accountCard = document.querySelector('#account .card');
+        if (accountCard) {
+            // Find auth buttons and hide them
+            document.querySelectorAll('.btn-auth').forEach(btn => btn.style.display = 'none');
+            
+            // Show logged-in status
+            let statusText = document.getElementById('authStatusText');
+            if (!statusText) {
+                statusText = document.createElement('p');
+                statusText.id = 'authStatusText';
+                statusText.style.color = 'green';
+                statusText.style.fontWeight = 'bold';
+                accountCard.insertBefore(statusText, accountCard.firstChild);
+            }
+            statusText.innerText = `✅ Securely Logged In as: ${user.email}`;
+        }
+
+        // 2. Fetch their custom Profile data from the database
+        const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        // 3. Populate the customization input fields automatically if they exist
+        if (profile) {
+            const inputs = document.querySelectorAll('#account input, #account textarea');
+            if (inputs[0]) inputs[0].value = profile.username || '';
+            if (inputs[1]) inputs[1].value = profile.bio || '';
+            if (inputs[2]) inputs[2].value = profile.favorite_bug || '';
+        }
+        
+        // 4. Load their friends list
+        loadFriendsList(user.id);
+    }
+}
+
+// --- Placeholder for Loading Friends ---
+async function loadFriendsList(userId) {
+    const friendsContainer = document.querySelector('#account .card:nth-of-type(2) p');
+    if (friendsContainer) {
+        friendsContainer.innerText = "Scanning network for connected partners...";
+        
+        // Fetch friendships where status is accepted
+        const { data: friends, error } = await supabaseClient
+            .from('friendships')
+            .select('*')
+            .or(`user_id.eq.${userId},friend_id.eq.${userId}`)
+            .eq('status', 'accepted');
+            
+        if (friends && friends.length > 0) {
+            friendsContainer.innerText = `Found ${friends.length} active field partner(s)!`;
+        } else {
+            friendsContainer.innerText = "No current active connections. Share your handle to add friends!";
+        }
+    }
+}
+
+// Run this check automatically every single time the page loads!
+window.addEventListener('load', () => {
+    checkUserSession();
+});
+   
 </script>
 </body>
 </html>
