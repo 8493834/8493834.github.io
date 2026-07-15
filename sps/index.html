@@ -492,7 +492,7 @@
             await fetch(JSONBIN_URL, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-                body: JSON.stringify([id": "000", "subject": "System Initialization", "coords": "0,0", "time": "BOP HQ Online])
+                body: JSON.stringify([])
             });
         } catch (err) { console.log("Primary down during wipe."); }
 
