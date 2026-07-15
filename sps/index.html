@@ -278,7 +278,67 @@
 
     window.addEventListener('load', () => {
         syncOfflineReports();
-        checkUserSession(); // Checks database login state right when app loads
+        // =========================================================
+    //   USER PROFILES & IDENTITY MANAGEMENT (ERROR-PROOF)
+    // =========================================================
+    async function checkUserSession() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        if (session) {
+            const user = session.user;
+            const accountCard = document.querySelector('#account .card');
+            
+            if (accountCard) {
+                document.querySelectorAll('.btn-auth').forEach(btn => btn.style.display = 'none');
+                
+                let statusText = document.getElementById('authStatusText');
+                if (!statusText) {
+                    statusText = document.createElement('p');
+                    statusText.id = 'authStatusText';
+                    statusText.style.color = 'green';
+                    statusText.style.fontWeight = 'bold';
+                    accountCard.insertBefore(statusText, accountCard.firstChild);
+                }
+                statusText.innerText = `✅ Securely Logged In: ${user.email}`;
+            }
+
+            // 1. Try to fetch the profile safely without forcing a .single() crash
+            let { data: profile, error } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id);
+
+            // 2. If no profile exists yet (empty array), auto-create a blank one!
+            if (!profile || profile.length === 0) {
+                console.log("No profile found. Generating new database matrix row...");
+                const tempUsername = user.email.split('@')[0];
+                
+                const { data: newProfile, error: insertError } = await supabaseClient
+                    .from('profiles')
+                    .insert([
+                        { id: user.id, username: tempUsername, bio: "Field observer.", favorite_bug: "Snail" }
+                    ])
+                    .select();
+                
+                if (insertError) {
+                    console.error("Profile auto-creation failed:", insertError);
+                } else {
+                    profile = newProfile;
+                }
+            }
+
+            // 3. Populate the customization input fields on screen
+            const activeProfile = Array.isArray(profile) ? profile[0] : profile;
+            if (activeProfile) {
+                const inputs = document.querySelectorAll('#account input, #account textarea');
+                if (inputs[0]) inputs[0].value = activeProfile.username || '';
+                if (inputs[1]) inputs[1].value = activeProfile.bio || '';
+                if (inputs[2]) inputs[2].value = activeProfile.favorite_bug || '';
+            }
+            
+            loadFriendsList(user.id);
+        }
+    }
     });
 
     // --- Snail Directory Data (Congrats Timmy & Gary on the eggs!) ---
