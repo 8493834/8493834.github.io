@@ -278,9 +278,10 @@
 
     window.addEventListener('load', () => {
         syncOfflineReports();
+        checkUserSession(); // Checks database login state right when app loads
     });
 
-    // --- Snail Directory Data ---
+    // --- Snail Directory Data (Congrats Timmy & Gary on the eggs!) ---
     const snails = [
         { name: "Shelly", species: "Garden Snail", status: "Healthy" },
         { name: "timmy", species: "garnden Snail", status: "healthy and has EGGS!!!!!" },
@@ -289,7 +290,7 @@
 
     const list = document.getElementById('snail-list');
     if (list) {
-        list.innerHTML = ''; // Clear previous entries
+        list.innerHTML = ''; 
         snails.forEach(s => {
             const card = document.createElement('div');
             card.className = 'card';
@@ -317,17 +318,24 @@
         });
     }
 
-    // --- Supabase Global Mainframe Config ---
-const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg";
+    // =========================================================
+    //   SUPABASE GLOBAL ANCHOR CONFIG (CLEAN MATRIX SETUP)
+    // =========================================================
+    const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg";
 
-// Initialize the database client cleanly
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-   if (typeof supabase === 'undefined' || !supabase.auth) {
-    var supabase = window['@supabase/supabase-js'].createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
+    // Clean single client definition
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
+    // =========================================================
+    //   LEGACY JSONBIN & STORAGE NODES (KEEPING INTACT)
+    // =========================================================
+    const BIN_ID = "6a0d6bca6610dd3ae8753b6c";
+    const API_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
+    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+    const KVDB_BUCKET_ID = "DDp2V1oNn6NzaHQ9bmj7gD"; 
+    const BACKUP_URL = `https://kvdb.io/${KVDB_BUCKET_ID}/bop_logs`;
+
     async function fetchFromCloud() {
         try {
             const res = await fetch(JSONBIN_URL, {
@@ -353,7 +361,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         throw new Error("All cloud databases unreachable.");
     }
 
-    // --- HELPER: MASTER CLOUD UPLOAD ---
     async function uploadToCloud(combinedLogs, targetSource) {
         if (targetSource === 'primary') {
             await fetch(JSONBIN_URL, {
@@ -370,7 +377,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     }
 
-    // --- TRANSMIT REPORT WITH TRIPLE REDUNDANCY ---
     const reportForm = document.getElementById('reportForm');
     if (reportForm) {
         reportForm.addEventListener('submit', async function(e) {
@@ -410,7 +416,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         });
     }
 
-    // --- FETCH AND CONSOLIDATE FOR CONSOLE ---
     async function loadReports() {
         const table = document.getElementById('reportData');
         if (!table) return;
@@ -463,7 +468,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     }
 
-    // --- AUTOMATIC SYNC PROCESS ---
     async function syncOfflineReports() {
         let localLogs = JSON.parse(localStorage.getItem('bop_offline_logs')) || [];
         if (localLogs.length === 0) return;
@@ -480,10 +484,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     }
 
-    // --- WIPE DATABASE AND LOCAL QUEUE ---
     async function clearReports() {
         if (!confirm("Wipe all logs? This clears both Cloud and Local caches.")) return;
-
         localStorage.removeItem('bop_offline_logs');
 
         try {
@@ -498,14 +500,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             await fetch(BACKUP_URL, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify([
-  {
-    "id": "000",
-    "subject": "System Initialization",
-    "coords": "0,0",
-    "time": "BOP HQ Online"
-  }
-])
+                body: JSON.stringify([{"id": "000", "subject": "System Initialization", "coords": "0,0", "time": "BOP HQ Online"}])
             });
         } catch (err) { console.log("Backup down during wipe."); }
         
@@ -513,120 +508,114 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         loadReports();
     }
 
-    // --- PWA Service Worker Registration ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sps/sw.js', { scope: '/sps/' })
             .then(reg => console.log('BOP Service Worker Online', reg.scope))
             .catch(err => console.log('BOP Worker Failed', err));
         });
-   }
-    
- async function signInWithGoogle() {
-    await supabaseClient.auth.signInWithOAuth({ 
-        provider: 'google',
-        options: {
-            // window.location.href automatically grabs the exact page you are currently looking at!
-            redirectTo: window.location.href 
-        }
-    });
-}
-
-async function signInWithGitHub() {
-    await supabaseClient.auth.signInWithOAuth({ 
-        provider: 'github',
-        options: {
-            redirectTo: window.location.href
-        }
-    });
-}
-
-    async function sendChatMessage() {
-    const input = document.getElementById('chatInput');
-    const user = supabase.auth.user();
-    
-    if(!user) { alert("You must be logged in to broadcast!"); return; }
-
-    await supabase.from('chat_messages').insert([
-        { user_id: user.id, username: user.email, message: input.value }
-    ]);
-    input.value = "";
-}
-async function sendChatMessage() {
-    const input = document.getElementById('chatInput');
-    const user = supabase.auth.user();
-    
-    if(!user) { alert("You must be logged in to broadcast!"); return; }
-
-    await supabase.from('chat_messages').insert([
-        { user_id: user.id, username: user.email, message: input.value }
-    ]);
-    input.value = "";
-}
-
-// Listen for live messages natively in real-time!
-supabase
-  .channel('public:chat_messages')
-  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
-      const box = document.getElementById('chatDisplay');
-      box.innerHTML += `<div class="chat-msg"><span class="chat-user">${payload.new.username}:</span> ${payload.new.message}</div>`;
-  })
-  .subscribe();
-
-// --- Check User Login Status and Update the Screen ---
-async function checkUserSession() {
-    // Get the current logged-in user session from Supabase
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    
-    if (session) {
-        const user = session.user;
-        
-        // 1. Swap login buttons with a welcome message
-        const accountCard = document.querySelector('#account .card');
-        if (accountCard) {
-            // Find auth buttons and hide them
-            document.querySelectorAll('.btn-auth').forEach(btn => btn.style.display = 'none');
-            
-            // Show logged-in status
-            let statusText = document.getElementById('authStatusText');
-            if (!statusText) {
-                statusText = document.createElement('p');
-                statusText.id = 'authStatusText';
-                statusText.style.color = 'green';
-                statusText.style.fontWeight = 'bold';
-                accountCard.insertBefore(statusText, accountCard.firstChild);
-            }
-            statusText.innerText = `✅ Securely Logged In as: ${user.email}`;
-        }
-
-        // 2. Fetch their custom Profile data from the database
-        const { data: profile } = await supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-        // 3. Populate the customization input fields automatically if they exist
-        if (profile) {
-            const inputs = document.querySelectorAll('#account input, #account textarea');
-            if (inputs[0]) inputs[0].value = profile.username || '';
-            if (inputs[1]) inputs[1].value = profile.bio || '';
-            if (inputs[2]) inputs[2].value = profile.favorite_bug || '';
-        }
-        
-        // 4. Load their friends list
-        loadFriendsList(user.id);
     }
-}
 
-// --- Placeholder for Loading Friends ---
-async function loadFriendsList(userId) {
-    const friendsContainer = document.querySelector('#account .card:nth-of-type(2) p');
-    if (friendsContainer) {
+    // =========================================================
+    //   GLOBAL AUTHENTICATION COMMAND MATRIX
+    // =========================================================
+    async function signInWithGoogle() {
+        await supabaseClient.auth.signInWithOAuth({ 
+            provider: 'google',
+            options: { redirectTo: window.location.href }
+        });
+    }
+
+    async function signInWithGitHub() {
+        await supabaseClient.auth.signInWithOAuth({ 
+            provider: 'github',
+            options: { redirectTo: window.location.href }
+        });
+    }
+
+    // =========================================================
+    //   REAL-TIME DISPATCH MESSAGING ENGINE
+    // =========================================================
+    async function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        if (!input || !input.value.trim()) return;
+
+        // Correct v2 session user fetch method
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        
+        if(!user) { 
+            alert("Transmission Denied! You must be logged into passport services to broadcast."); 
+            return; 
+        }
+
+        const { error } = await supabaseClient.from('chat_messages').insert([
+            { user_id: user.id, username: user.email.split('@')[0], message: input.value }
+        ]);
+        
+        if (error) console.error("Broadcast failed:", error);
+        input.value = "";
+    }
+
+    // Real-Time Chat Listener Linked to Mainframe
+    supabaseClient
+      .channel('public:chat_messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
+          const box = document.getElementById('chatDisplay');
+          if (box) {
+              box.innerHTML += `<div class="chat-msg"><span class="chat-user">${payload.new.username}:</span> ${payload.new.message}</div>`;
+              box.scrollTop = box.scrollHeight; // Auto scroll to newest line
+          }
+      })
+      .subscribe();
+
+    // =========================================================
+    //   USER PROFILES & IDENTITY MANAGEMENT
+    // =========================================================
+    async function checkUserSession() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        if (session) {
+            const user = session.user;
+            const accountCard = document.querySelector('#account .card');
+            
+            if (accountCard) {
+                document.querySelectorAll('.btn-auth').forEach(btn => btn.style.display = 'none');
+                
+                let statusText = document.getElementById('authStatusText');
+                if (!statusText) {
+                    statusText = document.createElement('p');
+                    statusText.id = 'authStatusText';
+                    statusText.style.color = 'green';
+                    statusText.style.fontWeight = 'bold';
+                    accountCard.insertBefore(statusText, accountCard.firstChild);
+                }
+                statusText.innerText = `✅ Securely Logged In: ${user.email}`;
+            }
+
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                const inputs = document.querySelectorAll('#account input, #account textarea');
+                if (inputs[0]) inputs[0].value = profile.username || '';
+                if (inputs[1]) inputs[1].value = profile.bio || '';
+                if (inputs[2]) inputs[2].value = profile.favorite_bug || '';
+            }
+            
+            loadFriendsList(user.id);
+        }
+    }
+
+    async function loadFriendsList(userId) {
+        const friendsContainer = document.querySelector('#account .card:nth-of-type(2) p');
+        if (!friendsContainer) return;
+        
         friendsContainer.innerText = "Scanning network for connected partners...";
         
-        // Fetch friendships where status is accepted
-        const { data: friends, error } = await supabaseClient
+        const { data: friends } = await supabaseClient
             .from('friendships')
             .select('*')
             .or(`user_id.eq.${userId},friend_id.eq.${userId}`)
@@ -638,13 +627,6 @@ async function loadFriendsList(userId) {
             friendsContainer.innerText = "No current active connections. Share your handle to add friends!";
         }
     }
-}
-
-// Run this check automatically every single time the page loads!
-window.addEventListener('load', () => {
-    checkUserSession();
-});
-   
 </script>
 </body>
 </html>
