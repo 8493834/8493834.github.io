@@ -233,10 +233,10 @@
                 </div>
             </div>
             
-            <form onsubmit="event.preventDefault(); alert('Chat database engine is being constructed next!');">
-                <input type="text" placeholder="Type transmission to field agents...">
-                <button type="submit" class="btn-main">Broadcast Message</button>
-            </form>
+            <form onsubmit="event.preventDefault(); sendChatMessage();">
+    <input type="text" id="chatInput" placeholder="Type transmission to field agents...">
+    <button type="submit" class="btn-main">Broadcast Message</button>
+</form>
         </div>
     </section>
 
