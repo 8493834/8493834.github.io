@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Clicker: Endless Bakery</title>
+    <!-- Links to your unified stylesheet layer -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Account Profile Management Panel -->
+    <div class="account-panel">
+        <div id="authContainer">
+            <input type="text" id="usernameInput" placeholder="Enter username..." maxlength="15">
+            <button id="loginBtn">Login / Create Account</button>
+        </div>
+        <div id="profileContainer" style="display: none;">
+            <span>Baker: <strong id="activeUser">Guest</strong></span>
+            <button id="saveBtn" class="action-btn">Save Game</button>
+            <button id="logoutBtn" class="action-btn logout">Logout</button>
+        </div>
+        <div id="saveStatus">Progress saved!</div>
+    </div>
+
+    <!-- Main Game Production Container -->
+    <div class="container">
+        <h1>Bakery Clicker</h1>
+        <div class="score-display" id="score">0</div>
+        <div class="cookie-tagline">cooookieeeeee!</div>
+        
+        <!-- Live Shorthand Economics Stats -->
+        <div class="stat-container">
+            <div class="stat">Cookies / Sec<span id="cps">0.0</span></div>
+            <div class="stat">Bake Power<span id="clickPower">1</span></div>
+        </div>
+        
+        <!-- Main Interactive Core Graphic Area -->
+        <div class="btn-wrapper" id="btnWrapper">
+            <button class="cookie-btn" id="cookieBtn" aria-label="Bake Cookie"></button>
+            <!-- System placeholder layer to map out the spinning ☝️ hands -->
+            <div class="cursor-holder" id="cursorHolder"></div>
+        </div>
+
+        <!-- Scrollable Upgrades Store Front -->
+        <div class="shop-header">Bakery Upgrades</div>
+        <div class="upgrades-list" id="shopList"></div>
+    </div>
+
+    <!-- Emergency script failure verification handler -->
+    <script>
+        window.addEventListener('error', function(e) {
+            if(e.message.toLowerCase().includes('script error') || e.message.toLowerCase().includes('game.js')) {
+                alert("Missing game.js engine block! Make sure your multi-part 'game.js' code is fully combined and saved in this exact same folder.");
+            }
+        });
+    </script>
+
+    <!-- Links to your continuous three-part logic script layer -->
+    <script src="game.js"></script>
+</body>
+</html>
