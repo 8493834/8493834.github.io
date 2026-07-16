@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Spamish 3D Book</title>
+
+<style>
+body {
+margin: 0;
+height: 100vh;
+display: flex;
+justify-content: center;
+align-items: center;
+background: #111;
+font-family: Arial;
+}
+
+.scene { perspective: 1600px; }
+
+.book {
+width: 460px;
+height: 640px;
+position: relative;
+}
+
+/* pages */
+.page {
+position: absolute;
+width: 100%;
+height: 100%;
+background: #f5e6c8;
+padding: 20px;
+border-radius: 8px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+display: none;
+overflow-y: auto;
+}
+
+.page.active { display: block; }
+
+.word {
+margin: 4px 0;
+font-size: 14px;
+}
+
+h1 {
+text-align: center;
+font-size: 20px;
+}
+
+/* controls */
+.controls {
+position: fixed;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 20px;
+z-index: 9999;
+}
+
+button {
+padding: 12px 18px;
+border: none;
+background: #333;
+color: white;
+border-radius: 8px;
+}
+
+button:hover { background: #555; }
+</style>
+</head>
+
+<body>
+
+<div class="scene">
+<div class="book">
+
+<!--PAGE 1 -->
+<div class="page active">
+<h1>SPAMISH BASICS</h1>
+<div class="word">Salu = Hello</div>
+<div class="word">Tavo = Goodbye</div>
+<div class="word">Savo = Yes</div>
+<div class="word">Navo = No</div>
+<div class="word">Savoa = Maybe</div>
+<div class="word">Savoza = Please</div>
+<div class="word">Grato = Thank you</div>
+<div class="word">Solvi = Sorry</div>
+<div class="word">Luno = Morning</div>
+<div class="word">Navi = Night</div>
+<div class="word">Kero = Welcome</div>
+<div class="word">Veta = Later</div>
+<div class="word">Mina = Now</div>
+<div class="word">Doro = Fast</div>
+<div class="word">Selo = Slow</div>
+</div>
+<!--PAGE 2 -->
+<div class="page">
+<h1>FEELINGS</h1>
+<div class="word">Feli = Happy</div>
+<div class="word">Soru = Sad</div>
+<div class="word">Raka = Angry</div>
+<div class="word">Doro = Tired</div>
+<div class="word">Vesi = Excited</div>
+<div class="word">Nelo = Nervous</div>
+<div class="word">Melo = Calm</div>
+<div class="word">Hapi = Joyful</div>
+<div class="word">Blapo = Confused</div>
+<div class="word">Zazo = Shocked</div>
+<div class="word">Lumi = Lonely</div>
+<div class="word">Travo = Annoyed</div>
+<div class="word">Glemo = Proud</div>
+<div class="word">Siko = Scared</div>
+<div class="word">Vano = Bored</div>
+</div>
+<!--PAGE 3 -->
+<div class="page">
+<h1>PEOPLE</h1>
+<div class="word">Voro = Person</div>
+<div class="word">Sibi = Friend</div>
+<div class="word">Ama = Mother</div>
+<div class="word">Aba = Father</div>
+<div class="word">Chilo = Child</div>
+<div class="word">Tano = Boy</div>
+<div class="word">Lena = Girl</div>
+<div class="word">Eldo = Elder</div>
+<div class="word">Kinglo = Leader</div>
+<div class="word">Dorko = Silly person</div>
+<div class="word">Venti = Enemy</div>
+<div class="word">Brano = Stranger</div>
+<div class="word">Sento = Teacher</div>
+<div class="word">Lumo = Student</div>
+<div class="word">Riko = Hero</div>
+</div>
+<!--PAGE 4 -->
+<div class="page">
+<h1>FOOD & DRINK</h1>
+<div class="word">Moku = Food</div>
+<div class="word">Aqua = Water</div>
+<div class="word">Bano = Banana</div>
+<div class="word">Poma = Apple</div>
+<div class="word">Bredo = Bread</div>
+<div class="word">Suko = Sugar</div>
+<div class="word">Supo = Soup</div>
+<div class="word">Drina = Drink</div>
+<div class="word">Snaco = Snack</div>
+<div class="word">Bisko = Biscuit</div>
+<div class="word">Kaka = Cake</div>
+<div class="word">Nodu = Noodle</div>
+<div class="word">Rizo = Rice</div>
+<div class="word">Leko = Milk</div>
+<div class="word">Juso = Juice</div>
+</div>
+<!--PAGE 5 -->
+<div class="page">
+<h1>ACTIONS</h1>
+<div class="word">Volo = Go</div>
+<div class="word">Pako = Eat</div>
+<div class="word">Drin = Drink</div>
+<div class="word">Taki = Talk</div>
+<div class="word">Seni = See</div>
+<div class="word">Runo = Run</div>
+<div class="word">Waka = Walk</div>
+<div class="word">Jumo = Jump</div>
+<div class="word">Bilo = Build</div>
+<div class="word">Toko = Touch</div>
+<div class="word">Falo = Fall</div>
+<div class="word">Gripo = Grab</div>
+<div class="word">Kito = Kick</div>
+<div class="word">Sapo = Stop</div>
+<div class="word">Mova = Move</div>
+</div>
+<!--PAGE 6 -->
+<div class="page">
+<h1>WORLD</h1>
+<div class="word">Sola = Sun</div>
+<div class="word">Luna = Moon</div>
+<div class="word">Stelo = Star</div>
+<div class="word">Tera = Earth</div>
+<div class="word">Aero = Air</div>
+<div class="word">Fira = Fire</div>
+<div class="word">Vira = River</div>
+<div class="word">Plava = Plant</div>
+<div class="word">Arbo = Tree</div>
+<div class="word">Noka = Night</div>
+<div class="word">Vento = Wind</div>
+<div class="word">Glaci = Ice</div>
+<div class="word">Suno = Heat</div>
+<div class="word">Roko = Rock</div>
+<div class="word">Duna = Sand</div>
+</div>
+<!--PAGE 7 -->
+<div class="page">
+<h1>PLACES & OBJECTS</h1>
+<div class="word">Dako = House</div>
+<div class="word">Cito = City</div>
+<div class="word">Vila = Village</div>
+<div class="word">Skola = School</div>
+<div class="word">Roko = Room</div>
+<div class="word">Paro = Park</div>
+<div class="word">Monto = Mountain</div>
+<div class="word">Bira = Book</div>
+<div class="word">Nemi = Phone</div>
+<div class="word">Kano = Pen</div>
+<div class="word">Soko = Store</div>
+<div class="word">Briko = Bridge</div>
+<div class="word">Turo = Tower</div>
+<div class="word">Homo = Home</div>
+<div class="word">Porto = Door</div>
+</div>
+</div>
+</div>
+
+<!--controls -->
+<div class="controls">
+<button onclick="prevPage()">⬅ Back</button>
+<button onclick="nextPage()">Next ➡</button>
+</div>
+<script>
+const pages = document.querySelectorAll(".page");
+let index = 0;
+
+function update() {
+pages.forEach((p, i) => {
+p.classList.toggle("active", i === index);
+});
+}
+
+function nextPage() {
+if (index < pages.length
+1) {
+index++;
+update();
+}
+}
+function prevPage() {
+if (index > 0) {
+index--;
+update();
+}
+}
+
+window.onload = () => {
+index = 0;
+update();
+};
+</script>
+
+</body>
+</html>
