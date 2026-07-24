@@ -1,25 +1,19 @@
 <!DOCTYPE html>
 
-<!--|==============|
-    |8493834 coding|
-    |==============| -->
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPS & BPS | BOP HQ</title>
 
-  <meta name="description" content="A short, clear summary of your website including your main target keywords naturally.">
+    <meta name="description" content="A short, clear summary of your website including your main target keywords naturally.">
+    <meta name="keywords" content="sps, snail, snails, snail protective services, snail protective service, protective service">
 
-  <meta name="keywords" content="sps, snail, snails, snail protective services, snail protective service, protective service">
-
-  <link rel="canonical" href="https://8493834.github.io" />
-    
+    <link rel="canonical" href="https://8493834.github.io" />
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2e7d32">
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script> 
-   <style>
+    
+    <style>
         :root {
             --primary: #2e7d32;
             --accent: #8bc34a;
@@ -241,9 +235,9 @@
             </div>
             
             <form onsubmit="event.preventDefault(); sendChatMessage();">
-    <input type="text" id="chatInput" placeholder="Type transmission to field agents...">
-    <button type="submit" class="btn-main">Broadcast Message</button>
-</form>
+                <input type="text" id="chatInput" placeholder="Type transmission to field agents...">
+                <button type="submit" class="btn-main">Broadcast Message</button>
+            </form>
         </div>
     </section>
 
@@ -283,72 +277,13 @@
         });
     }
 
+    // Window Load Trigger
     window.addEventListener('load', () => {
         syncOfflineReports();
-        // =========================================================
-    //   USER PROFILES & IDENTITY MANAGEMENT (ERROR-PROOF)
-    // =========================================================
-    async function checkUserSession() {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        
-        if (session) {
-            const user = session.user;
-            const accountCard = document.querySelector('#account .card');
-            
-            if (accountCard) {
-                document.querySelectorAll('.btn-auth').forEach(btn => btn.style.display = 'none');
-                
-                let statusText = document.getElementById('authStatusText');
-                if (!statusText) {
-                    statusText = document.createElement('p');
-                    statusText.id = 'authStatusText';
-                    statusText.style.color = 'green';
-                    statusText.style.fontWeight = 'bold';
-                    accountCard.insertBefore(statusText, accountCard.firstChild);
-                }
-                statusText.innerText = `✅ Securely Logged In: ${user.email}`;
-            }
-
-            // 1. Try to fetch the profile safely without forcing a .single() crash
-            let { data: profile, error } = await supabaseClient
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id);
-
-            // 2. If no profile exists yet (empty array), auto-create a blank one!
-            if (!profile || profile.length === 0) {
-                console.log("No profile found. Generating new database matrix row...");
-                const tempUsername = user.email.split('@')[0];
-                
-                const { data: newProfile, error: insertError } = await supabaseClient
-                    .from('profiles')
-                    .insert([
-                        { id: user.id, username: tempUsername, bio: "Field observer.", favorite_bug: "Snail" }
-                    ])
-                    .select();
-                
-                if (insertError) {
-                    console.error("Profile auto-creation failed:", insertError);
-                } else {
-                    profile = newProfile;
-                }
-            }
-
-            // 3. Populate the customization input fields on screen
-            const activeProfile = Array.isArray(profile) ? profile[0] : profile;
-            if (activeProfile) {
-                const inputs = document.querySelectorAll('#account input, #account textarea');
-                if (inputs[0]) inputs[0].value = activeProfile.username || '';
-                if (inputs[1]) inputs[1].value = activeProfile.bio || '';
-                if (inputs[2]) inputs[2].value = activeProfile.favorite_bug || '';
-            }
-            
-            loadFriendsList(user.id);
-        }
-    }
+        checkUserSession(); // Correctly triggers user session check on startup
     });
 
-    // --- Snail Directory Data (Congrats Timmy & Gary on the eggs!) ---
+    // --- Snail Directory Data ---
     const snails = [
         { name: "Shelly", species: "Garden Snail", status: "Healthy" },
         { name: "timmy", species: "garnden Snail", status: "healthy and has EGGS!!!!!" },
@@ -386,16 +321,15 @@
     }
 
     // =========================================================
-    //   SUPABASE GLOBAL ANCHOR CONFIG (CLEAN MATRIX SETUP)
+    //   SUPABASE GLOBAL ANCHOR CONFIG
     // =========================================================
     const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg";
 
-    // Clean single client definition
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     // =========================================================
-    //   LEGACY JSONBIN & STORAGE NODES (KEEPING INTACT)
+    //   LEGACY JSONBIN & STORAGE NODES
     // =========================================================
     const BIN_ID = "6a0d6bca6610dd3ae8753b6c";
     const API_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
@@ -607,7 +541,6 @@
         const input = document.getElementById('chatInput');
         if (!input || !input.value.trim()) return;
 
-        // Correct v2 session user fetch method
         const { data: { user } } = await supabaseClient.auth.getUser();
         
         if(!user) { 
@@ -630,13 +563,13 @@
           const box = document.getElementById('chatDisplay');
           if (box) {
               box.innerHTML += `<div class="chat-msg"><span class="chat-user">${payload.new.username}:</span> ${payload.new.message}</div>`;
-              box.scrollTop = box.scrollHeight; // Auto scroll to newest line
+              box.scrollTop = box.scrollHeight; 
           }
       })
       .subscribe();
 
     // =========================================================
-    //   USER PROFILES & IDENTITY MANAGEMENT
+    //   USER PROFILES & IDENTITY MANAGEMENT (ERROR-PROOF)
     // =========================================================
     async function checkUserSession() {
         const { data: { session } } = await supabaseClient.auth.getSession();
@@ -659,17 +592,32 @@
                 statusText.innerText = `✅ Securely Logged In: ${user.email}`;
             }
 
-            const { data: profile } = await supabaseClient
+            // Safe profile fetch that auto-creates missing rows
+            let { data: profile } = await supabaseClient
                 .from('profiles')
                 .select('*')
-                .eq('id', user.id)
-                .single();
+                .eq('id', user.id);
 
-            if (profile) {
+            if (!profile || profile.length === 0) {
+                console.log("No profile found. Generating new database matrix row...");
+                const tempUsername = user.email.split('@')[0];
+                
+                const { data: newProfile, error: insertError } = await supabaseClient
+                    .from('profiles')
+                    .insert([
+                        { id: user.id, username: tempUsername, bio: "Field observer.", favorite_bug: "Snail" }
+                    ])
+                    .select();
+                
+                if (!insertError) profile = newProfile;
+            }
+
+            const activeProfile = Array.isArray(profile) ? profile[0] : profile;
+            if (activeProfile) {
                 const inputs = document.querySelectorAll('#account input, #account textarea');
-                if (inputs[0]) inputs[0].value = profile.username || '';
-                if (inputs[1]) inputs[1].value = profile.bio || '';
-                if (inputs[2]) inputs[2].value = profile.favorite_bug || '';
+                if (inputs[0]) inputs[0].value = activeProfile.username || '';
+                if (inputs[1]) inputs[1].value = activeProfile.bio || '';
+                if (inputs[2]) inputs[2].value = activeProfile.favorite_bug || '';
             }
             
             loadFriendsList(user.id);
