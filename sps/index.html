@@ -260,17 +260,32 @@
 </div>
 
 <script>
-    // --- Navigation Logic (With Auto-Sync Trigger) ---
-    function showPage(pageId) {
-        const pages = ['home', 'snails', 'report', 'admin', 'account', 'chat', 'feedback'];
-        pages.forEach(p => {
-            const page = document.getElementById(p);
-            if (page) page.classList.add('hidden');
-        });
-        
-        const targetPage = document.getElementById(pageId);
-        if (targetPage) targetPage.classList.remove('hidden');
-        
+    // Set your HQ Admin PIN here
+const HQ_PIN = "snails_rule"; 
+
+function showPage(pageId) {
+    // Lock Admin Console behind PIN verification
+    if (pageId === 'admin') {
+        const inputPin = prompt("🔒 BOP HQ SECURITY CLEARANCE REQUIRED\nEnter Passcode:");
+        if (inputPin !== HQ_PIN) {
+            alert("❌ Access Denied! Intruders blocked from field logs.");
+            return; // Stops navigation to admin page
+        }
+    }
+
+    const pages = ['home', 'snails', 'report', 'admin', 'account', 'chat', 'feedback'];
+    pages.forEach(p => {
+        const page = document.getElementById(p);
+        if (page) page.classList.add('hidden');
+    });
+    
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.classList.remove('hidden');
+    
+    syncOfflineReports().then(() => {
+        if(pageId === 'admin') loadReports();
+    });
+}    
         syncOfflineReports().then(() => {
             if(pageId === 'admin') loadReports();
         });
