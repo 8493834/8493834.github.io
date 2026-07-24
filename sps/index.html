@@ -263,16 +263,47 @@
     // Set your HQ Admin PIN here
 const HQ_PIN = "snails_rule"; 
 
-function showPage(pageId) {
-    // Lock Admin Console behind PIN verification
-    if (pageId === 'chat') loadChatHistory();
+fasync function showPage(pageId) {
+    // Lock Admin Console behind Supabase Role Check
     if (pageId === 'admin') {
-        const inputPin = prompt("🔒 BOP HQ SECURITY CLEARANCE REQUIRED\nEnter Passcode:");
-        if (inputPin !== HQ_PIN) {
-            alert("❌ Access Denied! Intruders blocked from field logs.");
+        const { data: { user } } = await supabaseClient.auth.getUser();
+
+        if (!user) {
+            alert("🔒 Security Alert: You must be logged in to access the BOP Command Center!");
+            return;
+        }
+
+        // Fetch user profile to verify admin status
+        const { data: profile, error } = await supabaseClient
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', user.id)
+            .single();
+
+        if (error || !profile || !profile.is_admin) {
+            alert("❌ ACCESS DENIED! Your account lacks BOP Officer clearance.");
             return; // Stops navigation to admin page
         }
     }
+
+    // Hide all pages
+    const pages = ['home', 'snails', 'report', 'admin', 'account', 'chat', 'feedback'];
+    pages.forEach(p => {
+        const page = document.getElementById(p);
+        if (page) page.classList.add('hidden');
+    });
+    
+    // Show requested page
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.classList.remove('hidden');
+    
+    // Page specific triggers
+    if (pageId === 'chat') loadChatHistory();
+    
+    syncOfflineReports().then(() => {
+        if (pageId === 'admin') loadReports();
+    });
+}
 
     const pages = ['home', 'snails', 'report', 'admin', 'account', 'chat', 'feedback'];
     pages.forEach(p => {
