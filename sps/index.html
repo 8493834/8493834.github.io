@@ -549,13 +549,13 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// =========================================================
-//    GLOBAL AUTHENTICATION COMMAND MATRIX
-// =========================================================
 async function signInWithGoogle() {
     await supabaseClient.auth.signInWithOAuth({ 
         provider: 'google',
-        options: { redirectTo: window.location.href }
+        options: { 
+            // Ensures clean redirect back to your GitHub page route
+            redirectTo: window.location.origin + window.location.pathname 
+        }
     });
 }
 
