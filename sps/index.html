@@ -277,11 +277,18 @@
         });
     }
 
-    // Window Load Trigger
-    window.addEventListener('load', () => {
-        syncOfflineReports();
-        checkUserSession(); // Correctly triggers user session check on startup
-    });
+    // Automatically trigger profile check on page load & auth change
+window.addEventListener('load', () => {
+    syncOfflineReports();
+    checkUserSession();
+});
+
+// Real-time listener: updates UI instantly when user logs in or out
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        checkUserSession();
+    }
+});
 
     // --- Snail Directory Data ---
     const snails = [
@@ -642,6 +649,31 @@
             friendsContainer.innerText = "No current active connections. Share your handle to add friends!";
         }
     }
+
+    async function saveUserProfile() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return alert("Please sign in first!");
+
+    const inputs = document.querySelectorAll('#account input, #account textarea');
+    const username = inputs[0]?.value;
+    const bio = inputs[1]?.value;
+    const favorite_bug = inputs[2]?.value;
+
+    const { error } = await supabaseClient
+        .from('profiles')
+        .upsert({
+            id: user.id,
+            username: username,
+            bio: bio,
+            favorite_bug: favorite_bug
+        });
+
+    if (error) {
+        alert("Failed to save profile: " + error.message);
+    } else {
+        alert("✅ Profile successfully updated!");
+    }
+}
 </script>
 </body>
 </html>
