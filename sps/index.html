@@ -241,22 +241,22 @@
     </section>
 
     <section id="feedback" class="hidden">
-        <div class="card">
-            <h2>Submit Application Feedback</h2>
-            <p>Help us improve your field-work deployment setup.</p>
-            <form onsubmit="event.preventDefault(); alert('Feedback recorded! Sending to dev portal.'); this.reset();">
-                <label>Feedback Category:</label>
-                <select>
-                    <option>Feature Suggestion</option>
-                    <option>UI/Bug Glitch Report</option>
-                    <option>Database Sync Issue</option>
-                    <option>General Praise</option>
-                </select>
-                <textarea placeholder="Write detail instructions here..." required></textarea>
-                <button type="submit" class="btn-main">Submit Feedback Log</button>
-            </form>
-        </div>
-    </section>
+    <div class="card">
+        <h2>Submit Application Feedback</h2>
+        <p>Help us improve your field-work deployment setup.</p>
+        <form onsubmit="submitFeedback(event)">
+            <label>Feedback Category:</label>
+            <select id="fbCategory">
+                <option>Feature Suggestion</option>
+                <option>UI/Bug Glitch Report</option>
+                <option>Database Sync Issue</option>
+                <option>General Praise</option>
+            </select>
+            <textarea id="fbMessage" placeholder="Write detail instructions here..." required></textarea>
+            <button type="submit" class="btn-main">Submit Feedback Log</button>
+        </form>
+    </div>
+</section>
 </div>
 
 <script>
@@ -265,6 +265,7 @@ const HQ_PIN = "snails_rule";
 
 function showPage(pageId) {
     // Lock Admin Console behind PIN verification
+    if (pageId === 'chat') loadChatHistory();
     if (pageId === 'admin') {
         const inputPin = prompt("🔒 BOP HQ SECURITY CLEARANCE REQUIRED\nEnter Passcode:");
         if (inputPin !== HQ_PIN) {
@@ -687,6 +688,48 @@ function showPage(pageId) {
             alert("✅ Profile successfully updated!");
         }
     }
+
+async function loadChatHistory() {
+    const box = document.getElementById('chatDisplay');
+    if (!box) return;
+
+    const { data: messages, error } = await supabaseClient
+        .from('chat_messages')
+        .select('*')
+        .order('created_at', { ascending: true })
+        .limit(20);
+
+    if (error) {
+        console.error("Error loading chat history:", error);
+        return;
+    }
+
+    box.innerHTML = `<div class="chat-msg"><span class="chat-user">HQ Automated Bot:</span> Welcome to global dispatch channel. Communication lines are clear!</div>`;
+    
+    messages.forEach(msg => {
+        box.innerHTML += `<div class="chat-msg"><span class="chat-user">${msg.username}:</span> ${msg.message}</div>`;
+    });
+
+    box.scrollTop = box.scrollHeight;
+}
+
+async function submitFeedback(event) {
+    event.preventDefault();
+    const category = document.getElementById('fbCategory').value;
+    const message = document.getElementById('fbMessage').value;
+
+    const { error } = await supabaseClient
+        .from('feedback')
+        .insert([{ category, message }]);
+
+    if (error) {
+        alert("Transmission error: " + error.message);
+    } else {
+        alert("✅ Feedback securely logged to HQ database!");
+        event.target.reset();
+    }
+}
+        
 </script>
 </body>
 </html>
