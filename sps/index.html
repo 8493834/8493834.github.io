@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -212,7 +211,7 @@
             <label>Primary Specialty/Favorite Bug:</label>
             <input type="text" placeholder="Leopard Snail">
             
-            <button class="btn-main">Save Identity Settings</button>
+            <button onclick="saveUserProfile()" class="btn-main">Save Identity Settings</button>
         </div>
 
         <div class="card">
@@ -277,19 +276,6 @@
         });
     }
 
-    // Automatically trigger profile check on page load & auth change
-window.addEventListener('load', () => {
-    syncOfflineReports();
-    checkUserSession();
-});
-
-// Real-time listener: updates UI instantly when user logs in or out
-supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        checkUserSession();
-    }
-});
-
     // --- Snail Directory Data ---
     const snails = [
         { name: "Shelly", species: "Garden Snail", status: "Healthy" },
@@ -328,15 +314,27 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     }
 
     // =========================================================
-    //   SUPABASE GLOBAL ANCHOR CONFIG
+    //    SUPABASE GLOBAL ANCHOR CONFIG
     // =========================================================
     const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg";
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
+    // FIXED: Page-load triggers moved below supabaseClient initialization
+    window.addEventListener('load', () => {
+        syncOfflineReports();
+        checkUserSession();
+    });
+
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            checkUserSession();
+        }
+    });
+
     // =========================================================
-    //   LEGACY JSONBIN & STORAGE NODES
+    //    LEGACY JSONBIN & STORAGE NODES
     // =========================================================
     const BIN_ID = "6a0d6bca6610dd3ae8753b6c";
     const API_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
@@ -525,7 +523,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     }
 
     // =========================================================
-    //   GLOBAL AUTHENTICATION COMMAND MATRIX
+    //    GLOBAL AUTHENTICATION COMMAND MATRIX
     // =========================================================
     async function signInWithGoogle() {
         await supabaseClient.auth.signInWithOAuth({ 
@@ -542,7 +540,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     }
 
     // =========================================================
-    //   REAL-TIME DISPATCH MESSAGING ENGINE
+    //    REAL-TIME DISPATCH MESSAGING ENGINE
     // =========================================================
     async function sendChatMessage() {
         const input = document.getElementById('chatInput');
@@ -576,7 +574,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
       .subscribe();
 
     // =========================================================
-    //   USER PROFILES & IDENTITY MANAGEMENT (ERROR-PROOF)
+    //    USER PROFILES & IDENTITY MANAGEMENT (ERROR-PROOF)
     // =========================================================
     async function checkUserSession() {
         const { data: { session } } = await supabaseClient.auth.getSession();
@@ -651,29 +649,29 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     }
 
     async function saveUserProfile() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) return alert("Please sign in first!");
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) return alert("Please sign in first!");
 
-    const inputs = document.querySelectorAll('#account input, #account textarea');
-    const username = inputs[0]?.value;
-    const bio = inputs[1]?.value;
-    const favorite_bug = inputs[2]?.value;
+        const inputs = document.querySelectorAll('#account input, #account textarea');
+        const username = inputs[0]?.value;
+        const bio = inputs[1]?.value;
+        const favorite_bug = inputs[2]?.value;
 
-    const { error } = await supabaseClient
-        .from('profiles')
-        .upsert({
-            id: user.id,
-            username: username,
-            bio: bio,
-            favorite_bug: favorite_bug
-        });
+        const { error } = await supabaseClient
+            .from('profiles')
+            .upsert({
+                id: user.id,
+                username: username,
+                bio: bio,
+                favorite_bug: favorite_bug
+            });
 
-    if (error) {
-        alert("Failed to save profile: " + error.message);
-    } else {
-        alert("✅ Profile successfully updated!");
+        if (error) {
+            alert("Failed to save profile: " + error.message);
+        } else {
+            alert("✅ Profile successfully updated!");
+        }
     }
-}
 </script>
 </body>
 </html>
