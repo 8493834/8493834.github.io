@@ -275,14 +275,30 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5ODkyODUsImV4cCI6MjA1NjU2NTI4NX0.sE3I9Xo2Hw7aMInC8uL6zG3k5H9jU2y7G1f0W8e9D6A";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function toggleAdminPanel() {
-            const panel = document.getElementById('adminPanel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-            if (panel.style.display === 'block') {
-                loadAdminData();
-            }
+        async function toggleAdminPanel() {
+    const panel = document.getElementById('adminPanel');
+
+    if (panel.style.display !== 'block') {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+
+        // Check if user is logged in
+        if (!user) {
+            return alert("🔒 Sign-in required! You must be logged into BOP HQ as an Admin.");
         }
 
+        // Replace with your exact email address or target user ID
+        const AUTHORIZED_ADMIN_EMAIL = "your-email@example.com";
+
+        if (user.email === AUTHORIZED_ADMIN_EMAIL) {
+            panel.style.display = 'block';
+            loadAdminData();
+        } else {
+            alert("⛔ Access Denied: Your account does not have Snailflix Admin privileges.");
+        }
+    } else {
+        panel.style.display = 'none';
+    }
+}
         async function loadMovies() {
             const { data: movies, error } = await supabaseClient
                 .from('snailflix_movies')
