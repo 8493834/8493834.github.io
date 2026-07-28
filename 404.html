@@ -1,12 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
-  <title>404</title> 
-</head> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Off Trail | BOP HQ</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --light: #f1f8e9;
+            --dark: #1b5e20;
+            --text: #333;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            background-color: var(--light);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px 20px;
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { color: var(--primary); font-size: 4rem; margin: 0; }
+        h2 { color: var(--dark); margin-top: 10px; }
+        p { color: #666; margin-bottom: 30px; }
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: inline-block;
+            transition: 0.3s;
+        }
+        .btn-main:hover { background: var(--dark); }
+        .snail-icon { font-size: 5rem; margin-bottom: 10px; }
+    </style>
+</head>
 <body>
-  <h1>oops this page dosn't exist</h1>
-<nav>
-  <button onclick="window.open('https://8493834.github.io/', '_blank');">dev shop homepage</button>
-  <button onclick="window.open('https://8493834.github.io/sps/', '_blank');">Go to SPS home page</button>
-</nav>
+  <img src="https://8493834.github.io/sps/icon-192.png" alt="A descriptive sentence about the image" width="500" height="300">  
+  <div class="card">
+        <div class="snail-icon">🐌</div>
+        <h1>404</h1>
+        <h2>You've Wandered Off the Trail!</h2>
+        <p>The page or discovery log you are looking for has slithered away or doesn't exist in the BOP database.</p>
+        <a href="https://8493834.github.io/sps/" class="btn-main">Return to BOP HQ</a>
+        <a href="https://8493834.github.io/" class="btn-main">Return to dev shop</a>
+    </div>
 </body>
+</html>
