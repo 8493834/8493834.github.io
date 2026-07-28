@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snailflix - Free Snail Streaming & Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-color: #141414;
+            --card-bg: #1f1f1f;
+            --accent-red: #E50914;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --green-bop: #2e7d32;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            padding-bottom: 50px;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 4%;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(0,0,0,0.9);
+        }
+
+        .logo {
+            color: var(--accent-red);
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-admin { background-color: #333; color: white; }
+        .btn-admin:hover { background-color: #555; }
+        .btn-hq { background-color: var(--green-bop); color: white; }
+
+        /* --- Hero Billboard --- */
+        .hero {
+            height: 55vh;
+            display: flex;
+            align-items: center;
+            padding: 100px 4% 0;
+            background: linear-gradient(180deg, rgba(20,20,20,0.4) 0%, var(--bg-color) 100%), #2b2b2b;
+        }
+
+        .hero-content { max-width: 550px; }
+        .badge { background-color: var(--accent-red); font-size: 0.75rem; font-weight: bold; padding: 4px 8px; border-radius: 2px; }
+        .hero-title { font-size: 3rem; font-weight: 800; margin: 10px 0; }
+        .hero-desc { font-size: 1rem; color: #ccc; margin-bottom: 20px; }
+
+        /* --- Content Rows --- */
+        .row-container { padding: 20px 4%; }
+        .row-title { font-size: 1.3rem; margin-bottom: 15px; color: #e5e5e5; display: flex; align-items: center; gap: 8px; }
+
+        .row-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .movie-card {
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            height: 230px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            border: 1px solid #333;
+            position: relative;
+        }
+
+        .movie-card:hover { transform: scale(1.04); border-color: var(--accent-red); }
+        .card-emoji { font-size: 3.5rem; text-align: center; margin: auto 0; }
+        .card-title { font-size: 1rem; font-weight: bold; }
+        .card-meta { font-size: 0.75rem; color: #46d369; margin-top: 4px; display: flex; justify-content: space-between; }
+
+        /* --- Admin Management Panel --- */
+        #adminPanel {
+            display: none;
+            background-color: #181818;
+            border: 2px solid var(--accent-red);
+            border-radius: 8px;
+            margin: 100px 4% 20px;
+            padding: 25px;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) { .admin-grid { grid-template-columns: 1fr; } }
+
+        .admin-box {
+            background: #222;
+            padding: 20px;
+            border-radius: 6px;
+        }
+
+        .admin-box h3 { margin-bottom: 15px; color: var(--accent-red); }
+
+        .admin-box input, .admin-box select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .btn-action {
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .manage-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .btn-del {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="#" class="logo">SNAILFLIX</a>
+        <div class="nav-right">
+            <button onclick="toggleAdminPanel()" class="btn-nav btn-admin">⚙️ Admin Console</button>
+            <a href="index.html" class="btn-nav btn-hq">⬅ BOP HQ</a>
+        </div>
+    </nav>
+
+    <div id="adminPanel">
+        <h2>🛠️ Snailflix Admin Management Console</h2>
+        <div class="admin-grid">
+            
+            <div class="admin-box">
+                <h3>➕ Add New Movie</h3>
+                <input type="text" id="newTitle" placeholder="Movie Title (e.g. Shell Wars)">
+                <input type="text" id="newEmoji" placeholder="Emoji Poster (e.g. 🐌⚔️)">
+                <select id="newCategory">
+                    <option value="Action">Action</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Fantasy">Fantasy</option>
+                    <option value="Horror">Horror</option>
+                </select>
+                <input type="text" id="newDuration" placeholder="Duration (e.g. 2h 15m)">
+                <button onclick="addMovie()" class="btn-action">Publish Movie to Snailflix</button>
+            </div>
+
+            <div class="admin-box">
+                <h3>🎬 Manage Existing Movies</h3>
+                <div id="adminMovieList" style="max-height: 200px; overflow-y: auto;">
+                    <p style="color:#888;">Loading catalog...</p>
+                </div>
+
+                <h3 style="margin-top: 20px;">👥 Registered Users</h3>
+                <div id="adminUserList" style="max-height: 150px; overflow-y: auto;">
+                    <p style="color:#888;">Fetching user registry...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <header class="hero">
+        <div class="hero-content">
+            <span class="badge">🔥 #1 MOST WATCHED</span>
+            <h1 class="hero-title" id="heroTitle">Loading Top Movie...</h1>
+            <p class="hero-desc" id="heroDesc">Stream the highest trending snail blockbuster voted by viewers right now.</p>
+        </div>
+    </header>
+
+    <main class="row-container">
+        
+        <h2 class="row-title">🔥 Trending Now (Most Watched)</h2>
+        <div id="trendingRow" class="row-cards"></div>
+
+        <h2 class="row-title">🍿 Full Snailflix Catalog</h2>
+        <div id="catalogRow" class="row-cards"></div>
+
+    </main>
+
+    <script>
+        // Initialize Supabase (Uses the credentials from index.html)
+        const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5ODkyODUsImV4cCI6MjA1NjU2NTI4NX0.sE3I9Xo2Hw7aMInC8uL6zG3k5H9jU2y7G1f0W8e9D6A";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Toggle Admin View
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+            if (panel.style.display === 'block') {
+                loadAdminData();
+            }
+        }
+
+        // Fetch & Render Movies
+        async function loadMovies() {
+            const { data: movies, error } = await supabase
+                .from('snailflix_movies')
+                .select('*')
+                .order('views', { ascending: false });
+
+            if (error || !movies) return console.error('Error fetching movies:', error);
+
+            // Update Billboard Hero with #1 Most Watched
+            if (movies.length > 0) {
+                document.getElementById('heroTitle').innerText = `${movies[0].emoji} ${movies[0].title}`;
+                document.getElementById('heroDesc').innerText = `${movies[0].description || 'Top trending movie'} • ${movies[0].views} Total Views`;
+            }
+
+            // Render Trending Row (Top 4 views)
+            const trendingRow = document.getElementById('trendingRow');
+            trendingRow.innerHTML = movies.slice(0, 4).map(movie => createMovieCard(movie)).join('');
+
+            // Render Full Catalog
+            const catalogRow = document.getElementById('catalogRow');
+            catalogRow.innerHTML = movies.map(movie => createMovieCard(movie)).join('');
+        }
+
+        function createMovieCard(movie) {
+            return `
+                <div class="movie-card" onclick="watchMovie('${movie.id}', '${movie.title}', ${movie.views})">
+                    <div class="card-emoji">${movie.emoji}</div>
+                    <div>
+                        <div class="card-title">${movie.title}</div>
+                        <div class="card-meta">
+                            <span>👁️ ${movie.views} views</span>
+                            <span>${movie.duration || '1h 30m'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Click movie -> Increment Views in database & update Trending
+        async function watchMovie(id, title, currentViews) {
+            alert(`🎬 Playing "${title}"!`);
+
+            // Update views counter in Supabase
+            await supabase
+                .from('snailflix_movies')
+                .update({ views: currentViews + 1 })
+                .eq('id', id);
+
+            // Reload UI to reflect new trending status
+            loadMovies();
+        }
+
+        // --- ADMIN FUNCTIONS ---
+
+        async function loadAdminData() {
+            // Load movies list for deletion
+            const { data: movies } = await supabase.from('snailflix_movies').select('id, title, views');
+            const adminMovieList = document.getElementById('adminMovieList');
+            
+            if (movies) {
+                adminMovieList.innerHTML = movies.map(m => `
+                    <div class="manage-list-item">
+                        <span>${m.title} (${m.views} views)</span>
+                        <button onclick="deleteMovie('${m.id}')" class="btn-del">Delete</button>
+                    </div>
+                `).join('');
+            }
+
+            // Load registered users from profiles
+            const { data: profiles } = await supabase.from('profiles').select('username');
+            const adminUserList = document.getElementById('adminUserList');
+            if (profiles && profiles.length > 0) {
+                adminUserList.innerHTML = profiles.map(p => `
+                    <div class="manage-list-item">
+                        <span>👤 @${p.username || 'Anonymous Agent'}</span>
+                    </div>
+                `).join('');
+            } else {
+                adminUserList.innerHTML = `<p style="color:#888;">No profiles logged yet.</p>`;
+            }
+        }
+
+        async function addMovie() {
+            const title = document.getElementById('newTitle').value;
+            const emoji = document.getElementById('newEmoji').value || '🐌';
+            const category = document.getElementById('newCategory').value;
+            const duration = document.getElementById('newDuration').value || '1h 30m';
+
+            if (!title) return alert('Please enter a movie title!');
+
+            const { error } = await supabase
+                .from('snailflix_movies')
+                .insert([{ title, emoji, category, duration, views: 0 }]);
+
+            if (error) {
+                alert('Error adding movie: ' + error.message);
+            } else {
+                alert(`✅ "${title}" added to Snailflix!`);
+                document.getElementById('newTitle').value = '';
+                document.getElementById('newEmoji').value = '';
+                loadMovies();
+                loadAdminData();
+            }
+        }
+
+        async function deleteMovie(id) {
+            if (!confirm('Are you sure you want to remove this movie?')) return;
+
+            await supabase.from('snailflix_movies').delete().eq('id', id);
+            loadMovies();
+            loadAdminData();
+        }
+
+        // Initialize on page load
+        loadMovies();
+    </script>
+</body>
+</html>
