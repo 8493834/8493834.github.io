@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snailflix - Free Snail Streaming & Admin</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#E50914">
+    <link rel="icon" href="https://fav.farm/🐌">
+    <link rel="apple-touch-icon" href="https://fav.farm/🐌">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -206,16 +212,16 @@
     </div>
 
     <div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1100; justify-content:center; align-items:center;">
-        <div style="background:#1f1f1f; padding:30px; border-radius:8px; border:1px solid #e50914; width:320px; position:relative;">
-            <button onclick="toggleAuthModal()" style="position:absolute; top:10px; right:15px; background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
+        <form onsubmit="handleAuthSubmit(event)" style="background:#1f1f1f; padding:30px; border-radius:8px; border:1px solid #e50914; width:320px; position:relative;">
+            <button type="button" onclick="toggleAuthModal()" style="position:absolute; top:10px; right:15px; background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
             <h2 id="authTitle" style="color:white; margin-bottom:15px; text-align:center;">Sign In</h2>
             
-            <input type="email" id="authEmail" placeholder="Agent Email" style="width:100%; padding:10px; margin-bottom:10px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
-            <input type="password" id="authPassword" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
+            <input type="email" id="authEmail" placeholder="Agent Email" required style="width:100%; padding:10px; margin-bottom:10px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
+            <input type="password" id="authPassword" placeholder="Password" required style="width:100%; padding:10px; margin-bottom:15px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
             
-            <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="btn-action" style="margin-bottom:10px;">Sign In</button>
+            <button type="submit" id="authSubmitBtn" class="btn-action" style="margin-bottom:10px;">Sign In</button>
             <p style="color:#aaa; font-size:0.8rem; text-align:center; cursor:pointer;" onclick="toggleAuthMode()">Don't have an account? <span style="color:#e50914;">Sign Up</span></p>
-        </div>
+        </form>
     </div>
     
     <nav class="navbar">
@@ -295,11 +301,81 @@
     </div>
 
     <script>
+        // --- SUPABASE CONFIGURATION (Declared only ONCE) ---
         const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co"; 
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg"; // Paste your fresh key here!
-
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5ODkyODUsImV4cCI6MjA1NjU2NTI4NX0.sE3I9Xo2Hw7aMInC8uL6zG3k5H9jU2y7G1f0W8e9D6A";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- PWA SERVICE WORKER REGISTRATION ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log('✅ Snailflix PWA Service Worker Registered!'))
+                    .catch((err) => console.error('PWA Registration Failed:', err));
+            });
+        }
+
+        // --- AUTHENTICATION FUNCTIONS ---
+        let isSignUpMode = false;
+
+        function toggleAuthModal() {
+            const modal = document.getElementById('authModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('authTitle').innerText = isSignUpMode ? "Create Account" : "Sign In";
+            document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Sign Up" : "Sign In";
+        }
+
+        async function handleAuthSubmit(e) {
+            if (e) e.preventDefault(); // Prevent page refresh on submit
+
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            if (!email || !password) return alert('Please fill in both email and password.');
+
+            if (isSignUpMode) {
+                const { data, error } = await supabaseClient.auth.signUp({ email, password });
+                if (error) alert(error.message);
+                else {
+                    alert('✅ Registration successful! Please log in.');
+                    toggleAuthMode();
+                }
+            } else {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) alert(error.message);
+                else {
+                    alert('🎉 Logged in successfully!');
+                    toggleAuthModal();
+                    checkUserSession();
+                }
+            }
+        }
+
+        async function checkUserSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            const greeting = document.getElementById('userGreeting');
+            const authBtn = document.getElementById('authBtn');
+
+            if (session) {
+                greeting.innerText = `👤 ${session.user.email.split('@')[0]}`;
+                authBtn.innerText = "🚪 Sign Out";
+                authBtn.onclick = handleSignOut;
+            } else {
+                greeting.innerText = "";
+                authBtn.innerText = "🔑 Sign In";
+                authBtn.onclick = toggleAuthModal;
+            }
+        }
+
+        async function handleSignOut() {
+            await supabaseClient.auth.signOut();
+            alert("Signed out!");
+            checkUserSession();
+        }
 
         // --- ADMIN PANEL CONTROL ---
         async function toggleAdminPanel() {
@@ -363,7 +439,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
         async function watchMovie(id, title, currentViews, videoUrl, isTrailer) {
-            // Increment views
             await supabaseClient
                 .from('snailflix_movies')
                 .update({ views: currentViews + 1 })
@@ -501,66 +576,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             await supabaseClient.from('snailflix_movies').delete().eq('id', id);
             loadMovies();
             loadAdminData();
-        }
-
-        // --- AUTH SYSTEM ---
-        let isSignUpMode = false;
-
-        function toggleAuthModal() {
-            const modal = document.getElementById('authModal');
-            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-        }
-
-        function toggleAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            document.getElementById('authTitle').innerText = isSignUpMode ? "Create Account" : "Sign In";
-            document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Sign Up" : "Sign In";
-        }
-
-        async function handleAuthSubmit() {
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-
-            if (!email || !password) return alert('Please fill in both email and password.');
-
-            if (isSignUpMode) {
-                const { data, error } = await supabaseClient.auth.signUp({ email, password });
-                if (error) alert(error.message);
-                else {
-                    alert('✅ Registration successful! Please log in.');
-                    toggleAuthMode();
-                }
-            } else {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (error) alert(error.message);
-                else {
-                    alert('🎉 Logged in successfully!');
-                    toggleAuthModal();
-                    checkUserSession();
-                }
-            }
-        }
-
-        async function checkUserSession() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            const greeting = document.getElementById('userGreeting');
-            const authBtn = document.getElementById('authBtn');
-
-            if (session) {
-                greeting.innerText = `👤 ${session.user.email.split('@')[0]}`;
-                authBtn.innerText = "🚪 Sign Out";
-                authBtn.onclick = handleSignOut;
-            } else {
-                greeting.innerText = "";
-                authBtn.innerText = "🔑 Sign In";
-                authBtn.onclick = toggleAuthModal;
-            }
-        }
-
-        async function handleSignOut() {
-            await supabaseClient.auth.signOut();
-            alert("Signed out!");
-            checkUserSession();
         }
 
         // --- INITIALIZATION ---
