@@ -200,6 +200,24 @@
 </head>
 <body>
 
+<div id="authContainer" style="position: fixed; top: 20px; right: 280px; z-index: 101;">
+    <span id="userGreeting" style="color: white; font-weight: bold; margin-right: 10px;"></span>
+    <button id="authBtn" onclick="toggleAuthModal()" class="btn-nav btn-admin">🔑 Sign In</button>
+</div>
+
+<div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1100; justify-content:center; align-items:center;">
+    <div style="background:#1f1f1f; padding:30px; border-radius:8px; border:1px solid #e50914; width:320px; position:relative;">
+        <button onclick="toggleAuthModal()" style="position:absolute; top:10px; right:15px; background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
+        <h2 id="authTitle" style="color:white; margin-bottom:15px; text-align:center;">Sign In</h2>
+        
+        <input type="email" id="authEmail" placeholder="Agent Email" style="width:100%; padding:10px; margin-bottom:10px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
+        <input type="password" id="authPassword" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
+        
+        <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="btn-action" style="margin-bottom:10px;">Sign In</button>
+        <p style="color:#aaa; font-size:0.8rem; text-align:center; cursor:pointer;" onclick="toggleAuthMode()">Don't have an account? <span style="color:#e50914;">Sign Up</span></p>
+    </div>
+</div>
+    
     <nav class="navbar">
         <a href="#" class="logo">SNAILFLIX</a>
         <div class="nav-right">
@@ -279,22 +297,16 @@
     const panel = document.getElementById('adminPanel');
 
     if (panel.style.display !== 'block') {
-        const { data: { user } } = await supabaseClient.auth.getUser();
+        const { data: { session } } = await supabaseClient.auth.getSession();
 
-        // Check if user is logged in
-        if (!user) {
-            return alert("🔒 Sign-in required! You must be logged into BOP HQ as an Admin.");
+        if (!session) {
+            alert('🔒 Sign-in required! Please click "Sign In" to access the Admin Console.');
+            toggleAuthModal();
+            return;
         }
 
-        // Replace with your exact email address or target user ID
-        const AUTHORIZED_ADMIN_EMAIL = "your-email@example.com";
-
-        if (user.email === AUTHORIZED_ADMIN_EMAIL) {
-            panel.style.display = 'block';
-            loadAdminData();
-        } else {
-            alert("⛔ Access Denied: Your account does not have Snailflix Admin privileges.");
-        }
+        panel.style.display = 'block';
+        loadAdminData();
     } else {
         panel.style.display = 'none';
     }
@@ -462,6 +474,74 @@
         }
 
         loadMovies();
+
+let isSignUpMode = false;
+
+// 1. Toggle Login Modal
+function toggleAuthModal() {
+    const modal = document.getElementById('authModal');
+    modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function toggleAuthMode() {
+    isSignUpMode = !isSignUpMode;
+    document.getElementById('authTitle').innerText = isSignUpMode ? "Create Account" : "Sign In";
+    document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Sign Up" : "Sign In";
+}
+
+// 2. Handle Login / Sign-up with Supabase
+async function handleAuthSubmit() {
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
+
+    if (!email || !password) return alert('Please fill in both email and password.');
+
+    if (isSignUpMode) {
+        // Create Account
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) alert(error.message);
+        else {
+            alert('✅ Registration successful! Please log in.');
+            toggleAuthMode();
+        }
+    } else {
+        // Sign In
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message);
+        else {
+            alert('🎉 Logged in successfully!');
+            toggleAuthModal();
+            checkUserSession();
+        }
+    }
+}
+
+// 3. Check Session on Page Load
+async function checkUserSession() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const greeting = document.getElementById('userGreeting');
+    const authBtn = document.getElementById('authBtn');
+
+    if (session) {
+        greeting.innerText = `👤 ${session.user.email.split('@')[0]}`;
+        authBtn.innerText = "🚪 Sign Out";
+        authBtn.onclick = handleSignOut;
+    } else {
+        greeting.innerText = "";
+        authBtn.innerText = "🔑 Sign In";
+        authBtn.onclick = toggleAuthModal;
+    }
+}
+
+async function handleSignOut() {
+    await supabaseClient.auth.signOut();
+    alert("Signed out!");
+    checkUserSession();
+}
+
+// Automatically check session when page loads
+checkUserSession();
+        
     </script>
 </body>
 </html>
