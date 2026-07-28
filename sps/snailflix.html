@@ -46,7 +46,7 @@
             text-decoration: none;
         }
 
-        .nav-right { display: flex; gap: 12px; }
+        .nav-right { display: flex; gap: 12px; align-items: center; }
 
         .btn-nav {
             padding: 8px 16px;
@@ -200,23 +200,23 @@
 </head>
 <body>
 
-<div id="authContainer" style="position: fixed; top: 20px; right: 280px; z-index: 101;">
-    <span id="userGreeting" style="color: white; font-weight: bold; margin-right: 10px;"></span>
-    <button id="authBtn" onclick="toggleAuthModal()" class="btn-nav btn-admin">🔑 Sign In</button>
-</div>
-
-<div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1100; justify-content:center; align-items:center;">
-    <div style="background:#1f1f1f; padding:30px; border-radius:8px; border:1px solid #e50914; width:320px; position:relative;">
-        <button onclick="toggleAuthModal()" style="position:absolute; top:10px; right:15px; background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
-        <h2 id="authTitle" style="color:white; margin-bottom:15px; text-align:center;">Sign In</h2>
-        
-        <input type="email" id="authEmail" placeholder="Agent Email" style="width:100%; padding:10px; margin-bottom:10px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
-        <input type="password" id="authPassword" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
-        
-        <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="btn-action" style="margin-bottom:10px;">Sign In</button>
-        <p style="color:#aaa; font-size:0.8rem; text-align:center; cursor:pointer;" onclick="toggleAuthMode()">Don't have an account? <span style="color:#e50914;">Sign Up</span></p>
+    <div id="authContainer" style="position: fixed; top: 20px; right: 280px; z-index: 101;">
+        <span id="userGreeting" style="color: white; font-weight: bold; margin-right: 10px;"></span>
+        <button id="authBtn" onclick="toggleAuthModal()" class="btn-nav btn-admin">🔑 Sign In</button>
     </div>
-</div>
+
+    <div id="authModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1100; justify-content:center; align-items:center;">
+        <div style="background:#1f1f1f; padding:30px; border-radius:8px; border:1px solid #e50914; width:320px; position:relative;">
+            <button onclick="toggleAuthModal()" style="position:absolute; top:10px; right:15px; background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
+            <h2 id="authTitle" style="color:white; margin-bottom:15px; text-align:center;">Sign In</h2>
+            
+            <input type="email" id="authEmail" placeholder="Agent Email" style="width:100%; padding:10px; margin-bottom:10px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
+            <input type="password" id="authPassword" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
+            
+            <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="btn-action" style="margin-bottom:10px;">Sign In</button>
+            <p style="color:#aaa; font-size:0.8rem; text-align:center; cursor:pointer;" onclick="toggleAuthMode()">Don't have an account? <span style="color:#e50914;">Sign Up</span></p>
+        </div>
+    </div>
     
     <nav class="navbar">
         <a href="#" class="logo">SNAILFLIX</a>
@@ -242,9 +242,9 @@
                 </select>
                 
                 <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:0.9rem; color:#ccc; cursor:pointer;">
-    <input type="checkbox" id="newIsTrailer" style="width:auto; margin:0;"> 
-    🎥 Mark as Upcoming / Trailer Only (Unreleased Movie)
-</label>
+                    <input type="checkbox" id="newIsTrailer" style="width:auto; margin:0;"> 
+                    🎥 Mark as Upcoming / Trailer Only (Unreleased Movie)
+                </label>
                 
                 <input type="text" id="newDuration" placeholder="Duration (e.g. 2m 15s)">
                 
@@ -299,24 +299,27 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5ODkyODUsImV4cCI6MjA1NjU2NTI4NX0.sE3I9Xo2Hw7aMInC8uL6zG3k5H9jU2y7G1f0W8e9D6A";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // --- ADMIN PANEL CONTROL ---
         async function toggleAdminPanel() {
-    const panel = document.getElementById('adminPanel');
+            const panel = document.getElementById('adminPanel');
 
-    if (panel.style.display !== 'block') {
-        const { data: { session } } = await supabaseClient.auth.getSession();
+            if (panel.style.display !== 'block') {
+                const { data: { session } } = await supabaseClient.auth.getSession();
 
-        if (!session) {
-            alert('🔒 Sign-in required! Please click "Sign In" to access the Admin Console.');
-            toggleAuthModal();
-            return;
+                if (!session) {
+                    alert('🔒 Sign-in required! Please click "Sign In" to access the Admin Console.');
+                    toggleAuthModal();
+                    return;
+                }
+
+                panel.style.display = 'block';
+                loadAdminData();
+            } else {
+                panel.style.display = 'none';
+            }
         }
 
-        panel.style.display = 'block';
-        loadAdminData();
-    } else {
-        panel.style.display = 'none';
-    }
-}
+        // --- CATALOG & DISPLAY ---
         async function loadMovies() {
             const { data: movies, error } = await supabaseClient
                 .from('snailflix_movies')
@@ -338,82 +341,60 @@
         }
 
         function createMovieCard(movie) {
-            // Escape title quotes safely
             const safeTitle = movie.title.replace(/'/g, "\\'");
+            const isTrailer = movie.is_trailer;
+
             return `
-                <div class="movie-card" onclick="watchMovie('${movie.id}', '${safeTitle}', ${movie.views}, '${movie.video_url || ''}')">
+                <div class="movie-card" onclick="watchMovie('${movie.id}', '${safeTitle}', ${movie.views}, '${movie.video_url || ''}', ${isTrailer})">
                     <div class="card-emoji">${movie.emoji}</div>
                     <div>
                         <div class="card-title">${movie.title}</div>
                         <div class="card-meta">
-                            <span>👁️ ${movie.views} views</span>
-                            <span>${movie.duration || 'Short'}</span>
+                            ${isTrailer 
+                                ? `<span style="color:#ff9800; font-weight:bold;">⏳ COMING SOON</span>` 
+                                : `<span>👁️ ${movie.views} views</span>`}
+                            <span>${isTrailer ? 'Trailer' : (movie.duration || 'Short')}</span>
                         </div>
                     </div>
                 </div>
             `;
         }
 
-       async function watchMovie(id, title, currentViews, videoUrl, isTrailer) {
-    // Increment view count
-    await supabaseClient
-        .from('snailflix_movies')
-        .update({ views: currentViews + 1 })
-        .eq('id', id);
-
-    if (isTrailer) {
-        if (videoUrl) {
-            // Play Trailer Video
-            const modal = document.getElementById('videoModal');
-            const player = document.getElementById('snailVideoPlayer');
-            const source = document.getElementById('videoSource');
-            
-            document.getElementById('modalVideoTitle').innerText = `🎥 TRAILER: ${title} (Coming Soon)`;
-            source.src = videoUrl;
-            player.load();
-            modal.style.display = 'flex';
-            player.play();
-        } else {
-            // No trailer video uploaded yet
-            alert(`⏳ "PROMING SOON!"\n\n"${title}" is currently in production. The full movie has not been released yet!`);
-        }
-    } else {
-        // Full Released Movie
-        if (videoUrl) {
-            const modal = document.getElementById('videoModal');
-            const player = document.getElementById('snailVideoPlayer');
-            const source = document.getElementById('videoSource');
-            
-            document.getElementById('modalVideoTitle').innerText = title;
-            source.src = videoUrl;
-            player.load();
-            modal.style.display = 'flex';
-            player.play();
-        } else {
-            alert(`🎬 "${title}" is ready to watch! (Upload video file in Admin Console)`);
-        }
-    }
-
-    loadMovies();
-}
-            // Update views counter in database
+        async function watchMovie(id, title, currentViews, videoUrl, isTrailer) {
+            // Increment views
             await supabaseClient
                 .from('snailflix_movies')
                 .update({ views: currentViews + 1 })
                 .eq('id', id);
 
-            if (videoUrl) {
-                const modal = document.getElementById('videoModal');
-                const player = document.getElementById('snailVideoPlayer');
-                const source = document.getElementById('videoSource');
-                
-                document.getElementById('modalVideoTitle').innerText = title;
-                source.src = videoUrl;
-                player.load();
-                modal.style.display = 'flex';
-                player.play();
+            if (isTrailer) {
+                if (videoUrl) {
+                    const modal = document.getElementById('videoModal');
+                    const player = document.getElementById('snailVideoPlayer');
+                    const source = document.getElementById('videoSource');
+                    
+                    document.getElementById('modalVideoTitle').innerText = `🎥 TRAILER: ${title} (Coming Soon)`;
+                    source.src = videoUrl;
+                    player.load();
+                    modal.style.display = 'flex';
+                    player.play();
+                } else {
+                    alert(`⏳ "COMING SOON!"\n\n"${title}" is currently in production. The full movie has not been released yet!`);
+                }
             } else {
-                alert(`🎬 "${title}" was clicked! Upload a video file in the Admin Console to stream it.`);
+                if (videoUrl) {
+                    const modal = document.getElementById('videoModal');
+                    const player = document.getElementById('snailVideoPlayer');
+                    const source = document.getElementById('videoSource');
+                    
+                    document.getElementById('modalVideoTitle').innerText = title;
+                    source.src = videoUrl;
+                    player.load();
+                    modal.style.display = 'flex';
+                    player.play();
+                } else {
+                    alert(`🎬 "${title}" is ready! Upload a video file in the Admin Console to play it.`);
+                }
             }
 
             loadMovies();
@@ -426,69 +407,20 @@
             modal.style.display = 'none';
         }
 
+        // --- ADMIN FUNCTIONS ---
         async function addMovie() {
-    const title = document.getElementById('newTitle').value;
-    const emoji = document.getElementById('newEmoji').value || '🐌';
-    const category = document.getElementById('newCategory').value;
-    const duration = document.getElementById('newDuration').value || '1m 30s';
-    const is_trailer = document.getElementById('newIsTrailer').checked; // Read trailer status
-    const fileInput = document.getElementById('videoFile');
-    const btn = document.getElementById('uploadBtn');
+            const title = document.getElementById('newTitle').value;
+            const emoji = document.getElementById('newEmoji').value || '🐌';
+            const category = document.getElementById('newCategory').value;
+            const duration = document.getElementById('newDuration').value || '1m 30s';
+            const is_trailer = document.getElementById('newIsTrailer').checked;
+            const fileInput = document.getElementById('videoFile');
+            const btn = document.getElementById('uploadBtn');
 
-    if (!title) return alert('Please enter a movie title!');
+            if (!title) return alert('Please enter a movie title!');
 
-    let video_url = '';
+            let video_url = '';
 
-    // Handle File Upload (If uploading a trailer video file)
-    if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-        btn.innerText = "⏳ Uploading Video...";
-        btn.disabled = true;
-
-        const { data: uploadData, error: uploadError } = await supabaseClient
-            .storage
-            .from('videos')
-            .upload(fileName, file);
-
-        if (uploadError) {
-            btn.innerText = "Publish Movie to Snailflix";
-            btn.disabled = false;
-            return alert("Video upload failed: " + uploadError.message);
-        }
-
-        const { data: publicUrlData } = supabaseClient
-            .storage
-            .from('videos')
-            .getPublicUrl(fileName);
-
-        video_url = publicUrlData.publicUrl;
-    }
-
-    // Save Movie Details in Database
-    const { error } = await supabaseClient
-        .from('snailflix_movies')
-        .insert([{ title, emoji, category, duration, video_url, is_trailer, views: 0 }]);
-
-    btn.innerText = "Publish Movie to Snailflix";
-    btn.disabled = false;
-
-    if (error) {
-        alert('Error saving movie details: ' + error.message);
-    } else {
-        alert(`✅ "${title}" published ${is_trailer ? 'as a Trailer / Coming Soon!' : 'to Snailflix!'}`);
-        document.getElementById('newTitle').value = '';
-        document.getElementById('newEmoji').value = '';
-        document.getElementById('videoFile').value = '';
-        document.getElementById('newIsTrailer').checked = false;
-        loadMovies();
-        loadAdminData();
-    }
-}
-
-            // Handle Video File Upload to Supabase Storage
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
                 const fileExt = file.name.split('.').pop();
@@ -508,7 +440,6 @@
                     return alert("Video upload failed: " + uploadError.message);
                 }
 
-                // Get Public URL
                 const { data: publicUrlData } = supabaseClient
                     .storage
                     .from('videos')
@@ -517,10 +448,9 @@
                 video_url = publicUrlData.publicUrl;
             }
 
-            // Save Movie Details in Database
             const { error } = await supabaseClient
                 .from('snailflix_movies')
-                .insert([{ title, emoji, category, duration, video_url, views: 0 }]);
+                .insert([{ title, emoji, category, duration, video_url, is_trailer, views: 0 }]);
 
             btn.innerText = "Publish Movie to Snailflix";
             btn.disabled = false;
@@ -528,10 +458,11 @@
             if (error) {
                 alert('Error saving movie details: ' + error.message);
             } else {
-                alert(`✅ Snailflix Exclusive "${title}" published successfully!`);
+                alert(`✅ "${title}" published ${is_trailer ? 'as a Trailer / Coming Soon!' : 'to Snailflix!'}`);
                 document.getElementById('newTitle').value = '';
                 document.getElementById('newEmoji').value = '';
                 document.getElementById('videoFile').value = '';
+                document.getElementById('newIsTrailer').checked = false;
                 loadMovies();
                 loadAdminData();
             }
@@ -570,75 +501,69 @@
             loadAdminData();
         }
 
-        loadMovies();
+        // --- AUTH SYSTEM ---
+        let isSignUpMode = false;
 
-let isSignUpMode = false;
-
-// 1. Toggle Login Modal
-function toggleAuthModal() {
-    const modal = document.getElementById('authModal');
-    modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-}
-
-function toggleAuthMode() {
-    isSignUpMode = !isSignUpMode;
-    document.getElementById('authTitle').innerText = isSignUpMode ? "Create Account" : "Sign In";
-    document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Sign Up" : "Sign In";
-}
-
-// 2. Handle Login / Sign-up with Supabase
-async function handleAuthSubmit() {
-    const email = document.getElementById('authEmail').value;
-    const password = document.getElementById('authPassword').value;
-
-    if (!email || !password) return alert('Please fill in both email and password.');
-
-    if (isSignUpMode) {
-        // Create Account
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) alert(error.message);
-        else {
-            alert('✅ Registration successful! Please log in.');
-            toggleAuthMode();
+        function toggleAuthModal() {
+            const modal = document.getElementById('authModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
         }
-    } else {
-        // Sign In
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) alert(error.message);
-        else {
-            alert('🎉 Logged in successfully!');
-            toggleAuthModal();
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('authTitle').innerText = isSignUpMode ? "Create Account" : "Sign In";
+            document.getElementById('authSubmitBtn').innerText = isSignUpMode ? "Sign Up" : "Sign In";
+        }
+
+        async function handleAuthSubmit() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            if (!email || !password) return alert('Please fill in both email and password.');
+
+            if (isSignUpMode) {
+                const { data, error } = await supabaseClient.auth.signUp({ email, password });
+                if (error) alert(error.message);
+                else {
+                    alert('✅ Registration successful! Please log in.');
+                    toggleAuthMode();
+                }
+            } else {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) alert(error.message);
+                else {
+                    alert('🎉 Logged in successfully!');
+                    toggleAuthModal();
+                    checkUserSession();
+                }
+            }
+        }
+
+        async function checkUserSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            const greeting = document.getElementById('userGreeting');
+            const authBtn = document.getElementById('authBtn');
+
+            if (session) {
+                greeting.innerText = `👤 ${session.user.email.split('@')[0]}`;
+                authBtn.innerText = "🚪 Sign Out";
+                authBtn.onclick = handleSignOut;
+            } else {
+                greeting.innerText = "";
+                authBtn.innerText = "🔑 Sign In";
+                authBtn.onclick = toggleAuthModal;
+            }
+        }
+
+        async function handleSignOut() {
+            await supabaseClient.auth.signOut();
+            alert("Signed out!");
             checkUserSession();
         }
-    }
-}
 
-// 3. Check Session on Page Load
-async function checkUserSession() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    const greeting = document.getElementById('userGreeting');
-    const authBtn = document.getElementById('authBtn');
-
-    if (session) {
-        greeting.innerText = `👤 ${session.user.email.split('@')[0]}`;
-        authBtn.innerText = "🚪 Sign Out";
-        authBtn.onclick = handleSignOut;
-    } else {
-        greeting.innerText = "";
-        authBtn.innerText = "🔑 Sign In";
-        authBtn.onclick = toggleAuthModal;
-    }
-}
-
-async function handleSignOut() {
-    await supabaseClient.auth.signOut();
-    alert("Signed out!");
-    checkUserSession();
-}
-
-// Automatically check session when page loads
-checkUserSession();
-        
+        // --- INITIALIZATION ---
+        loadMovies();
+        checkUserSession();
     </script>
 </body>
 </html>
