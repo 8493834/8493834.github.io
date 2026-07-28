@@ -236,137 +236,139 @@
 
     </main>
 
-    <script>
-        // Initialize Supabase (Uses the credentials from index.html)
-        const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co"; 
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5ODkyODUsImV4cCI6MjA1NjU2NTI4NX0.sE3I9Xo2Hw7aMInC8uL6zG3k5H9jU2y7G1f0W8e9D6A";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+   <script>
+    // 1. Initialize Supabase with a unique variable name to avoid syntax crashes
+    const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co"; 
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5ODkyODUsImV4cCI6MjA1NjU2NTI4NX0.sE3I9Xo2Hw7aMInC8uL6zG3k5H9jU2y7G1f0W8e9D6A";
+    
+    // Change variable name here:
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Toggle Admin View
-        function toggleAdminPanel() {
-            const panel = document.getElementById('adminPanel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-            if (panel.style.display === 'block') {
-                loadAdminData();
-            }
+    // 2. Toggle Admin View
+    function toggleAdminPanel() {
+        const panel = document.getElementById('adminPanel');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        if (panel.style.display === 'block') {
+            loadAdminData();
+        }
+    }
+
+    // 3. Fetch & Render Movies
+    async function loadMovies() {
+        const { data: movies, error } = await supabaseClient
+            .from('snailflix_movies')
+            .select('*')
+            .order('views', { ascending: false });
+
+        if (error || !movies) return console.error('Error fetching movies:', error);
+
+        // Update Billboard Hero with #1 Most Watched
+        if (movies.length > 0) {
+            document.getElementById('heroTitle').innerText = `${movies[0].emoji} ${movies[0].title}`;
+            document.getElementById('heroDesc').innerText = `${movies[0].description || 'Top trending movie'} • ${movies[0].views} Total Views`;
         }
 
-        // Fetch & Render Movies
-        async function loadMovies() {
-            const { data: movies, error } = await supabase
-                .from('snailflix_movies')
-                .select('*')
-                .order('views', { ascending: false });
+        // Render Trending Row (Top 4 views)
+        const trendingRow = document.getElementById('trendingRow');
+        trendingRow.innerHTML = movies.slice(0, 4).map(movie => createMovieCard(movie)).join('');
 
-            if (error || !movies) return console.error('Error fetching movies:', error);
+        // Render Full Catalog
+        const catalogRow = document.getElementById('catalogRow');
+        catalogRow.innerHTML = movies.map(movie => createMovieCard(movie)).join('');
+    }
 
-            // Update Billboard Hero with #1 Most Watched
-            if (movies.length > 0) {
-                document.getElementById('heroTitle').innerText = `${movies[0].emoji} ${movies[0].title}`;
-                document.getElementById('heroDesc').innerText = `${movies[0].description || 'Top trending movie'} • ${movies[0].views} Total Views`;
-            }
-
-            // Render Trending Row (Top 4 views)
-            const trendingRow = document.getElementById('trendingRow');
-            trendingRow.innerHTML = movies.slice(0, 4).map(movie => createMovieCard(movie)).join('');
-
-            // Render Full Catalog
-            const catalogRow = document.getElementById('catalogRow');
-            catalogRow.innerHTML = movies.map(movie => createMovieCard(movie)).join('');
-        }
-
-        function createMovieCard(movie) {
-            return `
-                <div class="movie-card" onclick="watchMovie('${movie.id}', '${movie.title}', ${movie.views})">
-                    <div class="card-emoji">${movie.emoji}</div>
-                    <div>
-                        <div class="card-title">${movie.title}</div>
-                        <div class="card-meta">
-                            <span>👁️ ${movie.views} views</span>
-                            <span>${movie.duration || '1h 30m'}</span>
-                        </div>
+    function createMovieCard(movie) {
+        return `
+            <div class="movie-card" onclick="watchMovie('${movie.id}', '${movie.title}', ${movie.views})">
+                <div class="card-emoji">${movie.emoji}</div>
+                <div>
+                    <div class="card-title">${movie.title}</div>
+                    <div class="card-meta">
+                        <span>👁️ ${movie.views} views</span>
+                        <span>${movie.duration || '1h 30m'}</span>
                     </div>
                 </div>
-            `;
+            </div>
+        `;
+    }
+
+    // Click movie -> Increment Views in database & update Trending
+    async function watchMovie(id, title, currentViews) {
+        alert(`🎬 Playing "${title}"!`);
+
+        // Update views counter in Supabase
+        await supabaseClient
+            .from('snailflix_movies')
+            .update({ views: currentViews + 1 })
+            .eq('id', id);
+
+        // Reload UI to reflect new trending status
+        loadMovies();
+    }
+
+    // --- ADMIN FUNCTIONS ---
+
+    async function loadAdminData() {
+        // Load movies list for deletion
+        const { data: movies } = await supabaseClient.from('snailflix_movies').select('id, title, views');
+        const adminMovieList = document.getElementById('adminMovieList');
+        
+        if (movies) {
+            adminMovieList.innerHTML = movies.map(m => `
+                <div class="manage-list-item">
+                    <span>${m.title} (${m.views} views)</span>
+                    <button onclick="deleteMovie('${m.id}')" class="btn-del">Delete</button>
+                </div>
+            `).join('');
         }
 
-        // Click movie -> Increment Views in database & update Trending
-        async function watchMovie(id, title, currentViews) {
-            alert(`🎬 Playing "${title}"!`);
-
-            // Update views counter in Supabase
-            await supabase
-                .from('snailflix_movies')
-                .update({ views: currentViews + 1 })
-                .eq('id', id);
-
-            // Reload UI to reflect new trending status
-            loadMovies();
+        // Load registered users from profiles
+        const { data: profiles } = await supabaseClient.from('profiles').select('username');
+        const adminUserList = document.getElementById('adminUserList');
+        if (profiles && profiles.length > 0) {
+            adminUserList.innerHTML = profiles.map(p => `
+                <div class="manage-list-item">
+                    <span>👤 @${p.username || 'Anonymous Agent'}</span>
+                </div>
+            `).join('');
+        } else {
+            adminUserList.innerHTML = `<p style="color:#888;">No profiles logged yet.</p>`;
         }
+    }
 
-        // --- ADMIN FUNCTIONS ---
+    async function addMovie() {
+        const title = document.getElementById('newTitle').value;
+        const emoji = document.getElementById('newEmoji').value || '🐌';
+        const category = document.getElementById('newCategory').value;
+        const duration = document.getElementById('newDuration').value || '1h 30m';
 
-        async function loadAdminData() {
-            // Load movies list for deletion
-            const { data: movies } = await supabase.from('snailflix_movies').select('id, title, views');
-            const adminMovieList = document.getElementById('adminMovieList');
-            
-            if (movies) {
-                adminMovieList.innerHTML = movies.map(m => `
-                    <div class="manage-list-item">
-                        <span>${m.title} (${m.views} views)</span>
-                        <button onclick="deleteMovie('${m.id}')" class="btn-del">Delete</button>
-                    </div>
-                `).join('');
-            }
+        if (!title) return alert('Please enter a movie title!');
 
-            // Load registered users from profiles
-            const { data: profiles } = await supabase.from('profiles').select('username');
-            const adminUserList = document.getElementById('adminUserList');
-            if (profiles && profiles.length > 0) {
-                adminUserList.innerHTML = profiles.map(p => `
-                    <div class="manage-list-item">
-                        <span>👤 @${p.username || 'Anonymous Agent'}</span>
-                    </div>
-                `).join('');
-            } else {
-                adminUserList.innerHTML = `<p style="color:#888;">No profiles logged yet.</p>`;
-            }
-        }
+        const { error } = await supabaseClient
+            .from('snailflix_movies')
+            .insert([{ title, emoji, category, duration, views: 0 }]);
 
-        async function addMovie() {
-            const title = document.getElementById('newTitle').value;
-            const emoji = document.getElementById('newEmoji').value || '🐌';
-            const category = document.getElementById('newCategory').value;
-            const duration = document.getElementById('newDuration').value || '1h 30m';
-
-            if (!title) return alert('Please enter a movie title!');
-
-            const { error } = await supabase
-                .from('snailflix_movies')
-                .insert([{ title, emoji, category, duration, views: 0 }]);
-
-            if (error) {
-                alert('Error adding movie: ' + error.message);
-            } else {
-                alert(`✅ "${title}" added to Snailflix!`);
-                document.getElementById('newTitle').value = '';
-                document.getElementById('newEmoji').value = '';
-                loadMovies();
-                loadAdminData();
-            }
-        }
-
-        async function deleteMovie(id) {
-            if (!confirm('Are you sure you want to remove this movie?')) return;
-
-            await supabase.from('snailflix_movies').delete().eq('id', id);
+        if (error) {
+            alert('Error adding movie: ' + error.message);
+        } else {
+            alert(`✅ "${title}" added to Snailflix!`);
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newEmoji').value = '';
             loadMovies();
             loadAdminData();
         }
+    }
 
-        // Initialize on page load
+    async function deleteMovie(id) {
+        if (!confirm('Are you sure you want to remove this movie?')) return;
+
+        await supabaseClient.from('snailflix_movies').delete().eq('id', id);
         loadMovies();
-    </script>
+        loadAdminData();
+    }
+
+    // Initialize on page load
+    loadMovies();
+</script>
 </body>
 </html>
