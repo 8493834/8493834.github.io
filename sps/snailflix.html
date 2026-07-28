@@ -240,6 +240,12 @@
                     <option value="Fantasy">Fantasy</option>
                     <option value="Horror">Horror</option>
                 </select>
+                
+                <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:0.9rem; color:#ccc; cursor:pointer;">
+    <input type="checkbox" id="newIsTrailer" style="width:auto; margin:0;"> 
+    🎥 Mark as Upcoming / Trailer Only (Unreleased Movie)
+</label>
+                
                 <input type="text" id="newDuration" placeholder="Duration (e.g. 2m 15s)">
                 
                 <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:#aaa;">Select Video File (.mp4):</label>
@@ -348,7 +354,48 @@
             `;
         }
 
-        async function watchMovie(id, title, currentViews, videoUrl) {
+       async function watchMovie(id, title, currentViews, videoUrl, isTrailer) {
+    // Increment view count
+    await supabaseClient
+        .from('snailflix_movies')
+        .update({ views: currentViews + 1 })
+        .eq('id', id);
+
+    if (isTrailer) {
+        if (videoUrl) {
+            // Play Trailer Video
+            const modal = document.getElementById('videoModal');
+            const player = document.getElementById('snailVideoPlayer');
+            const source = document.getElementById('videoSource');
+            
+            document.getElementById('modalVideoTitle').innerText = `🎥 TRAILER: ${title} (Coming Soon)`;
+            source.src = videoUrl;
+            player.load();
+            modal.style.display = 'flex';
+            player.play();
+        } else {
+            // No trailer video uploaded yet
+            alert(`⏳ "PROMING SOON!"\n\n"${title}" is currently in production. The full movie has not been released yet!`);
+        }
+    } else {
+        // Full Released Movie
+        if (videoUrl) {
+            const modal = document.getElementById('videoModal');
+            const player = document.getElementById('snailVideoPlayer');
+            const source = document.getElementById('videoSource');
+            
+            document.getElementById('modalVideoTitle').innerText = title;
+            source.src = videoUrl;
+            player.load();
+            modal.style.display = 'flex';
+            player.play();
+        } else {
+            alert(`🎬 "${title}" is ready to watch! (Upload video file in Admin Console)`);
+        }
+    }
+
+    loadMovies();
+}
             // Update views counter in database
             await supabaseClient
                 .from('snailflix_movies')
@@ -380,16 +427,66 @@
         }
 
         async function addMovie() {
-            const title = document.getElementById('newTitle').value;
-            const emoji = document.getElementById('newEmoji').value || '🐌';
-            const category = document.getElementById('newCategory').value;
-            const duration = document.getElementById('newDuration').value || '1m 30s';
-            const fileInput = document.getElementById('videoFile');
-            const btn = document.getElementById('uploadBtn');
+    const title = document.getElementById('newTitle').value;
+    const emoji = document.getElementById('newEmoji').value || '🐌';
+    const category = document.getElementById('newCategory').value;
+    const duration = document.getElementById('newDuration').value || '1m 30s';
+    const is_trailer = document.getElementById('newIsTrailer').checked; // Read trailer status
+    const fileInput = document.getElementById('videoFile');
+    const btn = document.getElementById('uploadBtn');
 
-            if (!title) return alert('Please enter a movie title!');
+    if (!title) return alert('Please enter a movie title!');
 
-            let video_url = '';
+    let video_url = '';
+
+    // Handle File Upload (If uploading a trailer video file)
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        btn.innerText = "⏳ Uploading Video...";
+        btn.disabled = true;
+
+        const { data: uploadData, error: uploadError } = await supabaseClient
+            .storage
+            .from('videos')
+            .upload(fileName, file);
+
+        if (uploadError) {
+            btn.innerText = "Publish Movie to Snailflix";
+            btn.disabled = false;
+            return alert("Video upload failed: " + uploadError.message);
+        }
+
+        const { data: publicUrlData } = supabaseClient
+            .storage
+            .from('videos')
+            .getPublicUrl(fileName);
+
+        video_url = publicUrlData.publicUrl;
+    }
+
+    // Save Movie Details in Database
+    const { error } = await supabaseClient
+        .from('snailflix_movies')
+        .insert([{ title, emoji, category, duration, video_url, is_trailer, views: 0 }]);
+
+    btn.innerText = "Publish Movie to Snailflix";
+    btn.disabled = false;
+
+    if (error) {
+        alert('Error saving movie details: ' + error.message);
+    } else {
+        alert(`✅ "${title}" published ${is_trailer ? 'as a Trailer / Coming Soon!' : 'to Snailflix!'}`);
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newEmoji').value = '';
+        document.getElementById('videoFile').value = '';
+        document.getElementById('newIsTrailer').checked = false;
+        loadMovies();
+        loadAdminData();
+    }
+}
 
             // Handle Video File Upload to Supabase Storage
             if (fileInput.files.length > 0) {
