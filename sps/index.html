@@ -740,6 +740,102 @@ async function submitFeedback(event) {
         event.target.reset();
     }
 }
+
+// Send Partnership Request by Handle/Username
+async function sendFriendRequest() {
+    const handleInput = document.getElementById('friendSearchInput').value.trim().replace('@', '');
+    if (!handleInput) return alert("Please enter an Agent handle!");
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return alert("Sign in required to request field partners!");
+
+    // 1. Search for targeted user profile
+    const { data: targetProfile, error } = await supabaseClient
+        .from('profiles')
+        .select('id, username')
+        .eq('username', handleInput)
+        .single();
+
+    if (error || !targetProfile) {
+        return alert("❌ Agent handle not found in BOP registry!");
+    }
+
+    if (targetProfile.id === user.id) {
+        return alert("⚠️ You cannot send a partnership request to yourself!");
+    }
+
+    // 2. Insert request into friendships table
+    const { error: reqError } = await supabaseClient
+        .from('friendships')
+        .insert([{ user_id: user.id, friend_id: targetProfile.id, status: 'pending' }]);
+
+    if (reqError) {
+        alert("Request error: " + reqError.message);
+    } else {
+        alert(`✅ Partnership Request sent to @${targetProfile.username}!`);
+        document.getElementById('friendSearchInput').value = "";
+    }
+}
+
+// Updated loadFriendsList with Partnership Requests & Active Friends display
+async function loadFriendsList(userId) {
+    const friendsContainer = document.getElementById('friendsStatus');
+    const reqBox = document.getElementById('friendRequestsList');
+    if (!friendsContainer) return;
+
+    // Fetch incoming partnership requests
+    const { data: incoming } = await supabaseClient
+        .from('friendships')
+        .select('id, user_id, status')
+        .eq('friend_id', userId)
+        .eq('status', 'pending');
+
+    if (reqBox && incoming && incoming.length > 0) {
+        reqBox.innerHTML = `<h4>📥 Pending Requests (${incoming.length})</h4>`;
+        for (let req of incoming) {
+            const { data: sender } = await supabaseClient
+                .from('profiles')
+                .select('username')
+                .eq('id', req.user_id)
+                .single();
+
+            const senderName = sender ? sender.username : "Agent";
+            reqBox.innerHTML += `
+                <div style="background:#e1f5fe; padding:8px; margin:5px 0; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>@${senderName}</span>
+                    <button onclick="acceptFriendRequest('${req.id}', '${userId}')" style="background:#2e7d32; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Accept</button>
+                </div>`;
+        }
+    } else if (reqBox) {
+        reqBox.innerHTML = "";
+    }
+
+    // Fetch active friends
+    const { data: friends } = await supabaseClient
+        .from('friendships')
+        .select('*')
+        .or(`user_id.eq.${userId},friend_id.eq.${userId}`)
+        .eq('status', 'accepted');
+
+    if (friends && friends.length > 0) {
+        friendsContainer.innerText = `🟢 ${friends.length} Active Field Partner(s)`;
+    } else {
+        friendsContainer.innerText = "No current active connections. Share your handle to add friends!";
+    }
+}
+
+async function acceptFriendRequest(requestId, userId) {
+    const { error } = await supabaseClient
+        .from('friendships')
+        .update({ status: 'accepted' })
+        .eq('id', requestId);
+
+    if (!error) {
+        alert("🤝 Partnership officially accepted!");
+        loadFriendsList(userId);
+    }
+}
+    
 </script>
 </body>
 </html>
