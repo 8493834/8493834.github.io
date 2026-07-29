@@ -202,6 +202,16 @@
             cursor: pointer;
             border-radius: 5px;
         }
+    
+    /* TV Remote Focus State (Glow & Scale like Netflix) */
+:focus {
+    outline: none !important;
+    transform: scale(1.12) !important;
+    border: 3px solid #E50914 !important;
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.9) !important;
+    z-index: 10;
+}
+    
     </style>
 </head>
 <body>
@@ -582,6 +592,45 @@
         // --- INITIALIZATION ---
         loadMovies();
         checkUserSession();
+    
+// --- Android TV D-Pad Remote Navigation ---
+let focusableElements = [];
+let currentFocusIndex = 0;
+
+function updateFocusableElements() {
+    // Collect all interactive TV elements
+    focusableElements = Array.from(document.querySelectorAll('.movie-card, .btn-nav, button, input'));
+    focusableElements.forEach(el => el.setAttribute('tabindex', '0'));
+}
+
+document.addEventListener('keydown', (e) => {
+    updateFocusableElements();
+    if (focusableElements.length === 0) return;
+
+    switch (e.key) {
+        case 'ArrowRight':
+            currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
+            focusableElements[currentFocusIndex].focus();
+            break;
+        case 'ArrowLeft':
+            currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
+            focusableElements[currentFocusIndex].focus();
+            break;
+        case 'ArrowDown':
+            currentFocusIndex = Math.min(currentFocusIndex + 4, focusableElements.length - 1);
+            focusableElements[currentFocusIndex].focus();
+            break;
+        case 'ArrowUp':
+            currentFocusIndex = Math.max(currentFocusIndex - 4, 0);
+            focusableElements[currentFocusIndex].focus();
+            break;
+        case 'Enter':
+        case 'Select':
+            document.activeElement.click();
+            break;
+    }
+});
+        
     </script>
 </body>
 </html>
