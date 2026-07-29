@@ -302,8 +302,11 @@
 
     <script>
         // --- SUPABASE CONFIGURATION (Declared only ONCE) ---
-        const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co"; 
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5ODkyODUsImV4cCI6MjA1NjU2NTI4NX0.sE3I9Xo2Hw7aMInC8uL6zG3k5H9jU2y7G1f0W8e9D6A";
+        // --- SUPABASE CONFIGURATION ---
+const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co"; 
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg"; // Replace with your actual anon key
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- PWA SERVICE WORKER REGISTRATION ---
