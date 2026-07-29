@@ -301,12 +301,10 @@
     </div>
 
     <script>
-        // --- SUPABASE CONFIGURATION (Declared only ONCE) ---
         // --- SUPABASE CONFIGURATION ---
-const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co"; 
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg"; // Replace with your actual anon key
+        const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg";
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- PWA SERVICE WORKER REGISTRATION ---
@@ -333,7 +331,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
         async function handleAuthSubmit(e) {
-            if (e) e.preventDefault(); // Prevent page refresh on submit
+            if (e) e.preventDefault(); 
 
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
