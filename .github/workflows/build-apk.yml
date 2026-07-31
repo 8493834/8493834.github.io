@@ -67,12 +67,10 @@ jobs:
           }
 
       - name: Package MSIX
-        shell: cmd
+        shell: powershell
         run: |
-          makeappx pack /d win_staging /p Snailflix-Windows.msix /o
-
-      - name: Upload Windows App Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Snailflix-Windows
-          path: Snailflix-Windows.msix
+          # Locate makeappx.exe in the installed Windows SDK directory
+          $makeappx = (Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\makeappx.exe" | Select-Object -Last 1).FullName
+          
+          # Run makeappx to build the MSIX package
+          & $makeappx pack /d win_staging /p Snailflix-Windows.msix /o
