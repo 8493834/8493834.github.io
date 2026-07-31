@@ -48,10 +48,23 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path win_staging
           Copy-Item appxmanifest.xml win_staging/
-          Copy-Item snailflix.html win_staging/
+          
+          # Copy HTML file from the sps folder
+          if (Test-Path sps/snailflix.html) { 
+              Copy-Item sps/snailflix.html win_staging/ 
+          } elseif (Test-Path sps/index.html) { 
+              Copy-Item sps/index.html win_staging/ 
+          } else {
+              Get-ChildItem -Path sps -Filter *.html | Copy-Item -Destination win_staging/
+          }
+
           if (Test-Path manifest.json) { Copy-Item manifest.json win_staging/ }
+          
+          # Create assets directory and copy icon
           New-Item -ItemType Directory -Force -Path win_staging/assets
-          Copy-Item app/src/main/res/mipmap/ic_launcher.png win_staging/assets/
+          if (Test-Path app/src/main/res/mipmap/ic_launcher.png) {
+              Copy-Item app/src/main/res/mipmap/ic_launcher.png win_staging/assets/
+          }
 
       - name: Package MSIX
         shell: cmd
