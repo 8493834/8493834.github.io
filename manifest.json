@@ -1,0 +1,15 @@
+{
+  "name": "Snailflix",
+  "short_name": "Snailflix",
+  "start_url": "snailflix.html",
+  "display": "standalone",
+  "background_color": "#141414",
+  "theme_color": "#141414",
+  "icons": [
+    {
+      "src": "app/src/main/res/mipmap/ic_launcher.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
