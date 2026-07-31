@@ -1,4 +1,4 @@
-name: Build Android TV APK
+name: Build Cross-Platform Apps
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  # --- Android TV & Mobile Build ---
+  build-android:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
@@ -24,11 +24,42 @@ jobs:
         with:
           gradle-version: 8.1.1
 
-      - name: Build Debug APK
+      - name: Build Android APK
         run: gradle assembleDebug
 
-      - name: Upload APK Artifact
+      - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Snailflix-AndroidTV
+          name: Snailflix-Android
           path: app/build/outputs/apk/debug/app-debug.apk
+
+  # --- Windows App Build (.msix) ---
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild & Windows Tools
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Stage Windows App Package
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path win_staging
+          Copy-Item appxmanifest.xml win_staging/
+          Copy-Item snailflix.html win_staging/
+          if (Test-Path manifest.json) { Copy-Item manifest.json win_staging/ }
+          New-Item -ItemType Directory -Force -Path win_staging/assets
+          Copy-Item app/src/main/res/mipmap/ic_launcher.png win_staging/assets/
+
+      - name: Package MSIX
+        shell: cmd
+        run: |
+          makeappx pack /d win_staging /p Snailflix-Windows.msix /o
+
+      - name: Upload Windows App Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Snailflix-Windows
+          path: Snailflix-Windows.msix
