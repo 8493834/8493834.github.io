@@ -203,13 +203,26 @@
             border-radius: 5px;
         }
     
-    /* TV Remote Focus State (Glow & Scale like Netflix) */
-:focus {
+    :focus {
     outline: none !important;
     transform: scale(1.12) !important;
     border: 3px solid #E50914 !important;
     box-shadow: 0 0 20px rgba(229, 9, 20, 0.9) !important;
     z-index: 10;
+}
+    
+    
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+
+.movie-row {
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
     
     </style>
