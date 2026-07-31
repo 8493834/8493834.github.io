@@ -20,7 +20,7 @@
   </Dependencies>
 
   <Applications>
-    <Application Id="App" StartPage="https://8493834.github.io/snailflix.html">
+    <Application Id="App" StartPage="https://8493834.github.io/sps/snailflix.html">
       <uap:VisualElements
         DisplayName="Snailflix"
         Description="Stream Snailflix directly on your Windows PC"
