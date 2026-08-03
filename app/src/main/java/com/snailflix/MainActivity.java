@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         settings.setMediaPlaybackRequiresUserGesture(false);
 
         webView.setWebViewClient(new WebViewClient());
-        webView.loadUrl("https://8493834.github.io/snailflix.html");
+        webView.loadUrl("https://8493834.github.io/sps/snailflix.html");
     }
 
     @Override
