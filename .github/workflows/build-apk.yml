@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # --- Android TV & Mobile Build ---
+  # --- Android TV & Mobile  ---
   build-android:
     runs-on: ubuntu-latest
     steps:
@@ -24,16 +24,22 @@ jobs:
         with:
           gradle-version: 8.1.1
 
-      - name: Build Android APK
+      - name: Build Android APKs
         run: gradle assembleDebug
 
-      - name: Upload Android Artifact
+      - name: Upload Mobile APK
         uses: actions/upload-artifact@v4
         with:
-          name: Snailflix-Android
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: Snailflix-Mobile
+          path: app/build/outputs/apk/mobile/debug/app-mobile-debug.apk
 
-  # --- Windows App Build (.msix) ---
+      - name: Upload TV APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Snailflix-TV
+          path: app/build/outputs/apk/tv/debug/app-tv-debug.apk
+
+  # --- Windows App ---
   build-windows:
     runs-on: windows-latest
     steps:
@@ -74,3 +80,9 @@ jobs:
           
           # Run makeappx to build the MSIX package
           & $makeappx pack /d win_staging /p Snailflix-Windows.msix /o
+
+      - name: Upload Windows App Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Snailflix-Windows
+          path: Snailflix-Windows.msix
