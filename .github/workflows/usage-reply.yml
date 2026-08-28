@@ -1,0 +1,31 @@
+# Copyright (C) 2026 Joshua Steel. All rights reserved.
+# This code is source-available. You must submit a GitHub Issue form before using.
+name: Auto Reply to Usage Heads-Up
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  reply:
+    runs-on: ubuntu-latest
+    # Only run this if the issue has the specific label from your form
+    if: contains(github.event.issue.labels.*.name, 'permission-requested')
+    
+    steps:
+      - name: Post Comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hello @${{ github.event.issue.user.login }},
+
+            Thank you for submitting your code usage heads-up! 
+
+            **Status:** ⏳ Pending Review
+            
+            As a reminder for this Java/Web project:
+            * You may proceed with integration once a maintainer reviews this issue and posts an approval comment.
+            * Please ensure the copyright headers in the HTML, CSS, JS, or Java files remain intact.
+
+            The project owner has been notified and will reply shortly.

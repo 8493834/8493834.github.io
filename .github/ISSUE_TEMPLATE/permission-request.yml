@@ -1,0 +1,45 @@
+ # Copyright (C) 2026 Joshua Steel. All rights reserved.
+ # This code is source-available. You must submit a GitHub Issue form before using.
+ 
+
+name: 🚀 Code Usage Heads-Up
+description: Notify the creator that you intend to use this code.
+title: "[Heads-Up] Code Usage Request - [Your Name/Project]"
+labels: ["permission-requested"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reaching out! Per the project's license, please provide a quick heads-up on how you plan to use this Java/Web code.
+  - type: input
+    id: user-project
+    attributes:
+      label: Your Project Name
+      placeholder: e.g., My Personal Portfolio Website, School Assignment, Java Desktop App
+    validations:
+      required: true
+  - type: textarea
+    id: usage-details
+    attributes:
+      label: How are you using the code?
+      placeholder: e.g., I am using the CSS styling for my layout, or I am integrating the Java backend logic.
+    validations:
+      required: true
+  - type: dropdown
+    id: project-type
+    attributes:
+      label: Project Type
+      options:
+        - Personal / Educational (Non-commercial)
+        - Commercial / Business
+        - Open Source Project
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Acknowledgement
+      options:
+        - label: I understand I cannot distribute this code until the author acknowledges this issue.
+          required: true

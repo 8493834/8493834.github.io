@@ -1,3 +1,8 @@
+/* 
+ Copyright (C) 2026 Joshua steel. All rights reserved.
+ This code is source-available. You must submit a GitHub Issue form before using.
+*/
+
 const emailForm = document.getElementById('email-auth-form');
 const statusDiv = document.getElementById('auth-status');
 const toggleBtn = document.getElementById('toggle-auth');

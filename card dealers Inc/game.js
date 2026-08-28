@@ -1,3 +1,8 @@
+/* 
+ Copyright (C) 2026 Joshua Steel. All rights reserved.
+ This code is source-available. You must submit a GitHub Issue form before using.
+*/
+
 const canvas = document.getElementById('pong');
 const ctx = canvas.getContext('2d');
 const pauseBtn = document.getElementById('pauseBtn');

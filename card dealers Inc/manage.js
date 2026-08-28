@@ -1,15 +1,20 @@
+/*
+  Copyright (C) 2026 Joshua Steel. All rights reserved.
+  This code is source-available. You must submit a GitHub Issue form before using.
+*/
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 🛑 REPLACE THESE WITH YOUR ACTUAL JSONBIN.IO CREDENTIALS 🛑
+    
     const MANAGE_PASSWORD = "ADMIN!@#"; 
     const BIN_ID = "68fb133f43b1c97be97c60c2"; 
     const MASTER_KEY = "$2a$10$cyMnz51JbXNQBoIE7Gi.seT.I2EkWazeGljSLnum7IjzDeOPn5wSi"; 
     const ACCESS_KEY = "$2a$10$NHhvVWLtO9Zu.ErTUqoRieEs8tHCo/nc9R.mEy9kLCBP.X/mETDqa"; 
 
     const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-    // -------------------------------------------------------------
     
-    // 🎯 OFFLINE STORAGE KEYS 🎯
+    
+    
     const CACHE_KEY = 'contentCache';
     const SYNC_QUEUE_KEY = 'syncQueue';
     
@@ -53,9 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --- API Functions (Now Offline-Aware) ---
-
-    // 🎯 MODIFIED: Fetches from network, saves to cache, falls back to cache 🎯
+    
     async function fetchContentFromAPI() {
         console.log('Attempting to fetch content from API...');
         try {
@@ -84,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // 🎯 NEW: Attempts to save to the API and runs the sync queue 🎯
+   
     async function updateContentInAPI(newContent, skipQueue = false) {
         if (!navigator.onLine || skipQueue) {
             
@@ -94,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let queue = getSyncQueue();
                 queue.push(newContent);
                 setSyncQueue(queue);
-                alert('⚠️ You are offline. Changes saved locally and will sync when online.');
+                alert('You are offline. Changes saved locally and will sync when online.');
                 
                 // Immediately update local content so the user sees their change
                 setLocalContent(newContent); 
@@ -138,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // 🎯 NEW: Synchronization Logic 🎯
+   
     async function syncQueue() {
         if (!navigator.onLine) {
             console.log('Cannot sync: Still offline.');

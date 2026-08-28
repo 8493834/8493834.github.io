@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2026 Joshua Steel. All rights reserved.
+  This code is source-available. You must submit a GitHub Issue form before using.
+*/
 const CACHE_NAME = 'card-dealers-v1';
 const urlsToCache = [
     '/',
@@ -11,9 +15,7 @@ const urlsToCache = [
     'terms.html',
     'manage.html',
     'other-businesses.html',
-    // Add paths to any specific images if you want them cached
-    // 'https://via.placeholder.com/400x300.png?text=Professional+Dealer',
-    // ...
+    
 ];
 
 // Install: Cache all necessary assets

@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2026 Joshua Steel. All rights reserved.
+  This code is source-available. You must submit a GitHub Issue form before using.
+*/
 const ADMIN_EMAIL = "joshuasteeljoshua19@gmail.com";
 
 document.addEventListener('DOMContentLoaded', () => {
