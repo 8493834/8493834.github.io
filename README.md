@@ -1,7 +1,7 @@
-# Project Title
+# SPS/spamia/card dealers inc. and dev shop
 
 ![License: Proprietary](https://shields.io)
-![Status: Source--Available](https://shields.io)
+![Status: Source-Available](https://shields.io)
 
 > ⚠️ **Usage Requirement:** This code is public to view, but you **must** notify me and get confirmation before using it in your own projects. 
 
