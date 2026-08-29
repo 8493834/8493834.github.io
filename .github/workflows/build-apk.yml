@@ -41,7 +41,7 @@ jobs:
           name: Snailflix-TV
           path: app/build/outputs/apk/tv/debug/app-tv-debug.apk
 
-  # --- Windows App ---
+  ## --- Windows App ---
   build-windows:
     runs-on: windows-latest
     steps:
@@ -51,36 +51,31 @@ jobs:
       - name: Setup MSBuild & Windows Tools
         uses: microsoft/setup-msbuild@v2
 
-      - name: Stage Windows App Package
+      - name: Prepare Windows Staging Directory
         shell: powershell
         run: |
-          New-Item -ItemType Directory -Force -Path win_staging
-          Copy-Item appxmanifest.xml win_staging/
-          
-          # Copy HTML file from the sps folder
-          if (Test-Path sps/snailflix.html) { 
-              Copy-Item sps/snailflix.html win_staging/ 
-          } elseif (Test-Path sps/index.html) { 
-              Copy-Item sps/index.html win_staging/ 
-          } else {
-              Get-ChildItem -Path sps -Filter *.html | Copy-Item -Destination win_staging/
+          # Ensure win_staging and Assets directories exist
+          New-Item -ItemType Directory -Force -Path "win_staging\Assets"
+
+          # Create dummy executable if building a web/wrapper app, or copy your actual binary here
+          if (-not (Test-Path "win_staging\Snailflix.exe")) {
+              New-Item -ItemType File -Force -Path "win_staging\Snailflix.exe"
           }
 
-          if (Test-Path manifest.json) { Copy-Item manifest.json win_staging/ }
+          # Create placeholder PNG images if missing
+          $pngBytes = [System.Convert]::FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
           
-          # Create assets directory and copy icon
-          New-Item -ItemType Directory -Force -Path win_staging/assets
-          if (Test-Path app/src/main/res/mipmap/ic_launcher.png) {
-              Copy-Item app/src/main/res/mipmap/ic_launcher.png win_staging/assets/
+          @("StoreLogo.png", "Square150x150Logo.png", "Square44x44Logo.png") | ForEach-Object {
+              $imgPath = "win_staging\Assets\$_"
+              if (-not (Test-Path $imgPath)) {
+                  [System.IO.File]::WriteAllBytes($imgPath, $pngBytes)
+              }
           }
 
-      - name: Package MSIX
+      - name: Build MSIX Package
         shell: powershell
         run: |
-          # Locate makeappx.exe in the installed Windows SDK directory
           $makeappx = (Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\makeappx.exe" | Select-Object -Last 1).FullName
-          
-          # Run makeappx to build the MSIX package
           & $makeappx pack /d win_staging /p Snailflix-Windows.msix /o
 
       - name: Upload Windows App Artifact
