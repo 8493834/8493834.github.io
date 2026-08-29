@@ -42,22 +42,16 @@ jobs:
           path: app/build/outputs/apk/tv/debug/app-tv-debug.apk
 
   ## --- Windows App ---
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup MSBuild & Windows Tools
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Prepare Windows Staging Directory
+  - name: Prepare Windows Staging Directory
         shell: powershell
         run: |
           # Ensure win_staging and Assets directories exist
           New-Item -ItemType Directory -Force -Path "win_staging\Assets"
 
-          # Create dummy executable if building a web/wrapper app, or copy your actual binary here
+          # Copy appxmanifest.xml from root into win_staging as AppxManifest.xml
+          Copy-Item "appxmanifest.xml" -Destination "win_staging\AppxManifest.xml" -Force
+
+          # Create dummy executable if missing
           if (-not (Test-Path "win_staging\Snailflix.exe")) {
               New-Item -ItemType File -Force -Path "win_staging\Snailflix.exe"
           }
@@ -71,7 +65,7 @@ jobs:
                   [System.IO.File]::WriteAllBytes($imgPath, $pngBytes)
               }
           }
-
+          
       - name: Build MSIX Package
         shell: powershell
         run: |
