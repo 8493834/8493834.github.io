@@ -88,3 +88,26 @@ jobs:
         with:
           name: Snailflix-Windows
           path: Snailflix-Windows.msix
+
+          # --- Linux Build Step ---
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build Web Desktop Package
+        run: |
+          mkdir -p linux_dist
+          cp sps/snailflix.html linux_dist/index.html
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Snailflix-Linux
+          path: linux_dist/

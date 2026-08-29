@@ -5,23 +5,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Snailflix">
-
-<link rel="apple-touch-icon" href="app/src/main/res/mipmap/ic_launcher.png">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-<link rel="manifest" href="manifest.json">
-    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Snailflix - Free Snail Streaming & Admin</title>
 
-    <link rel="manifest" href="manifest.json">
+    <!-- App / PWA Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Snailflix">
     <meta name="theme-color" content="#E50914">
+
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" href="https://fav.farm/🐌">
     <link rel="apple-touch-icon" href="https://fav.farm/🐌">
 
@@ -36,14 +30,33 @@
             --green-bop: #2e7d32;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
 
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             overflow-x: hidden;
-            padding-bottom: 50px;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: max(50px, env(safe-area-inset-bottom));
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        /* D-Pad & Keyboard Focus State */
+        :focus {
+            outline: none !important;
+            transform: scale(1.08) !important;
+            border: 3px solid var(--accent-red) !important;
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.9) !important;
+            z-index: 10;
         }
 
         /* --- Navbar --- */
@@ -77,6 +90,7 @@
             font-size: 0.85rem;
             border: none;
             cursor: pointer;
+            transition: transform 0.2s ease;
         }
 
         .btn-admin { background-color: #333; color: white; }
@@ -217,42 +231,11 @@
             cursor: pointer;
             border-radius: 5px;
         }
-    
-    :focus {
-    outline: none !important;
-    transform: scale(1.12) !important;
-    border: 3px solid #E50914 !important;
-    box-shadow: 0 0 20px rgba(229, 9, 20, 0.9) !important;
-    z-index: 10;
-}
-    
-    
-* {
-    -webkit-tap-highlight-color: transparent;
-    -webkit-user-select: none;
-    user-select: none;
-}
-
-
-.movie-row {
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-}
-    
-body {
-    
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-    background-color: #141414; 
-}  
-    
-</style>
+    </style>
 </head>
 <body>
 
+    <!-- Auth UI -->
     <div id="authContainer" style="position: fixed; top: 20px; right: 280px; z-index: 101;">
         <span id="userGreeting" style="color: white; font-weight: bold; margin-right: 10px;"></span>
         <button id="authBtn" onclick="toggleAuthModal()" class="btn-nav btn-admin">🔑 Sign In</button>
@@ -263,14 +246,15 @@ body {
             <button type="button" onclick="toggleAuthModal()" style="position:absolute; top:10px; right:15px; background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
             <h2 id="authTitle" style="color:white; margin-bottom:15px; text-align:center;">Sign In</h2>
             
-            <input type="email" id="authEmail" placeholder="Agent Email" required style="width:100%; padding:10px; margin-bottom:10px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
-            <input type="password" id="authPassword" placeholder="Password" required style="width:100%; padding:10px; margin-bottom:15px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
+            <input type="email" id="authEmail" placeholder="Agent Email" required>
+            <input type="password" id="authPassword" placeholder="Password" required>
             
             <button type="submit" id="authSubmitBtn" class="btn-action" style="margin-bottom:10px;">Sign In</button>
             <p style="color:#aaa; font-size:0.8rem; text-align:center; cursor:pointer;" onclick="toggleAuthMode()">Don't have an account? <span style="color:#e50914;">Sign Up</span></p>
         </form>
     </div>
     
+    <!-- Navbar -->
     <nav class="navbar">
         <a href="#" class="logo">SNAILFLIX</a>
         <div class="nav-right">
@@ -279,10 +263,10 @@ body {
         </div>
     </nav>
 
+    <!-- Admin Panel -->
     <div id="adminPanel">
         <h2>🛠️ Snailflix Admin Management Console</h2>
         <div class="admin-grid">
-            
             <div class="admin-box">
                 <h3>➕ Upload New Exclusive Movie</h3>
                 <input type="text" id="newTitle" placeholder="Movie Title (e.g. Turbo Shell)">
@@ -300,7 +284,6 @@ body {
                 </label>
                 
                 <input type="text" id="newDuration" placeholder="Duration (e.g. 2m 15s)">
-                
                 <label style="display:block; margin-bottom:5px; font-size:0.85rem; color:#aaa;">Select Video File (.mp4):</label>
                 <input type="file" id="videoFile" accept="video/mp4,video/*">
 
@@ -318,10 +301,10 @@ body {
                     <p style="color:#888;">Fetching user registry...</p>
                 </div>
             </div>
-
         </div>
     </div>
 
+    <!-- Hero Billboard -->
     <header class="hero">
         <div class="hero-content">
             <span class="badge">🔥 #1 MOST WATCHED</span>
@@ -330,6 +313,7 @@ body {
         </div>
     </header>
 
+    <!-- Content Sections -->
     <main class="row-container">
         <h2 class="row-title">🔥 Trending Now (Most Watched)</h2>
         <div id="trendingRow" class="row-cards"></div>
@@ -338,32 +322,32 @@ body {
         <div id="catalogRow" class="row-cards"></div>
     </main>
 
+    <!-- Player Overlay -->
     <div id="videoModal">
-        <button onclick="closeVideo()" class="close-btn">✕ Close Player</button>
+        <button id="closePlayerBtn" onclick="closeVideo()" class="close-btn" tabindex="0">✕ Close Player</button>
         <h2 id="modalVideoTitle" style="margin-bottom:15px; color:white;"></h2>
-        <video id="snailVideoPlayer" controls style="max-width:90%; max-height:75vh; border-radius:10px; box-shadow: 0 0 25px rgba(229,9,20,0.6);">
+        <video id="snailVideoPlayer" controls controlsList="nodownload" oncontextmenu="return false;" style="max-width:90%; max-height:75vh; border-radius:10px; box-shadow: 0 0 25px rgba(229,9,20,0.6);">
             <source id="videoSource" src="" type="video/mp4">
             Your browser does not support HTML5 video.
         </video>
     </div>
 
     <script>
-        // --- SUPABASE CONFIGURATION ---
         const SUPABASE_URL = "https://ocirrwivejnoobjcykkb.supabase.co"; 
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaXJyd2l2ZWpub29iamN5a2tiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTE2NDUsImV4cCI6MjA5NTY4NzY0NX0.AK7RLWplAFdL8ap5miJQKtHG_ItiLtg968pW35gmYjg";
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- PWA SERVICE WORKER REGISTRATION ---
+        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(() => console.log('✅ Snailflix PWA Service Worker Registered!'))
-                    .catch((err) => console.error('PWA Registration Failed:', err));
+                    .then(() => console.log('✅ Service Worker Registered'))
+                    .catch((err) => console.error('SW Failed:', err));
             });
         }
 
-        // --- AUTHENTICATION FUNCTIONS ---
+        // Auth Handler
         let isSignUpMode = false;
 
         function toggleAuthModal() {
@@ -383,7 +367,7 @@ body {
             const email = document.getElementById('authEmail').value;
             const password = document.getElementById('authPassword').value;
 
-            if (!email || !password) return alert('Please fill in both email and password.');
+            if (!email || !password) return alert('Please enter email and password.');
 
             if (isSignUpMode) {
                 const { data, error } = await supabaseClient.auth.signUp({ email, password });
@@ -396,7 +380,7 @@ body {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) alert(error.message);
                 else {
-                    alert('🎉 Logged in successfully!');
+                    alert('🎉 Logged in!');
                     toggleAuthModal();
                     checkUserSession();
                 }
@@ -421,11 +405,9 @@ body {
 
         async function handleSignOut() {
             await supabaseClient.auth.signOut();
-            alert("Signed out!");
             checkUserSession();
         }
 
-        // --- ADMIN PANEL CONTROL ---
         async function toggleAdminPanel() {
             const panel = document.getElementById('adminPanel');
 
@@ -433,7 +415,7 @@ body {
                 const { data: { session } } = await supabaseClient.auth.getSession();
 
                 if (!session) {
-                    alert('🔒 Sign-in required! Please click "Sign In" to access the Admin Console.');
+                    alert('🔒 Authentication required for Admin Console.');
                     toggleAuthModal();
                     return;
                 }
@@ -445,25 +427,21 @@ body {
             }
         }
 
-        // --- CATALOG & DISPLAY ---
         async function loadMovies() {
             const { data: movies, error } = await supabaseClient
                 .from('snailflix_movies')
                 .select('*')
                 .order('views', { ascending: false });
 
-            if (error || !movies) return console.error('Error fetching movies:', error);
+            if (error || !movies) return console.error('Fetch error:', error);
 
             if (movies.length > 0) {
                 document.getElementById('heroTitle').innerText = `${movies[0].emoji} ${movies[0].title}`;
                 document.getElementById('heroDesc').innerText = `${movies[0].description || 'Snailflix Original'} • ${movies[0].views} Total Views`;
             }
 
-            const trendingRow = document.getElementById('trendingRow');
-            trendingRow.innerHTML = movies.slice(0, 4).map(movie => createMovieCard(movie)).join('');
-
-            const catalogRow = document.getElementById('catalogRow');
-            catalogRow.innerHTML = movies.map(movie => createMovieCard(movie)).join('');
+            document.getElementById('trendingRow').innerHTML = movies.slice(0, 4).map(movie => createMovieCard(movie)).join('');
+            document.getElementById('catalogRow').innerHTML = movies.map(movie => createMovieCard(movie)).join('');
         }
 
         function createMovieCard(movie) {
@@ -471,7 +449,7 @@ body {
             const isTrailer = movie.is_trailer;
 
             return `
-                <div class="movie-card" onclick="watchMovie('${movie.id}', '${safeTitle}', ${movie.views}, '${movie.video_url || ''}', ${isTrailer})">
+                <div class="movie-card" tabindex="0" onclick="watchMovie('${movie.id}', '${safeTitle}', ${movie.views}, '${movie.video_url || ''}', ${isTrailer})">
                     <div class="card-emoji">${movie.emoji}</div>
                     <div>
                         <div class="card-title">${movie.title}</div>
@@ -492,34 +470,19 @@ body {
                 .update({ views: currentViews + 1 })
                 .eq('id', id);
 
-            if (isTrailer) {
-                if (videoUrl) {
-                    const modal = document.getElementById('videoModal');
-                    const player = document.getElementById('snailVideoPlayer');
-                    const source = document.getElementById('videoSource');
-                    
-                    document.getElementById('modalVideoTitle').innerText = `🎥 TRAILER: ${title} (Coming Soon)`;
-                    source.src = videoUrl;
-                    player.load();
-                    modal.style.display = 'flex';
-                    player.play();
-                } else {
-                    alert(`⏳ "COMING SOON!"\n\n"${title}" is currently in production. The full movie has not been released yet!`);
-                }
+            if (videoUrl) {
+                const modal = document.getElementById('videoModal');
+                const player = document.getElementById('snailVideoPlayer');
+                const source = document.getElementById('videoSource');
+                
+                document.getElementById('modalVideoTitle').innerText = isTrailer ? `🎥 TRAILER: ${title}` : title;
+                source.src = videoUrl;
+                player.load();
+                modal.style.display = 'flex';
+                player.play();
+                document.getElementById('closePlayerBtn').focus();
             } else {
-                if (videoUrl) {
-                    const modal = document.getElementById('videoModal');
-                    const player = document.getElementById('snailVideoPlayer');
-                    const source = document.getElementById('videoSource');
-                    
-                    document.getElementById('modalVideoTitle').innerText = title;
-                    source.src = videoUrl;
-                    player.load();
-                    modal.style.display = 'flex';
-                    player.play();
-                } else {
-                    alert(`🎬 "${title}" is ready! Upload a video file in the Admin Console to play it.`);
-                }
+                alert(`🎬 "${title}" has no video URL linked yet.`);
             }
 
             loadMovies();
@@ -532,7 +495,6 @@ body {
             modal.style.display = 'none';
         }
 
-        // --- ADMIN FUNCTIONS ---
         async function addMovie() {
             const title = document.getElementById('newTitle').value;
             const emoji = document.getElementById('newEmoji').value || '🐌';
@@ -542,7 +504,7 @@ body {
             const fileInput = document.getElementById('videoFile');
             const btn = document.getElementById('uploadBtn');
 
-            if (!title) return alert('Please enter a movie title!');
+            if (!title) return alert('Please provide a title.');
 
             let video_url = '';
 
@@ -562,7 +524,7 @@ body {
                 if (uploadError) {
                     btn.innerText = "Publish Movie to Snailflix";
                     btn.disabled = false;
-                    return alert("Video upload failed: " + uploadError.message);
+                    return alert("Upload failed: " + uploadError.message);
                 }
 
                 const { data: publicUrlData } = supabaseClient
@@ -581,9 +543,9 @@ body {
             btn.disabled = false;
 
             if (error) {
-                alert('Error saving movie details: ' + error.message);
+                alert('Database Error: ' + error.message);
             } else {
-                alert(`✅ "${title}" published ${is_trailer ? 'as a Trailer / Coming Soon!' : 'to Snailflix!'}`);
+                alert(`✅ "${title}" Published!`);
                 document.getElementById('newTitle').value = '';
                 document.getElementById('newEmoji').value = '';
                 document.getElementById('videoFile').value = '';
@@ -615,59 +577,56 @@ body {
                     </div>
                 `).join('');
             } else {
-                adminUserList.innerHTML = `<p style="color:#888;">No profiles logged yet.</p>`;
+                adminUserList.innerHTML = `<p style="color:#888;">No profiles registered.</p>`;
             }
         }
 
         async function deleteMovie(id) {
-            if (!confirm('Are you sure you want to remove this movie?')) return;
+            if (!confirm('Remove this movie?')) return;
             await supabaseClient.from('snailflix_movies').delete().eq('id', id);
             loadMovies();
             loadAdminData();
         }
 
-        // --- INITIALIZATION ---
+        // TV Remote Navigation Handler
+        let focusableElements = [];
+        let currentFocusIndex = 0;
+
+        function updateFocusableElements() {
+            focusableElements = Array.from(document.querySelectorAll('.movie-card, .btn-nav, button, input'));
+            focusableElements.forEach(el => el.setAttribute('tabindex', '0'));
+        }
+
+        document.addEventListener('keydown', (e) => {
+            updateFocusableElements();
+            if (focusableElements.length === 0) return;
+
+            switch (e.key) {
+                case 'ArrowRight':
+                    currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
+                    focusableElements[currentFocusIndex].focus();
+                    break;
+                case 'ArrowLeft':
+                    currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
+                    focusableElements[currentFocusIndex].focus();
+                    break;
+                case 'ArrowDown':
+                    currentFocusIndex = Math.min(currentFocusIndex + 4, focusableElements.length - 1);
+                    focusableElements[currentFocusIndex].focus();
+                    break;
+                case 'ArrowUp':
+                    currentFocusIndex = Math.max(currentFocusIndex - 4, 0);
+                    focusableElements[currentFocusIndex].focus();
+                    break;
+                case 'Enter':
+                    document.activeElement.click();
+                    break;
+            }
+        });
+
+        // Initialize Application
         loadMovies();
         checkUserSession();
-    
-// --- Android TV D-Pad Remote Navigation ---
-let focusableElements = [];
-let currentFocusIndex = 0;
-
-function updateFocusableElements() {
-    // Collect all interactive TV elements
-    focusableElements = Array.from(document.querySelectorAll('.movie-card, .btn-nav, button, input'));
-    focusableElements.forEach(el => el.setAttribute('tabindex', '0'));
-}
-
-document.addEventListener('keydown', (e) => {
-    updateFocusableElements();
-    if (focusableElements.length === 0) return;
-
-    switch (e.key) {
-        case 'ArrowRight':
-            currentFocusIndex = (currentFocusIndex + 1) % focusableElements.length;
-            focusableElements[currentFocusIndex].focus();
-            break;
-        case 'ArrowLeft':
-            currentFocusIndex = (currentFocusIndex - 1 + focusableElements.length) % focusableElements.length;
-            focusableElements[currentFocusIndex].focus();
-            break;
-        case 'ArrowDown':
-            currentFocusIndex = Math.min(currentFocusIndex + 4, focusableElements.length - 1);
-            focusableElements[currentFocusIndex].focus();
-            break;
-        case 'ArrowUp':
-            currentFocusIndex = Math.max(currentFocusIndex - 4, 0);
-            focusableElements[currentFocusIndex].focus();
-            break;
-        case 'Enter':
-        case 'Select':
-            document.activeElement.click();
-            break;
-    }
-});
-        
     </script>
 </body>
 </html>
