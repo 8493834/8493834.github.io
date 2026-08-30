@@ -65,7 +65,7 @@ jobs:
                   [System.IO.File]::WriteAllBytes($imgPath, $pngBytes)
               }
           }
-          
+
       - name: Build MSIX Package
         shell: powershell
         run: |
@@ -100,3 +100,4 @@ jobs:
         with:
           name: Snailflix-Linux
           path: linux_dist/
+          
