@@ -8,7 +8,6 @@ on:
   workflow_dispatch:
 
 jobs: 
-
   build-android:
     runs-on: ubuntu-latest
     steps:
@@ -41,7 +40,13 @@ jobs:
           name: Snailflix-TV
           path: app/build/outputs/apk/tv/debug/app-tv-debug.apk
 
-  - name: Prepare Windows Staging Directory
+  build-windows:
+    runs-on: windows-latest  # CRITICAL: Powershell and Windows Kits require a Windows runner
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Prepare Windows Staging Directory
         shell: powershell
         run: |
           # Ensure win_staging and Assets directories exist
@@ -75,9 +80,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Snailflix-Windows
-          path: Snailflix-Windows.msix
+          path: Snailflix-Windows.msix  # Corrected path to target the generated file
 
-          # --- Linux Build Step ---
   build-linux:
     runs-on: ubuntu-latest
     steps:
