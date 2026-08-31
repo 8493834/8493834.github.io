@@ -7,8 +7,7 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
-jobs:
- 
+jobs: 
 
   build-android:
     runs-on: ubuntu-latest
@@ -42,7 +41,6 @@ jobs:
           name: Snailflix-TV
           path: app/build/outputs/apk/tv/debug/app-tv-debug.apk
 
-  ## --- Windows App ---
   - name: Prepare Windows Staging Directory
         shell: powershell
         run: |
