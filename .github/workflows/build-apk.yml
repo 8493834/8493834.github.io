@@ -1,4 +1,4 @@
-# Copyright (C) 2026 Joshua Steel. All rights reserved.
+# Copyright (C) 2026 Snailflix. All rights reserved.
 # This code is source-available. You must submit a GitHub Issue form before using.
 name: Build Cross-Platform Apps
 
@@ -98,8 +98,13 @@ jobs:
           mkdir -p linux_dist
           cp sps/snailflix.html linux_dist/index.html
 
+      # NEW STEP: Compress the distribution folder into a zip file
+      - name: Compress Linux Build to ZIP
+        run: |
+          zip -r Snailflix-Linux.zip linux_dist
+
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Linux-distribution-snailflix
-          path: linux_dist/
+          path: Snailflix-Linux.zip  # Updated to upload the zip file directly
