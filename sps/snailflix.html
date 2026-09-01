@@ -495,65 +495,80 @@
             modal.style.display = 'none';
         }
 
-        async function addMovie() {
-            const title = document.getElementById('newTitle').value;
-            const emoji = document.getElementById('newEmoji').value || '🐌';
-            const category = document.getElementById('newCategory').value;
-            const duration = document.getElementById('newDuration').value || '1m 30s';
-            const is_trailer = document.getElementById('newIsTrailer').checked;
-            const fileInput = document.getElementById('videoFile');
-            const btn = document.getElementById('uploadBtn');
+       async function addMovie() {
+    const title = document.getElementById('newTitle').value;
+    const emoji = document.getElementById('newEmoji').value || '🐌';
+    const category = document.getElementById('newCategory').value;
+    const duration = document.getElementById('newDuration').value || '1m 30s';
+    const is_trailer = document.getElementById('newIsTrailer').checked;
+    const fileInput = document.getElementById('videoFile');
+    const btn = document.getElementById('uploadBtn');
 
-            if (!title) return alert('Please provide a title.');
+    if (!title) return alert('Please provide a title.');
 
-            let video_url = '';
+    let video_url = '';
 
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-                btn.innerText = "⏳ Uploading Video...";
-                btn.disabled = true;
+        btn.innerText = "⏳ Uploading Video... 0%";
+        btn.disabled = true;
 
-                const { data: uploadData, error: uploadError } = await supabaseClient
-                    .storage
-                    .from('videos')
-                    .upload(fileName, file);
+        // 1. Create a signed upload URL to allow large file transfers
+        const { data: signedData, error: signedError } = await supabaseClient
+            .storage
+            .from('videos')
+            .createSignedUploadUrl(fileName);
 
-                if (uploadError) {
-                    btn.innerText = "Publish Movie to Snailflix";
-                    btn.disabled = false;
-                    return alert("Upload failed: " + uploadError.message);
-                }
-
-                const { data: publicUrlData } = supabaseClient
-                    .storage
-                    .from('videos')
-                    .getPublicUrl(fileName);
-
-                video_url = publicUrlData.publicUrl;
-            }
-
-            const { error } = await supabaseClient
-                .from('snailflix_movies')
-                .insert([{ title, emoji, category, duration, video_url, is_trailer, views: 0 }]);
-
+        if (signedError) {
             btn.innerText = "Publish Movie to Snailflix";
             btn.disabled = false;
-
-            if (error) {
-                alert('Database Error: ' + error.message);
-            } else {
-                alert(`✅ "${title}" Published!`);
-                document.getElementById('newTitle').value = '';
-                document.getElementById('newEmoji').value = '';
-                document.getElementById('videoFile').value = '';
-                document.getElementById('newIsTrailer').checked = false;
-                loadMovies();
-                loadAdminData();
-            }
+            return alert("Failed to initialize upload: " + signedError.message);
         }
+
+        // 2. Upload directly using the signed URL
+        const { error: uploadError } = await supabaseClient
+            .storage
+            .from('videos')
+            .uploadToSignedUrl(fileName, signedData.token, file);
+
+        if (uploadError) {
+            btn.innerText = "Publish Movie to Snailflix";
+            btn.disabled = false;
+            return alert("Upload failed: " + uploadError.message);
+        }
+
+        // 3. Retrieve the public URL
+        const { data: publicUrlData } = supabaseClient
+            .storage
+            .from('videos')
+            .getPublicUrl(fileName);
+
+        video_url = publicUrlData.publicUrl;
+    }
+
+    // 4. Save metadata to the database
+    const { error: dbError } = await supabaseClient
+        .from('snailflix_movies')
+        .insert([{ title, emoji, category, duration, video_url, is_trailer, views: 0 }]);
+
+    btn.innerText = "Publish Movie to Snailflix";
+    btn.disabled = false;
+
+    if (dbError) {
+        alert('Database Error: ' + dbError.message);
+    } else {
+        alert(`✅ "${title}" Published!`);
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newEmoji').value = '';
+        document.getElementById('videoFile').value = '';
+        document.getElementById('newIsTrailer').checked = false;
+        if (typeof loadMovies === 'function') loadMovies();
+        if (typeof loadAdminData === 'function') loadAdminData();
+    }
+}
 
         async function loadAdminData() {
             const { data: movies } = await supabaseClient.from('snailflix_movies').select('id, title, views');
