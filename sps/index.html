@@ -571,35 +571,47 @@ async function signInWithGitHub() {
     });
 }
 
-// =========================================================
-//    REAL-TIME DISPATCH MESSAGING ENGINE
-// =========================================================
 async function sendChatMessage() {
-    const input = document.getElementById('chatInput');
-    if (!input || !input.value.trim()) return;
+    const messageInput = document.getElementById('chatInput');
+    const messageText = messageInput.value.trim();
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    
-    if(!user) { 
-        alert("Transmission Denied! You must be logged into passport services to broadcast."); 
-        return; 
+    if (!messageText) return;
+
+    // Check for profanity and hate speech
+    if (typeof containsProfanity === 'function' && containsProfanity(messageText)) {
+        alert("⚠️ Message blocked: Inappropriate language or hate speech detected. Please keep HQ Chat respectful!");
+        messageInput.value = ''; // Clear input
+        return;
     }
 
-    const { error } = await supabaseClient.from('chat_messages').insert([
-        { user_id: user.id, username: user.email.split('@')[0], message: input.value }
-    ]);
-    
-    if (error) console.error("Broadcast failed:", error);
-    input.value = "";
+    // Get the current user or guest name
+    const username = localStorage.getItem('snailflix_user') || 'Anonymous Snail';
+
+    // Insert message into Supabase ('hq_chat')
+    const { error } = await supabaseClient
+        .from('hq_chat')
+        .insert([
+            { username: username, message: messageText, created_at: new Date().toISOString() }
+        ]);
+
+    if (error) {
+        alert("Failed to send message: " + error.message);
+    } else {
+        messageInput.value = ''; // Clear input box after sending
+    }
 }
 
-// Real-Time Chat Listener Linked to Mainframe
+// Real-Time Chat Listener Linked to 'hq_chat'
 supabaseClient
-  .channel('public:chat_messages')
-  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
+  .channel('public:hq_chat')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'hq_chat' }, payload => {
       const box = document.getElementById('chatDisplay');
       if (box) {
-          box.innerHTML += `<div class="chat-msg"><span class="chat-user">${payload.new.username}:</span> ${payload.new.message}</div>`;
+          // Sanitize message to prevent XSS script execution
+          const safeUser = document.createTextNode(payload.new.username).textContent;
+          const safeMsg = document.createTextNode(payload.new.message).textContent;
+
+          box.innerHTML += `<div class="chat-msg"><span class="chat-user">${safeUser}:</span> ${safeMsg}</div>`;
           box.scrollTop = box.scrollHeight; 
       }
   })
