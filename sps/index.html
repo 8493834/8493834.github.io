@@ -840,6 +840,45 @@ async function acceptFriendRequest(requestId, userId) {
     }
 }
     
+// Global variable to hold banned words
+let bannedWordsList = [];
+
+// Fetch banned words from Supabase on page load
+async function loadBannedWords() {
+    const { data, error } = await supabaseClient
+        .from('banned_words')
+        .select('word');
+
+    if (error) {
+        console.error('Failed to load banned words:', error);
+        return;
+    }
+
+    if (data) {
+        bannedWordsList = data.map(item => item.word.toLowerCase());
+    }
+}
+
+// Call this immediately on page initialization
+loadBannedWords();
+
+// Function to check if a string contains any banned words
+function containsProfanity(text) {
+    if (!text) return false;
+    
+    // Normalize text: convert to lowercase and replace common l33tspeak bypasses
+    const cleanedText = text
+        .toLowerCase()
+        .replace(/0/g, 'o')
+        .replace(/1/g, 'i')
+        .replace(/!/g, 'i')
+        .replace(/3/g, 'e')
+        .replace(/@/g, 'a')
+        .replace(/\$/g, 's')
+        .replace(/[\_\-\.\s]/g, ''); // Removes spaces and special characters used to split words
+
+    return bannedWordsList.some(bannedWord => cleanedText.includes(bannedWord));
+}
 </script>
 </body>
 </html>
