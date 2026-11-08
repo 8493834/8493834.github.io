@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2e7d32">
+<title>SPS & BPS | Joinrules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function validApplication(d) {
+      return d.keys().hasOnly(['number', 'role', 'fullName', 'handle', 'email', 'location', 'availability', 'start', 'favorite', 'experience', 'why', 'link', 'uid', 'status', 'createdAt'])
+        && d.keys().hasAll(['number', 'role', 'fullName', 'handle', 'email', 'location', 'availability', 'start', 'favorite', 'experience', 'why', 'link', 'uid', 'status', 'createdAt'])
+        && d.number is string && d.number.matches('^BOP-[0-9]{4}-[A-Z0-9]{5}$')
+        && d.role is string && d.role.matches('^[A-Z]{3}-[0-9]{2}$')
+        && d.fullName is string && d.fullName.size() >= 2 && d.fullName.size() <= 100
+        && d.handle is string && d.handle.size() <= 30
+        && d.email is string && d.email.size() <= 200 && d.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
+        && d.location is string && d.location.size() >= 1 && d.location.size() <= 100
+        && d.availability in ['Weekdays', 'Weekends', 'Evenings', 'Flexible']
+        && d.start is string && d.start.size() <= 10
+        && d.favorite is string && d.favorite.size() <= 100
+        && d.experience is string && d.experience.size() <= 3000
+        && d.why is string && d.why.size() >= 40 && d.why.size() <= 3000
+        && d.link is string && d.link.size() <= 300
+        && d.status == 'received'
+        && d.createdAt == request.time
+        && (d.uid == null || (request.auth != null && d.uid == request.auth.uid));
+    }
+
+    match /applications/{applicationId} {
+      // Anyone can send one application. The document id must be its application number, so an existing one cannot be overwritten.
+      allow create: if validApplication(request.resource.data) &&  BOP</title>
+<meta name="description" content="Apply to become an employee of the Bug Observation Project (BOP). Open roles with Snail Protective Services (SPS) and Bug Protection Services (BPS).">
+<meta name="keywords" content="sps, snail, snails, snail protective services, bug protection services, bop, careers, apply">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232e7d32'/%3E%3Cpath d='M16 17c-1.2 0-2-.9-2-2s1-3 3-3 4 1.7 4 4-2 5-5 5-6-2.5-6-6 3-7 7-7 8 3.5 8 8' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky field-office header, split hero with an intake card, role dossier grid, then the application form beside a how-hiring-works sequence. */
+:root {
+  --bg: #eef2ec;
+  --surface: #f8faf6;
+  --ink: #14231a;
+  --muted: #4b5f52;
+  --line: #cfd9cc;
+  --accent: #2e7d32;
+  --accent-text: #1f6a25;
+  --accent-soft: #dcebd9;
+  --on-accent: #ffffff;
+  --danger: #b3261e;
+  --display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1a12;""
+    --surface: #15241a;
+    --ink: #e5eee6;
+    --muted: #9db3a2;
+    --line: #28392d;
+    --accent: #2e7d32;
+    --accent-text: #78c97d;
+    --accent-soft: #1b3a20;
+    --danger: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1a12;
+  --surface: #15241a;
+  --ink: #e5eee6;
+  --muted: #9db3a2;
+  --line: #28392d;
+  --accent: #2e7d32;
+  --accent-text: #78c97d;
+  --accent-soft: #1b3a20;
+  --danger: #ff8a80;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { max-width: 100%; }
+a { color: var(--accent-text); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+p { margin: 0; }
+:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 2px; border-radius: 4px; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; }
+.label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+/* Header */
+.site-header {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.bar { display: flex; align-items: center; gap: 16px; min-height: 64px; flex-wrap: wrap; padding-block: 8px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); margin-right: auto; }
+.brand svg { width: 34px; height: 34px; flex: none; }
+.brand b { font-family: var(--display); font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+.brand small { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; line-height: 1.2; }
+nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; flex-wrap: wrap; }
+nav a.nav-link { display: block; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 15px; font-weight: 500; }
+nav a.nav-link:hover { background: var(--accent-soft); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 20px; border-radius: 8px; border: 2px solid var(--accent);
+  background: var(--accent); color: var(--on-accent);
+  font: 600 15px/1.2 var(--body); text-decoration: none; cursor: pointer;
+}
+.btn:hover { filter: brightness(1.1); }
+.btn.ghost { background: transparent; color: var(--accent-text); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--accent-text); filter: none; }
+.btn.small { padding: 9px 14px; font-size: 14px; }
+
+/* Hero */
+.hero { padding-block: 64px 56px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 48px; align-items: center; }
+.hero h1 { font-size: clamp(40px, 6.4vw, 76px); font-weight: 800; margin-top: 14px; }
+.hero h1 em { font-style: normal; color: var(--accent-text); }
+.hero p.lead { margin-top: 20px; font-size: 18px; color: var(--muted); max-width: 52ch; }
+.hero .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+
+.intake {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  font-family: var(--mono);
+  font-size: 13px;
+  box-shadow: 0 1px 0 var(--line), 0 18px 40px -28px rgba(20, 35, 26, 0.45);
+}
+.intake header { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px dashed var(--line); margin-bottom: 14px; color: var(--muted); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; }
+.intake dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; }
+.intake dt { color: var(--muted); }
+.intake dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); font-weight: 500; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent-text); }
+
+/* Sections */
+section.block { padding-block: 64px; border-top: 1px solid var(--line); }
+.sec-head { display: grid; gap: 10px; margin-bottom: 32px; max-width: 62ch; }
+.sec-head h2 { font-size: clamp(30px, 4.4vw, 46px); font-weight: 800; }
+.sec-head p { color: var(--muted); }
+
+.mission { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.mission div { padding-top: 14px; border-top: 3px solid var(--accent); }
+.mission h3 { font-size: 22px; margin-bottom: 6px; }
+.mission p { color: var(--muted); font-size: 15px; }
+
+/* Roles */
+.roles { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.role {
+  display: flex; flex-direction: column; gap: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px; min-width: 0;
+}
+.role .code { display: flex; justify-content: space-between; gap: 8px; font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: 0.08em; }
+.role h3 { font-size: 24px; }
+.role p { color: var(--muted); font-size: 15px; flex: 1; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags span { font-family: var(--mono); font-size: 12px; padding: 3px 9px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); }
+.role .btn { align-self: flex-start; }
+
+/* Apply */
+.apply-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr); gap: 40px; align-items: start; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: step; position: sticky; top: 92px; }
+.steps li { counter-increment: step; position: relative; padding: 0 0 26px 48px; }
+.steps li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent); color: var(--on-accent); font: 500 14px var(--mono);
+}
+.steps li::after { content: ""; position: absolute; left: 15px; top: 36px; bottom: 4px; width: 2px; background: var(--line); }
+.steps li:last-child { padding-bottom: 0; }
+.steps li:last-child::after { display: none; }
+.steps b { display: block; font-family: var(--display); font-size: 19px; }
+.steps span { color: var(--muted); font-size: 14.5px; }
+
+form#apply { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: grid; gap: 20px; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 16px; }
+legend { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-text); padding: 0; margin-bottom: 12px; }
+.row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field label { font-weight: 600; font-size: 14.5px; }
+.field .opt { font-weight: 400; color: var(--muted); }
+.field .hint { font-size: 13px; color: var(--muted); }
+input, select, textarea {
+  width: 100%; font: inherit; color: var(--ink);
+  background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; padding: 11px 12px;
+}
+textarea { min-height: 130px; resize: vertical; }
+input:hover, select:hover, textarea:hover { border-color: var(--muted); }
+input:focus, select:focus, textarea:focus { outline: 3px solid var(--accent-text); outline-offset: 1px; border-color: var(--accent-text); }
+.field.invalid input, .field.invalid select, .field.invalid textarea { border-color: var(--danger); }
+.err { color: var(--danger); font-size: 13.5px; font-weight: 500; }
+.counter { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: right; }
+.check { display: flex; gap: 12px; align-items: flex-start; }
+.check input { width: 20px; height: 20px; margin-top: 3px; flex: none; accent-color: var(--accent); }
+.check label { font-weight: 400; font-size: 14.5px; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.form-foot { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.form-foot small { color: var(--muted); font-size: 13px; flex: 1; min-width: 200px; }
+.banner { padding: 12px 14px; border-radius: 8px; font-size: 14.5px; border: 1px solid var(--danger); color: var(--danger); }
+
+.receipt { background: var(--surface); border: 2px solid var(--accent); border-radius: var(--radius); padding: 28px; display: grid; gap: 18px; }
+.receipt h3 { font-size: 30px; }
+.receipt .no { font-family: var(--mono); font-size: 22px; letter-spacing: 0.06em; padding: 12px 16px; background: var(--accent-soft); color: var(--accent-text); border-radius: 8px; width: fit-content; max-width: 100%; overflow-wrap: anywhere; }
+.receipt p { color: var(--muted); }
+.receipt .acts { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Applications on this device */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14.5px; }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+td.mono { font-family: var(--mono); font-size: 13.5px; }
+.empty { padding: 26px 16px; color: var(--muted); text-align: center; }
+.tools { display: flex; gap: 10px; margin-top: 14px; }
+
+[hidden] { display: none !important; }
+#authWrap { margin-bottom: 24px; }
+.authbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); font-size: 14.5px; }
+.authbar span { min-width: 0; overflow-wrap: anywhere; }
+#authMsg { margin-top: 8px; }
+
+/* FAQ */
+.faq { display: grid; gap: 10px; max-width: 760px; }
+details { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 18px; }
+summary { cursor: pointer; padding: 16px 0; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; font-family: var(--mono); color: var(--accent-text); font-size: 20px; line-height: 1; }
+details[open] summary::after { content: "\2212"; }
+details p { padding: 0 0 16px; color: var(--muted); }
+
+footer { border-top: 1px solid var(--line); padding-block: 32px 40px; color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; }
+
+@media (max-width: 860px) {
+  .hero-grid, .apply-grid { grid-template-columns: minmax(0, 1fr); }
+  .steps { position: static; order: -1; }
+  .mission { grid-template-columns: minmax(0, 1fr); }
+  .hero { padding-block: 40px 40px; }
+}
+@media (max-width: 560px) {
+  .row { grid-template-columns: minmax(0, 1fr); }
+  form#apply, .receipt { padding: 18px; }
+  nav a.nav-link { padding: 8px 9px; font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="SPS and BPS, BOP HQ">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#2e7d32"/><path d="M16 17c-1.2 0-2-.9-2-2s1-3 3-3 4 1.7 4 4-2 5-5 5-6-2.5-6-6 3-7 7-7 8 3.5 8 8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span><b>SPS &amp; BPS</b><small>BOP HQ &middot; Recruitment</small></span>
+    </a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a class="nav-link" href="#mission">Mission</a></li>
+        <li><a class="nav-link" href="#roles">Open roles</a></li>
+        <li><a class="nav-link" href="#apply">Apply</a></li>
+        <li><a class="nav-link" href="#status">My applications</a></li>
+        <li><a class="nav-link" href="#faq">FAQ</a></li>
+      </ul>
+    </nav>
+    <a class="btn small" href="#apply">Apply now</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="label">Bug Observation Project &middot; Now hiring</span>
+        <h1>Get paid to look after the <em>small ones.</em></h1>
+        <p class="lead">Snail Protective Services (SPS) and Bug Protection Services (BPS) are recruiting field agents, surveyors and HQ staff. If you stop to move a snail off the footpath, you already know the job.</p>
+        <div class="cta">
+          <a class="btn" href="#apply">Start your application</a>
+          <a class="btn ghost" href="#roles">See open roles</a>
+        </div>
+      </div>
+      <aside class="intake" aria-label="Recruitment office status">
+        <header><span>Recruitment office</span><span>Form BOP-HR</span></header>
+        <dl>
+          <dt>Intake</dt><dd><span class="pill">Open</span></dd>
+          <dt>Open roles</dt><dd id="roleCount">6</dd>
+          <dt>Division</dt><dd>SPS &middot; BPS</dd>
+          <dt>Operated by</dt><dd>BOP</dd>
+          <dt>Works offline</dt><dd>Field log PWA</dd>
+          <dt>Reply time</dt><dd>Within 10 days</dd>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <section class="block" id="mission">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Our mission</span>
+        <h2>Protect the gastropods and insects that keep our world spinning.</h2>
+        <p>The Bug Observation Project runs a digital headquarters where agents log findings in the field, even with no signal. Employees keep that network running.</p>
+      </div>
+      <div class="mission">
+        <div><h3>Observe</h3><p>Log sightings with a GPS pin, a time and a species. Every record goes to the BOP Command Center.</p></div>
+        <div><h3>Protect</h3><p>Move snails off roads, mark nesting sites and report habitat damage before it spreads.</p></div>
+        <div><h3>Connect</h3><p>Work with field partners on the global dispatch channel and share what you find with the rest of the agents.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="roles">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Open roles</span>
+        <h2>Pick the desk, or the hedge, that suits you.</h2>
+        <p>Choose a role and the application form fills in for you.</p>
+      </div>
+      <div class="roles" id="roleGrid"></div>
+    </div>
+  </section>
+
+  <section class="block" id="apply">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Apply</span>
+        <h2>Employee application</h2>
+        <p>It takes about five minutes. Fields marked with an asterisk are required.</p>
+      </div>
+      <div id="authWrap" hidden>
+        <div class="authbar"><span id="authText"></span><button class="btn ghost small" type="button" id="authBtn"></button></div>
+        <p class="err" id="authMsg" hidden></p>
+      </div>
+      <div class="apply-grid">
+        <div id="formArea">
+          <form id="apply" novalidate>
+            <div class="hp" aria-hidden="true">
+              <label for="website">Leave this field empty</label>
+              <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+
+            <fieldset>
+              <legend>1. About you</legend>
+              <div class="row">
+                <div class="field">
+                  <label for="fullName">Full name *</label>
+                  <input id="fullName" name="fullName" type="text" autocomplete="name" aria-describedby="err-fullName">
+                  <p class="err" id="err-fullName" hidden></p>
+                </div>
+                <div class="field">
+                  <label for="handle">Agent handle <span class="opt">(optional)</span></label>
+                  <input id="handle" name="handle" type="text" placeholder="e.g. ShellScout" maxlength="30">
+                </div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="email">Email *</label>
+                  <input id="email" name="email" type="email" autocomplete="email" aria-describedby="err-email">
+                  <p class="err" id="err-email" hidden></p>
+                </div>
+                <div class="field">
+                  <label for="location">Town or region *</label>
+                  <input id="location" name="location" type="text" autocomplete="address-level2" aria-describedby="err-location">
+                  <p class="err" id="err-location" hidden></p>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>2. The role</legend>
+              <div class="row">
+                <div class="field">
+                  <label for="role">Role *</label>
+                  <select id="role" name="role" aria-describedby="err-role"></select>
+                  <p class="err" id="err-role" hidden></p>
+                </div>
+                <div class="field">
+                  <label for="availability">Availability *</label>
+                  <select id="availability" name="availability" aria-describedby="err-availability">
+                    <option value="">Select one</option>
+                    <option>Weekdays</option>
+                    <option>Weekends</option>
+                    <option>Evenings</option>
+                    <option>Flexible</option>
+                  </select>
+                  <p class="err" id="err-availability" hidden></p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="start">Earliest start date</label>
+                  <input id="start" name="start" type="date">
+                </div>
+                <div class="field">
+                  <label for="favorite">Favorite bug or snail</label>
+                  <input id="favorite" name="favorite" type="text" placeholder="e.g. Garden snail">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>3. Your story</legend>
+              <div class="field">
+                <label for="experience">Relevant experience <span class="opt">(optional)</span></label>
+                <textarea id="experience" name="experience" placeholder="Surveys, volunteering, gardening, coding, radio work, anything that fits the role."></textarea>
+              </div>
+              <div class="field">
+                <label for="why">Why do you want to join BOP? *</label>
+                <textarea id="why" name="why" aria-describedby="err-why why-count"></textarea>
+                <div class="counter" id="why-count">0 / 40 minimum</div>
+                <p class="err" id="err-why" hidden></p>
+              </div>
+              <div class="field">
+                <label for="link">Link to your work <span class="opt">(optional)</span></label>
+                <input id="link" name="link" type="url" placeholder="https://">
+                <p class="err" id="err-link" hidden></p>
+              </div>
+            </fieldset>
+
+            <div class="field">
+              <div class="check">
+                <input id="agree" name="agree" type="checkbox" aria-describedby="err-agree">
+                <label for="agree">I confirm the details above are accurate and agree to BOP contacting me about this application.</label>
+              </div>
+              <p class="err" id="err-agree" hidden></p>
+            </div>
+
+            <div id="formError" class="banner" role="alert" hidden></div>
+
+            <div class="form-foot">
+              <button class="btn" type="submit" id="submitBtn">Submit application</button>
+              <small>You will get an application number straight away.</small>
+            </div>
+          </form>
+        </div>
+
+        <ol class="steps" aria-label="How hiring works">
+          <li><b>Submit</b><span>Send the form. You get an application number to quote in any later contact.</span></li>
+          <li><b>HQ review</b><span>The recruitment office reads every application and shortlists by role.</span></li>
+          <li><b>Field interview</b><span>A short call with your division lead, plus one practical question about a real sighting.</span></li>
+          <li><b>First patrol</b><span>Successful applicants start with a supervised patrol and a login to the BOP Command Center.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="status">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">My applications</span>
+        <h2>Applications sent from this device</h2>
+        <p id="statusNote">Your submissions are listed here so you can find your application number again. This list lives in this browser only.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Number</th><th>Role</th><th>Submitted</th><th>Status</th></tr></thead>
+          <tbody id="appRows"></tbody>
+        </table>
+      </div>
+      <div class="tools"><button class="btn ghost small" id="clearApps" type="button">Clear list</button></div>
+    </div>
+  </section>
+
+  <section class="block" id="faq">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">FAQ</span>
+        <h2>Before you apply</h2>
+      </div>
+      <div class="faq">
+        <details><summary>Do I need to be an expert on snails or insects?</summary><p>No. Field Agents are trained on the job. Specialist roles list the skills they need, and curiosity counts for a lot.</p></details>
+        <details><summary>Can I work remotely?</summary><p>Most roles combine remote work with local patrols near you. HQ roles can be done fully from home.</p></details>
+        <details><summary>How long until I hear back?</summary><p>The recruitment office aims to reply within 10 days of receiving your application.</p></details>
+        <details><summary>I made a mistake in my application. What now?</summary><p>Submit a new one and mention the earlier application number in the story section. HQ will use the latest.</p></details>
+        <details><summary>Where does my information go?</summary><p>Only to the BOP recruitment office, and only to process your application.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; <span id="year"></span> Bug Observation Project. SPS &amp; BPS are BOP operated.</span>
+    <a href="https://8493834.github.io/sps/">Back to SPS HQ</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* Site settings. Edit these three values before publishing. */
+  var CONFIG = {
+    // Firebase web app config (Firebase console > Project settings > Your apps). Leave apiKey empty to turn Firebase off.
+    firebase: {
+      apiKey: "AIzaSyCQtd_y5gctRYICiusAqQltND5RSssfgjM",
+      authDomain: "employ-e9fff.firebaseapp.com",
+      projectId: "employ-e9fff",
+      storageBucket: "employ-e9fff.firebasestorage.app",
+      messagingSenderId: "638702768595",
+      appId: "1:638702768595:web:7b5cd7bc8a405be6701f26"
+    },
+    googleSignIn: true, // Lets applicants sign in with Google to see their applications on any device. Needs Firebase.
+    formEndpoint: "",   // Used only when Firebase is off. Form service URL, for example "https://formspree.io/f/abcdwxyz".
+    contactEmail: "",   // Optional. Shown on the receipt so applicants can email their application to HQ.
+    storageKey: "bop-applications"
+  };
+
+  var ROLES = [
+    { id: "FLD-01", title: "Field Agent, Gastropods", division: "SPS", type: "Part-time", where: "Local patrols", blurb: "Patrol your area, log snail sightings with GPS and move animals out of harm's way.", tags: ["Outdoors", "Logging", "Patience"] },
+    { id: "SVY-02", title: "Insect Surveyor", division: "BPS", type: "Part-time", where: "Local patrols", blurb: "Run timed counts of insects at set sites and record species, numbers and habitat notes.", tags: ["Identification", "Data entry"] },
+    { id: "HAB-03", title: "Habitat Restorer", division: "SPS + BPS", type: "Casual", where: "Site work", blurb: "Plant, clear and repair small habitats such as hedgerows, log piles and damp corners.", tags: ["Gardening", "Teamwork"] },
+    { id: "DSP-04", title: "HQ Dispatcher", division: "BOP HQ", type: "Part-time", where: "Remote", blurb: "Keep the global dispatch channel clear, welcome new agents and flag urgent reports.", tags: ["Communication", "Calm under load"] },
+    { id: "DEV-05", title: "Field App Developer", division: "BOP HQ", type: "Contract", where: "Remote", blurb: "Improve the offline-first field log app, the sync layer and the BOP Command Center.", tags: ["JavaScript", "PWA", "Sync"] },
+    { id: "OUT-06", title: "Community Outreach Lead", division: "BOP HQ", type: "Part-time", where: "Remote or local", blurb: "Run school visits and snail-spotting events, and recruit the next wave of agents.", tags: ["Teaching", "Events"] }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $("apply");
+  var roleSelect = $("role");
+
+  /* Render roles and the role select */
+  function renderRoles() {
+    var grid = $("roleGrid");
+    grid.innerHTML = ROLES.map(function (r) {
+      return '<article class="role">' +
+        '<div class="code"><span>' + r.id + '</span><span>' + r.division + '</span></div>' +
+        '<h3>' + r.title + '</h3>' +
+        '<p>' + r.blurb + '</p>' +
+        '<div class="tags"><span>' + r.type + '</span><span>' + r.where + '</span>' +
+        r.tags.map(function (t) { return '<span>' + t + '</span>'; }).join("") + '</div>' +
+        '<a class="btn small" href="#apply" data-role="' + r.id + '">Apply for this role</a>' +
+        '</article>';
+    }).join("");
+    roleSelect.innerHTML = '<option value="">Select a role</option>' +
+      ROLES.map(function (r) { return '<option value="' + r.id + '">' + r.id + ' · ' + r.title + '</option>'; }).join("");
+    $("roleCount").textContent = String(ROLES.length);
+    grid.addEventListener("click", function (e) {
+      var a = e.target.closest("a[data-role]");
+      if (a) { roleSelect.value = a.getAttribute("data-role"); clearError("role"); }
+    });
+  }
+
+  function roleLabel(id) {
+    for (var i = 0; i < ROLES.length; i++) if (ROLES[i].id === id) return ROLES[i].id + " · " + ROLES[i].title;
+    return id;
+  }
+
+  /* Validation */
+  var rules = {
+    fullName: function (v) { return v.trim().length < 2 ? "Enter your full name." : ""; },
+    email: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? "" : "Enter a valid email address, like name@example.com."; },
+    location: function (v) { return v.trim() ? "" : "Enter your town or region."; },
+    role: function (v) { return v ? "" : "Choose the role you are applying for."; },
+    availability: function (v) { return v ? "" : "Choose when you can work."; },
+    why: function (v) { return v.trim().length >= 40 ? "" : "Write at least 40 characters about why you want to join."; },
+    link: function (v) { return !v.trim() || /^https?:\/\/\S+\.\S+/.test(v.trim()) ? "" : "Enter a full web address starting with https://."; }
+  };
+
+  function showError(name, msg) {
+    var el = $("err-" + name); if (!el) return;
+    el.textContent = msg; el.hidden = false;
+    var input = $(name); if (input) { input.setAttribute("aria-invalid", "true"); input.closest(".field").classList.add("invalid"); }
+  }
+  function clearError(name) {
+    var el = $("err-" + name); if (!el) return;
+    el.hidden = true; el.textContent = "";
+    var input = $(name); if (input) { input.removeAttribute("aria-invalid"); input.closest(".field").classList.remove("invalid"); }
+  }
+
+  function validate() {
+    var firstBad = null;
+    Object.keys(rules).forEach(function (name) {
+      var msg = rules[name]($(name).value);
+      if (msg) { showError(name, msg); if (!firstBad) firstBad = $(name); } else { clearError(name); }
+    });
+    if (!$("agree").checked) { showError("agree", "Tick the box to confirm before submitting."); if (!firstBad) firstBad = $("agree"); } else { clearError("agree"); }
+    if (firstBad) firstBad.focus();
+    return !firstBad;
+  }
+
+  Object.keys(rules).forEach(function (name) {
+    var el = $(name);
+    el.addEventListener("input", function () { if (!el.closest(".field").classList.contains("invalid")) return; if (!rules[name](el.value)) clearError(name); });
+    el.addEventListener("change", function () { if (!rules[name](el.value)) clearError(name); });
+  });
+  $("agree").addEventListener("change", function () { if ($("agree").checked) clearError("agree"); });
+  $("why").addEventListener("input", function () {
+    var n = $("why").value.trim().length;
+    $("why-count").textContent = n + " / 40 minimum";
+  });
+
+  /* Storage helpers */
+  function loadApps() {
+    try { var raw = localStorage.getItem(CONFIG.storageKey); var list = raw ? JSON.parse(raw) : []; return Array.isArray(list) ? list : []; } catch (e) { return []; }
+  }
+  function saveApps(list) { try { localStorage.setItem(CONFIG.storageKey, JSON.stringify(list)); return true; } catch (e) { return false; } }
+
+  function makeNumber() {
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", s = "";
+    for (var i = 0; i < 5; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return "BOP-" + new Date().getFullYear() + "-" + s;
+  }
+
+  function summaryText(app) {
+    return [
+      "BOP EMPLOYEE APPLICATION",
+      "Application number: " + app.number,
+      "Submitted: " + app.submittedAt,
+      "Role: " + roleLabel(app.role),
+      "Name: " + app.fullName,
+      "Agent handle: " + (app.handle || "-"),
+      "Email: " + app.email,
+      "Location: " + app.location,
+      "Availability: " + app.availability,
+      "Earliest start: " + (app.start || "-"),
+      "Favorite bug: " + (app.favorite || "-"),
+      "Link: " + (app.link || "-"),
+      "",
+      "Experience:",
+      app.experience || "-",
+      "",
+      "Why BOP:",
+      app.why
+    ].join("\n");
+  }
+
+  /* Submit */
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    $("formError").hidden = true;
+    if (!validate()) return;
+
+    var fd = new FormData(form);
+    if (fd.get("website")) { showReceipt({ number: makeNumber(), role: fd.get("role"), fullName: "", email: "", submittedAt: new Date().toISOString() }, "skipped"); return; }
+
+    var app = {
+      number: makeNumber(),
+      submittedAt: new Date().toISOString(),
+      fullName: fd.get("fullName").trim(),
+      handle: (fd.get("handle") || "").trim(),
+      email: fd.get("email").trim(),
+      location: fd.get("location").trim(),
+      role: fd.get("role"),
+      availability: fd.get("availability"),
+      start: fd.get("start") || "",
+      favorite: (fd.get("favorite") || "").trim(),
+      experience: (fd.get("experience") || "").trim(),
+      why: fd.get("why").trim(),
+      link: (fd.get("link") || "").trim()
+    };
+
+    var btn = $("submitBtn");
+    btn.disabled = true; btn.textContent = "Sending…";
+
+    function done(mode) {
+      var list = loadApps();
+      list.unshift({ number: app.number, role: app.role, submittedAt: app.submittedAt, status: mode === "sent" ? "Received by HQ" : "Saved on this device" });
+      saveApps(list);
+      renderApps();
+      showReceipt(app, mode);
+      if (mode === "sent" && FB.user) loadRemoteApps();
+    }
+
+    if (firebaseConfigured()) {
+      sendToFirebase(app).then(function () { done("sent"); }).catch(function () {
+        btn.disabled = false; btn.textContent = "Submit application";
+        var box = $("formError");
+        box.textContent = "The application could not be sent. Check your connection and try again. Your answers are still in the form.";
+        box.hidden = false;
+      });
+    } else if (CONFIG.formEndpoint) {
+      var payload = Object.assign({}, app, { role: roleLabel(app.role), _subject: "BOP application " + app.number + " - " + roleLabel(app.role), _replyto: app.email });
+      fetch(CONFIG.formEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(function (res) {
+        if (!res.ok) throw new Error("bad status");
+        done("sent");
+      }).catch(function () {
+        btn.disabled = false; btn.textContent = "Submit application";
+        var box = $("formError");
+        box.textContent = "The application could not be sent. Check your connection and try again. Your answers are still in the form.";
+        box.hidden = false;
+      });
+    } else {
+      done("local");
+    }
+  });
+
+  function showReceipt(app, mode) {
+    var area = $("formArea");
+    var sent = mode === "sent";
+    var html = '<div class="receipt" role="status" tabindex="-1" id="receipt">' +
+      '<span class="label">Application received</span>' +
+      '<h3>Thank you' + (app.fullName ? ", " + escapeHTML(app.fullName.split(" ")[0]) : "") + '.</h3>' +
+      '<div class="no">' + app.number + '</div>' +
+      '<p>' + (sent
+        ? "Your application for " + escapeHTML(roleLabel(app.role)) + " has gone to the BOP recruitment office. Keep this number and quote it in any message to HQ."
+        : "Your application for " + escapeHTML(roleLabel(app.role)) + " is saved on this device. To finish, copy it and send it to the recruitment office." ) + '</p>' +
+      '<div class="acts">' +
+      (sent ? "" : '<button class="btn" type="button" id="copyApp">Copy application</button>') +
+      (!sent && CONFIG.contactEmail ? '<a class="btn ghost" href="mailto:' + encodeURI(CONFIG.contactEmail) + '?subject=' + encodeURIComponent("BOP application " + app.number) + '">Email HQ</a>' : "") +
+      '<button class="btn ghost" type="button" id="newApp">Start another application</button>' +
+      '</div>' +
+      (!sent && CONFIG.contactEmail ? '<p>HQ email: <b>' + escapeHTML(CONFIG.contactEmail) + '</b></p>' : "") +
+      '</div>';
+    area.innerHTML = html;
+    var r = $("receipt"); r.focus(); r.scrollIntoView({ block: "start" });
+    var copy = $("copyApp");
+    if (copy) copy.addEventListener("click", function () {
+      var text = summaryText(app);
+      function fallback() {
+        var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); copy.textContent = "Copied"; } catch (err) { copy.textContent = "Select and copy manually"; }
+        document.body.removeChild(ta);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { copy.textContent = "Copied"; }, fallback);
+      } else { fallback(); }
+    });
+    $("newApp").addEventListener("click", function () { window.location.reload(); });
+  }
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+  }
+
+  /* Applications list */
+  function renderApps(remoteList) {
+    var remote = Array.isArray(remoteList);
+    var list = remote ? remoteList : loadApps();
+    var body = $("appRows");
+    $("statusNote").textContent = remote
+      ? "These applications are linked to your Google account. HQ updates the status as it reviews them."
+      : "Your submissions are listed here so you can find your application number again. This list lives in this browser only.";
+    if (!list.length) {
+      body.innerHTML = '<tr><td class="empty" colspan="4">' + (remote ? "No applications linked to your account yet." : "No applications sent from this device yet.") + '</td></tr>';
+      $("clearApps").hidden = true;
+      return;
+    }
+    $("clearApps").hidden = remote;
+    body.innerHTML = list.map(function (a) {
+      var d = new Date(a.submittedAt);
+      var when = isNaN(d) ? "" : d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+      return "<tr><td class='mono'>" + escapeHTML(a.number) + "</td><td>" + escapeHTML(roleLabel(a.role)) + "</td><td>" + escapeHTML(when) + "</td><td><span class='pill'>" + escapeHTML(a.status) + "</span></td></tr>";
+    }).join("");
+  }
+  $("clearApps").addEventListener("click", function () { saveApps([]); renderApps(); });
+
+  /* Firebase (loaded only when CONFIG.firebase is filled in) */
+  var FB = { db: null, auth: null, user: null, m: null };
+  var fbPromise = null;
+
+  function firebaseConfigured() {
+    var c = CONFIG.firebase;
+    return !!(c && c.apiKey && c.projectId && c.appId);
+  }
+
+  function loadFirebase() {
+    if (!firebaseConfigured()) return Promise.resolve(null);
+    if (fbPromise) return fbPromise;
+    var base = "https://www.gstatic.com/firebasejs/10.14.1/";
+    fbPromise = Promise.all([
+      import(base + "firebase-app.js"),
+      import(base + "firebase-firestore.js"),
+      import(base + "firebase-auth.js")
+    ]).then(function (mods) {
+      var app = mods[0].initializeApp(CONFIG.firebase);
+      FB.m = { fs: mods[1], au: mods[2] };
+      FB.db = mods[1].getFirestore(app);
+      FB.auth = mods[2].getAuth(app);
+      return FB;
+    }).catch(function () { fbPromise = null; return null; });
+    return fbPromise;
+  }
+
+  function sendToFirebase(app) {
+    var timeout = new Promise(function (resolve, reject) { setTimeout(function () { reject(new Error("timeout")); }, 15000); });
+    var write = loadFirebase().then(function (fb) {
+      if (!fb) throw new Error("load");
+      var fs = fb.m.fs;
+      return fs.setDoc(fs.doc(fb.db, "applications", app.number), {
+        number: app.number, role: app.role, fullName: app.fullName, handle: app.handle, email: app.email,
+        location: app.location, availability: app.availability, start: app.start, favorite: app.favorite,
+        experience: app.experience, why: app.why, link: app.link,
+        uid: FB.user ? FB.user.uid : null, status: "received", createdAt: fs.serverTimestamp()
+      });
+    });
+    return Promise.race([write, timeout]);
+  }
+
+  function statusLabel(s) {
+    if (!s || s === "received") return "Received by HQ";
+    s = String(s);
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function loadRemoteApps() {
+    if (!FB.user) return;
+    var fs = FB.m.fs;
+    fs.getDocs(fs.query(fs.collection(FB.db, "applications"), fs.where("uid", "==", FB.user.uid))).then(function (snap) {
+      var list = [];
+      snap.forEach(function (d) {
+        var x = d.data();
+        var t = x.createdAt && x.createdAt.toDate ? x.createdAt.toDate().toISOString() : new Date().toISOString();
+        list.push({ number: x.number, role: x.role, submittedAt: t, status: statusLabel(x.status) });
+      });
+      list.sort(function (a, b) { return a.submittedAt < b.submittedAt ? 1 : -1; });
+      renderApps(list);
+    }).catch(function () { renderApps(); });
+  }
+
+  function showAuthMsg(msg) { var el = $("authMsg"); el.textContent = msg; el.hidden = !msg; }
+
+  function renderAuthBar() {
+    var wrap = $("authWrap");
+    if (!firebaseConfigured() || !CONFIG.googleSignIn) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    if (FB.user) {
+      $("authText").textContent = "Signed in as " + (FB.user.email || FB.user.displayName || "agent") + ". Your applications are linked to this account.";
+      $("authBtn").textContent = "Sign out";
+    } else {
+      $("authText").textContent = "Sign in with Google to see your applications on any device. You can also apply without signing in.";
+      $("authBtn").textContent = "Sign in with Google";
+    }
+  }
+
+  function signIn() {
+    showAuthMsg("");
+    loadFirebase().then(function (fb) {
+      if (!fb) throw new Error("load");
+      return fb.m.au.signInWithPopup(fb.auth, new fb.m.au.GoogleAuthProvider());
+    }).catch(function (err) {
+      if (err && (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request")) return;
+      showAuthMsg("Sign-in did not complete. Check that this site's address is allowed in Firebase, then try again.");
+    });
+  }
+
+  function prefill(user) {
+    var n = $("fullName"), m = $("email");
+    if (n && !n.value && user.displayName) n.value = user.displayName;
+    if (m && !m.value && user.email) m.value = user.email;
+  }
+
+  function watchAuth() {
+    if (!firebaseConfigured()) return;
+    loadFirebase().then(function (fb) {
+      if (!fb) return;
+      fb.m.au.onAuthStateChanged(fb.auth, function (user) {
+        FB.user = user;
+        renderAuthBar();
+        if (user) { prefill(user); loadRemoteApps(); } else { renderApps(); }
+      });
+    });
+  }
+
+  $("authBtn").addEventListener("click", function () {
+    if (FB.user) { FB.m.au.signOut(FB.auth); } else { signIn(); }
+  });
+
+  $("year").textContent = new Date().getFullYear();
+  renderRoles();
+  renderApps();
+  renderAuthBar();
+  watchAuth();
+})();
+</script>
+</body>
+</html>
