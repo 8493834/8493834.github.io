@@ -4,33 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#2e7d32">
-<title>SPS & BPS | Joinrules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    function validApplication(d) {
-      return d.keys().hasOnly(['number', 'role', 'fullName', 'handle', 'email', 'location', 'availability', 'start', 'favorite', 'experience', 'why', 'link', 'uid', 'status', 'createdAt'])
-        && d.keys().hasAll(['number', 'role', 'fullName', 'handle', 'email', 'location', 'availability', 'start', 'favorite', 'experience', 'why', 'link', 'uid', 'status', 'createdAt'])
-        && d.number is string && d.number.matches('^BOP-[0-9]{4}-[A-Z0-9]{5}$')
-        && d.role is string && d.role.matches('^[A-Z]{3}-[0-9]{2}$')
-        && d.fullName is string && d.fullName.size() >= 2 && d.fullName.size() <= 100
-        && d.handle is string && d.handle.size() <= 30
-        && d.email is string && d.email.size() <= 200 && d.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
-        && d.location is string && d.location.size() >= 1 && d.location.size() <= 100
-        && d.availability in ['Weekdays', 'Weekends', 'Evenings', 'Flexible']
-        && d.start is string && d.start.size() <= 10
-        && d.favorite is string && d.favorite.size() <= 100
-        && d.experience is string && d.experience.size() <= 3000
-        && d.why is string && d.why.size() >= 40 && d.why.size() <= 3000
-        && d.link is string && d.link.size() <= 300
-        && d.status == 'received'
-        && d.createdAt == request.time
-        && (d.uid == null || (request.auth != null && d.uid == request.auth.uid));
-    }
-
-    match /applications/{applicationId} {
-      // Anyone can send one application. The document id must be its application number, so an existing one cannot be overwritten.
-      allow create: if validApplication(request.resource.data) &&  BOP</title>
+<title>SPS & BPS | Join BOP</title>
 <meta name="description" content="Apply to become an employee of the Bug Observation Project (BOP). Open roles with Snail Protective Services (SPS) and Bug Protection Services (BPS).">
 <meta name="keywords" content="sps, snail, snails, snail protective services, bug protection services, bop, careers, apply">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232e7d32'/%3E%3Cpath d='M16 17c-1.2 0-2-.9-2-2s1-3 3-3 4 1.7 4 4-2 5-5 5-6-2.5-6-6 3-7 7-7 8 3.5 8 8' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E">
@@ -38,7 +12,6 @@ service cloud.firestore {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* Layout: sticky field-office header, split hero with an intake card, role dossier grid, then the application form beside a how-hiring-works sequence. */
 :root {
   --bg: #eef2ec;
   --surface: #f8faf6;
@@ -57,7 +30,7 @@ service cloud.firestore {
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e1a12;""
+    --bg: #0e1a12;
     --surface: #15241a;
     --ink: #e5eee6;
     --muted: #9db3a2;
@@ -200,7 +173,7 @@ section.block { padding-block: 64px; border-top: 1px solid var(--line); }
 .steps b { display: block; font-family: var(--display); font-size: 19px; }
 .steps span { color: var(--muted); font-size: 14.5px; }
 
-form#apply { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: grid; gap: 20px; }
+form#applyForm { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; display: grid; gap: 20px; }
 fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 16px; }
 legend { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-text); padding: 0; margin-bottom: 12px; }
 .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -268,7 +241,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
 }
 @media (max-width: 560px) {
   .row { grid-template-columns: minmax(0, 1fr); }
-  form#apply, .receipt { padding: 18px; }
+  form#applyForm, .receipt { padding: 18px; }
   nav a.nav-link { padding: 8px 9px; font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -362,7 +335,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
       </div>
       <div class="apply-grid">
         <div id="formArea">
-          <form id="apply" novalidate>
+          <form id="applyForm" novalidate>
             <div class="hp" aria-hidden="true">
               <label for="website">Leave this field empty</label>
               <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
@@ -545,7 +518,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: 
   ];
 
   var $ = function (id) { return document.getElementById(id); };
-  var form = $("apply");
+  var form = $("applyForm");
   var roleSelect = $("role");
 
   /* Render roles and the role select */
