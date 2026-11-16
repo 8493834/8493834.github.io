@@ -22,7 +22,20 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 // 👑 ADMIN CONFIGURATION
-const ADMIN_EMAILS = ["joshuasteeljoshua19@gmail.com"]; 
+const ADMIN_EMAILS = ["joshuasteeljoshua19@gmail.com"];
+
+// Escape text before it goes into innerHTML, so anything a visitor types
+// (names, messages, project titles) can't run as code on your pages.
+function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+}
+
+// Only allow normal web links in href attributes (blocks javascript: links)
+function safeUrl(url) {
+    return /^https?:\/\//i.test(url || '') ? url : '#';
+}
 
 
 // ==========================================
@@ -64,23 +77,30 @@ onAuthStateChanged(auth, (user) => {
 // ==========================================
 
 // 1. Fetch and Display Public Portfolio Items
+// (wrapped in try/catch so a failed load can't stop the rest of this file from running,
+//  which used to break the contact form and the delete buttons)
 const grid = document.getElementById('portfolio-grid');
 if (grid) {
-    grid.innerHTML = ''; 
-    const querySnapshot = await getDocs(collection(db, "projects"));
-    querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const statusClass = data.isInProgress ? 'in-progress' : 'completed';
-        const statusText = data.isInProgress ? 'In Progress' : 'Live';
-        
-        grid.innerHTML += `
-            <div class="card">
-                <span class="badge ${statusClass}">${statusText}</span>
-                <h3>${data.title}</h3>
-                <a href="${data.link || '#'}" target="_blank">View Project</a>
-            </div>
-        `;
-    });
+    grid.innerHTML = '';
+    try {
+        const querySnapshot = await getDocs(collection(db, "projects"));
+        querySnapshot.forEach((projectDoc) => {
+            const data = projectDoc.data();
+            const statusClass = data.isInProgress ? 'in-progress' : 'completed';
+            const statusText = data.isInProgress ? 'In Progress' : 'Live';
+
+            grid.innerHTML += `
+                <div class="card">
+                    <span class="badge ${statusClass}">${statusText}</span>
+                    <h3>${escapeHTML(data.title)}</h3>
+                    <a href="${escapeHTML(safeUrl(data.link))}" target="_blank" rel="noopener noreferrer">View Project</a>
+                </div>
+            `;
+        });
+    } catch (error) {
+        console.error("Error loading portfolio: ", error);
+        grid.innerHTML = '<p>Could not load projects right now. Please try again later.</p>';
+    }
 }
 
 // 2. Protected Contact Form Submission (with reCAPTCHA validation)
@@ -90,10 +110,14 @@ if (contactForm) {
         e.preventDefault();
 
         // 🤖 Validate reCAPTCHA response state
+        if (typeof grecaptcha === 'undefined') {
+            alert('reCAPTCHA did not load. Please refresh the page and try again.');
+            return;
+        }
         const recaptchaResponse = grecaptcha.getResponse();
         if (!recaptchaResponse) {
             alert('Please check the "I\'m not a robot" box before sending your proposal!');
-            return; 
+            return;
         }
 
         try {
@@ -104,10 +128,10 @@ if (contactForm) {
                 timestamp: new Date()
             });
             alert('Proposal sent straight to my console! I will talk to you soon.');
-            
+
             contactForm.reset();
             grecaptcha.reset(); // Clear reCAPTCHA visual state
-            
+
         } catch (error) {
             console.error("Error submitting message: ", error);
             alert("Something went wrong. Please try again.");
@@ -118,40 +142,45 @@ if (contactForm) {
 // 3. Authenticated Client Progress Tracker Dashboard
 async function loadClientProject(email) {
     if (!trackerSection) return;
-    const q = query(collection(db, "projects"), where("clientEmail", "==", email));
-    const snapshot = await getDocs(q);
-    
-    if (!snapshot.empty) {
-        trackerSection.classList.remove('hidden');
-        const card = document.getElementById('tracker-card');
-        card.innerHTML = '';
-        
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const currentProgress = data.progress || 0;
-            
-            card.innerHTML += `
-                <div class="card" style="margin-top: 1rem; border-left: 5px solid var(--accent);">
-                    <h3>🚀 Project Profile: ${data.title}</h3>
-                    
-                    <div style="margin: 1.5rem 0;">
-                        <label><strong>Build Progress:</strong></label>
-                        <div class="progress-container">
-                            <div class="progress-bar" style="width: ${currentProgress}%"></div>
-                            <div class="progress-text">${currentProgress}%</div>
-                        </div>
-                        <p style="font-size: 0.9rem; color: #94a3b8; margin-top: 0.5rem;">
-                            ${data.isInProgress ? '⚙️ Standby! I am actively writing code and adding more features.' : '✅ Project wrapped up and pushed to manufacturing!'}
-                        </p>
-                    </div>
 
-                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 6px;">
-                        <h4>📝 Your System Proposal & Scope:</h4>
-                        <p style="white-space: pre-wrap; font-style: italic; color: #cbd5e1;">"${data.proposal || 'No design parameters documented yet.'}"</p>
+    try {
+        const q = query(collection(db, "projects"), where("clientEmail", "==", email));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            trackerSection.classList.remove('hidden');
+            const card = document.getElementById('tracker-card');
+            card.innerHTML = '';
+
+            snapshot.forEach(projectDoc => {
+                const data = projectDoc.data();
+                const currentProgress = Math.min(100, Math.max(0, Number(data.progress) || 0));
+
+                card.innerHTML += `
+                    <div class="card" style="margin-top: 1rem; border-left: 5px solid var(--accent);">
+                        <h3>🚀 Project Profile: ${escapeHTML(data.title)}</h3>
+
+                        <div style="margin: 1.5rem 0;">
+                            <label><strong>Build Progress:</strong></label>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: ${currentProgress}%"></div>
+                                <div class="progress-text">${currentProgress}%</div>
+                            </div>
+                            <p style="font-size: 0.9rem; color: #94a3b8; margin-top: 0.5rem;">
+                                ${data.isInProgress ? '⚙️ Standby! I am actively writing code and adding more features.' : '✅ Project wrapped up and pushed to manufacturing!'}
+                            </p>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 6px;">
+                            <h4>📝 Your System Proposal & Scope:</h4>
+                            <p style="white-space: pre-wrap; font-style: italic; color: #cbd5e1;">"${escapeHTML(data.proposal || 'No design parameters documented yet.')}"</p>
+                        </div>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            });
+        }
+    } catch (error) {
+        console.error("Error loading client project: ", error);
     }
 }
 
@@ -160,7 +189,7 @@ async function loadClientProject(email) {
 // ==========================================
 const portfolioForm = document.getElementById('portfolio-form');
 if (portfolioForm) {
-    
+
     // Strict URL Route Security Guard
     onAuthStateChanged(auth, (user) => {
         if (!user || !ADMIN_EMAILS.includes(user.email)) {
@@ -182,32 +211,65 @@ if (portfolioForm) {
                 clientEmail: document.getElementById('proj-client-email').value.trim().toLowerCase()
             });
             alert('Project database synchronized perfectly!');
-            window.location.reload(); 
+            window.location.reload();
         } catch (error) {
             console.error("Error creating project: ", error);
             alert("Failed to save project execution framework.");
         }
     });
 
-    // 2. Fetch and Read Inbound Client Mail with Delete Capabilities
+    // 2. List existing projects (this panel was empty before) with delete buttons
+    const projectList = document.getElementById('admin-projects-list');
+    if (projectList) {
+        try {
+            const projectSnapshot = await getDocs(collection(db, "projects"));
+            projectList.innerHTML = '';
+
+            if (projectSnapshot.empty) {
+                projectList.innerHTML = '<p>No projects yet.</p>';
+            }
+
+            projectSnapshot.forEach(projectDoc => {
+                const data = projectDoc.data();
+                const row = document.createElement('div');
+                row.style.marginBottom = '1rem';
+                row.innerHTML = `
+                    <strong>${escapeHTML(data.title)}</strong>
+                    <div>${escapeHTML(data.clientEmail || 'No client assigned')} · ${Number(data.progress) || 0}% · ${data.isInProgress ? 'In progress' : 'Live'}</div>
+                    <button class="delete-btn" data-id="${escapeHTML(projectDoc.id)}" data-collection="projects" style="background: #ef4444; margin-top: 0.5rem;">Delete Project</button>
+                `;
+                projectList.appendChild(row);
+            });
+        } catch (error) {
+            console.error("Error loading projects: ", error);
+            projectList.innerHTML = '<p>Could not load projects.</p>';
+        }
+    }
+
+    // 3. Fetch and Read Inbound Client Mail with Delete Capabilities
     const msgList = document.getElementById('messages-list');
     if (msgList) {
-        const msgSnapshot = await getDocs(collection(db, "messages"));
-        msgList.innerHTML = ''; 
-        
-        msgSnapshot.forEach(docSnapshot => {
-            const data = docSnapshot.data();
-            const docId = docSnapshot.id;
-            
-            const msgCard = document.createElement('div');
-            msgCard.className = 'card';
-            msgCard.innerHTML = `
-                <h4>From: ${data.name} (${data.email})</h4>
-                <p style="white-space: pre-wrap;">${data.details}</p>
-                <button class="delete-btn" data-id="${docId}" data-collection="messages" style="background: #ef4444; margin-top: 1rem;">Delete Message</button>
-            `;
-            msgList.appendChild(msgCard);
-        });
+        try {
+            const msgSnapshot = await getDocs(collection(db, "messages"));
+            msgList.innerHTML = '';
+
+            msgSnapshot.forEach(docSnapshot => {
+                const data = docSnapshot.data();
+                const docId = docSnapshot.id;
+
+                const msgCard = document.createElement('div');
+                msgCard.className = 'card';
+                msgCard.innerHTML = `
+                    <h4>From: ${escapeHTML(data.name)} (${escapeHTML(data.email)})</h4>
+                    <p style="white-space: pre-wrap;">${escapeHTML(data.details)}</p>
+                    <button class="delete-btn" data-id="${escapeHTML(docId)}" data-collection="messages" style="background: #ef4444; margin-top: 1rem;">Delete Message</button>
+                `;
+                msgList.appendChild(msgCard);
+            });
+        } catch (error) {
+            console.error("Error loading messages: ", error);
+            msgList.innerHTML = '<p>Could not load messages.</p>';
+        }
     }
 }
 
@@ -218,7 +280,7 @@ document.addEventListener('click', async (e) => {
     if (e.target.classList.contains('delete-btn')) {
         const docId = e.target.getAttribute('data-id');
         const collectionName = e.target.getAttribute('data-collection');
-        
+
         if (confirm('Are you sure you want to permanently delete this document data?')) {
             try {
                 await deleteDoc(doc(db, collectionName, docId));

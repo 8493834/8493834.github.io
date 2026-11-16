@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace 'com.snailflix.app'
+    namespace 'com.snailflix'
     compileSdk 34
 
     defaultConfig {

@@ -5,9 +5,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title> payment page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment page (demo)</title>
 </head>
 <body>
+   <p style="border: 2px solid #b45309; background: #fef3c7; color: #78350f; padding: 10px; font-weight: bold;">
+     Demo only: no payment is processed and nothing you type is sent anywhere. Please do not enter real card details.
+   </p>
    <form action="/process-payment" method="POST" id="payment-form">
   
   <!-- Cardholder Name -->
@@ -97,7 +102,7 @@ document.getElementById('payment-form').addEventListener('submit', function(even
     } else if (step === 3) {
       statusDiv.textContent = "Processing...";
     } else if (step === 4) {
-      statusDiv.textContent = "Payment successful now redirecting.";
+      statusDiv.textContent = "Demo complete (nothing was charged). Redirecting.";
     } else if (step === 5) {
       statusDiv.textContent = "Redirecting..";
     } else if (step === 6) {
@@ -112,3 +117,4 @@ document.getElementById('payment-form').addEventListener('submit', function(even
 });
 </script>
 </body>
+</html>

@@ -83,6 +83,7 @@ button:hover { background: #555; }
 <!--PAGE 1 -->
 <div class="page active">
 <h1>SPAMISH BASICS</h1>
+<div class="word">president = Rome</div>
 <div class="word">Salu = Hello</div>
 <div class="word">Tavo = Goodbye</div>
 <div class="word">Savo = Yes</div>
@@ -232,8 +233,7 @@ p.classList.toggle("active", i === index);
 }
 
 function nextPage() {
-if (index < pages.length
-1) {
+if (index < pages.length - 1) {
 index++;
 update();
 }

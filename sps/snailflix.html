@@ -15,7 +15,7 @@
     <meta name="apple-mobile-web-app-title" content="Snailflix">
     <meta name="theme-color" content="#E50914">
 
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="https://fav.farm/🐌">
     <link rel="apple-touch-icon" href="https://fav.farm/🐌">
 
@@ -48,6 +48,12 @@
             padding-bottom: max(50px, env(safe-area-inset-bottom));
             padding-left: env(safe-area-inset-left);
             padding-right: env(safe-area-inset-right);
+        }
+
+        /* Without this, iOS Safari can't type into inputs because of the user-select: none above */
+        input, textarea, select {
+            -webkit-user-select: text;
+            user-select: text;
         }
 
         /* D-Pad & Keyboard Focus State */
@@ -338,6 +344,16 @@
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Escape text before it goes into innerHTML so titles, usernames etc. can't run as code (XSS)
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => (
+                { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+            ));
+        }
+
+        // Movies by id, so cards can look their data up instead of putting it in onclick="..." text
+        let moviesById = {};
+
         // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -420,6 +436,19 @@
                     return;
                 }
 
+                // Being signed in is not enough: only admins may open the console
+                // (anyone can create an account here). Real protection also needs Supabase RLS rules.
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .select('is_admin')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profileError || !profile || !profile.is_admin) {
+                    alert('❌ ACCESS DENIED! Your account lacks admin clearance.');
+                    return;
+                }
+
                 panel.style.display = 'block';
                 loadAdminData();
             } else {
@@ -435,6 +464,9 @@
 
             if (error || !movies) return console.error('Fetch error:', error);
 
+            moviesById = {};
+            movies.forEach(m => { moviesById[m.id] = m; });
+
             if (movies.length > 0) {
                 document.getElementById('heroTitle').innerText = `${movies[0].emoji} ${movies[0].title}`;
                 document.getElementById('heroDesc').innerText = `${movies[0].description || 'Snailflix Original'} • ${movies[0].views} Total Views`;
@@ -445,19 +477,18 @@
         }
 
         function createMovieCard(movie) {
-            const safeTitle = movie.title.replace(/'/g, "\\'");
             const isTrailer = movie.is_trailer;
 
             return `
-                <div class="movie-card" tabindex="0" onclick="watchMovie('${movie.id}', '${safeTitle}', ${movie.views}, '${movie.video_url || ''}', ${isTrailer})">
-                    <div class="card-emoji">${movie.emoji}</div>
+                <div class="movie-card" tabindex="0" data-movie-id="${escapeHTML(movie.id)}">
+                    <div class="card-emoji">${escapeHTML(movie.emoji)}</div>
                     <div>
-                        <div class="card-title">${movie.title}</div>
+                        <div class="card-title">${escapeHTML(movie.title)}</div>
                         <div class="card-meta">
                             ${isTrailer 
                                 ? `<span style="color:#ff9800; font-weight:bold;">⏳ COMING SOON</span>` 
-                                : `<span>👁️ ${movie.views} views</span>`}
-                            <span>${isTrailer ? 'Trailer' : (movie.duration || 'Short')}</span>
+                                : `<span>👁️ ${escapeHTML(movie.views)} views</span>`}
+                            <span>${isTrailer ? 'Trailer' : escapeHTML(movie.duration || 'Short')}</span>
                         </div>
                     </div>
                 </div>
@@ -470,7 +501,7 @@
                 .update({ views: currentViews + 1 })
                 .eq('id', id);
 
-            if (videoUrl) {
+            if (videoUrl && /^https?:\/\//i.test(videoUrl)) {
                 const modal = document.getElementById('videoModal');
                 const player = document.getElementById('snailVideoPlayer');
                 const source = document.getElementById('videoSource');
@@ -577,8 +608,8 @@
             if (movies) {
                 adminMovieList.innerHTML = movies.map(m => `
                     <div class="manage-list-item">
-                        <span>${m.title} (${m.views} views)</span>
-                        <button onclick="deleteMovie('${m.id}')" class="btn-del">Delete</button>
+                        <span>${escapeHTML(m.title)} (${escapeHTML(m.views)} views)</span>
+                        <button data-delete-id="${escapeHTML(m.id)}" class="btn-del">Delete</button>
                     </div>
                 `).join('');
             }
@@ -588,7 +619,7 @@
             if (profiles && profiles.length > 0) {
                 adminUserList.innerHTML = profiles.map(p => `
                     <div class="manage-list-item">
-                        <span>👤 @${p.username || 'Anonymous Agent'}</span>
+                        <span>👤 @${escapeHTML(p.username || 'Anonymous Agent')}</span>
                     </div>
                 `).join('');
             } else {
@@ -613,8 +644,20 @@
         }
 
         document.addEventListener('keydown', (e) => {
+            const active = document.activeElement;
+            const tag = active ? active.tagName : '';
+            const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag);
+            const clicksItself = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'].includes(tag);
+
+            // Left/Right must keep moving the text cursor while someone is typing
+            if (typing && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+
             updateFocusableElements();
             if (focusableElements.length === 0) return;
+
+            // Stay in sync with whatever is really focused (mouse click or Tab key)
+            const realIndex = focusableElements.indexOf(active);
+            if (realIndex >= 0) currentFocusIndex = realIndex;
 
             switch (e.key) {
                 case 'ArrowRight':
@@ -634,9 +677,25 @@
                     focusableElements[currentFocusIndex].focus();
                     break;
                 case 'Enter':
-                    document.activeElement.click();
+                    // Buttons and links already click themselves on Enter. Clicking them again here
+                    // made toggles (like the admin panel) open and then instantly close.
+                    if (active && !clicksItself) active.click();
                     break;
             }
+        });
+
+        // Click on a movie card (mouse, or Enter from the TV remote)
+        document.addEventListener('click', (e) => {
+            const card = e.target.closest('.movie-card');
+            if (!card) return;
+            const m = moviesById[card.dataset.movieId];
+            if (m) watchMovie(m.id, m.title, m.views, m.video_url || '', !!m.is_trailer);
+        });
+
+        // Delete buttons in the admin panel
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-delete-id]');
+            if (btn) deleteMovie(btn.dataset.deleteId);
         });
 
         // Initialize Application

@@ -10,10 +10,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPS & BPS | BOP HQ</title>
 
-    <meta name="description" content="A short, clear summary of your website including your main target keywords naturally.">
+    <meta name="description" content="Snail Protective Services (SPS) by the Bug Observation Project: log snail and bug discoveries in the field, even offline.">
     <meta name="keywords" content="sps, snail, snails, snail protective services, snail protective service, protective service">
 
-    <link rel="canonical" href="https://8493834.github.io" />
+    <link rel="canonical" href="https://8493834.github.io/sps/" />
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2e7d32">
     
@@ -201,8 +201,8 @@
             <p>Sign in to sync your profile, customize your identity card, and add field partners.</p>
             
             <button onclick="signInWithGoogle()" class="btn-auth" style="background: #ea4335; color: white;">Sign in with Google</button>
-            <button class="btn-auth" style="background: #000000; color: white;">Sign in with Apple</button>
-            <button class="btn-auth" style="background: #00a4ef; color: white;">Sign in with Microsoft</button>
+            <button onclick="signInWithProvider('apple')" class="btn-auth" style="background: #000000; color: white;">Sign in with Apple</button>
+            <button onclick="signInWithProvider('azure')" class="btn-auth" style="background: #00a4ef; color: white;">Sign in with Microsoft</button>
             <button onclick="signInWithGitHub()" class="btn-auth" style="background: #24292e; color: white;">Sign in with GitHub</button>
             
             <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
@@ -222,9 +222,10 @@
 
         <div class="card">
             <h3>Field Connections (Friends)</h3>
-            <input type="text" placeholder="Search Agent handle name...">
-            <button class="btn-main" style="background: #0277bd;">Send Partnership Request</button>
-            <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">No current active connections.</p>
+            <input type="text" id="friendSearchInput" placeholder="Search Agent handle name...">
+            <button onclick="sendFriendRequest()" class="btn-main" style="background: #0277bd;">Send Partnership Request</button>
+            <div id="friendRequestsList"></div>
+            <p id="friendsStatus" style="font-size: 0.9rem; color: #666; margin-top: 10px;">No current active connections.</p>
         </div>
     </section>
 
@@ -266,6 +267,26 @@
 </div>
 
 <script>
+// Escape text before it goes into innerHTML so user-typed text can't run as code (XSS)
+function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+}
+
+// Adds one chat line using text nodes, so names and messages are never treated as HTML
+function appendChatMessage(box, user, text) {
+    const row = document.createElement('div');
+    row.className = 'chat-msg';
+    const name = document.createElement('span');
+    name.className = 'chat-user';
+    name.textContent = user + ':';
+    row.appendChild(name);
+    row.appendChild(document.createTextNode(' ' + text));
+    box.appendChild(row);
+    box.scrollTop = box.scrollHeight;
+}
+
 // --- Snail Directory Data ---
 const snails = [
     { name: "Shelly", species: "Garden Snail", status: "Healthy" },
@@ -273,7 +294,7 @@ const snails = [
     { name: "Gary", species: "Garden Snail", status: "healthy and has children!!!!!!!" },
     { name: "chease", species: "Garden Snail", status: "dead" },
     { name: "tom snooze", species: "Garden Snail", status: "Healthy" },
-  { name: "neil foot slither", species: "Garden Snail", status: "Healthy and it the first snail to fly!" }
+  { name: "neil foot slither", species: "Garden Snail", status: "Healthy and the first snail to fly!" }
     
       
 
@@ -368,7 +389,9 @@ window.addEventListener('load', () => {
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        checkUserSession();
+        // Calling other Supabase functions directly inside this callback can deadlock,
+        // so hand the work to the next tick instead.
+        setTimeout(checkUserSession, 0);
     }
 });
 
@@ -491,9 +514,9 @@ async function loadReports() {
     localLogs.slice().reverse().forEach(l => {
         table.innerHTML += `
             <tr style="background: #fff8e1;">
-                <td>${l.subject}</td>
-                <td><a href="https://maps.google.com/?q=${l.coords}" target="_blank">View Map</a></td>
-                <td>${l.time}</td>
+                <td>${escapeHTML(l.subject)}</td>
+                <td><a href="https://maps.google.com/?q=${encodeURIComponent(l.coords)}" target="_blank" rel="noopener noreferrer">View Map</a></td>
+                <td>${escapeHTML(l.time)}</td>
                 <td><span style="color:#ef6c00; font-weight:bold;">💾 Offline Queue</span></td>
             </tr>`;
     });
@@ -501,9 +524,9 @@ async function loadReports() {
     cloudLogs.slice().reverse().forEach(l => {
         table.innerHTML += `
             <tr>
-                <td>${l.subject}</td>
-                <td><a href="https://maps.google.com/?q=${l.coords}" target="_blank">View Map</a></td>
-                <td>${l.time}</td>
+                <td>${escapeHTML(l.subject)}</td>
+                <td><a href="https://maps.google.com/?q=${encodeURIComponent(l.coords)}" target="_blank" rel="noopener noreferrer">View Map</a></td>
+                <td>${escapeHTML(l.time)}</td>
                 <td>${serverStatusText}</td>
             </tr>`;
     });
@@ -574,8 +597,18 @@ async function signInWithGoogle() {
 async function signInWithGitHub() {
     await supabaseClient.auth.signInWithOAuth({ 
         provider: 'github',
-        options: { redirectTo: window.location.href }
+        options: { redirectTo: window.location.origin + window.location.pathname }
     });
+}
+
+// Used by the Apple and Microsoft buttons. These providers must also be switched on
+// in the Supabase dashboard (Authentication > Providers), otherwise Supabase returns an error.
+async function signInWithProvider(provider) {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: provider,
+        options: { redirectTo: window.location.origin + window.location.pathname }
+    });
+    if (error) alert("Sign-in failed: " + error.message);
 }
 
 async function sendChatMessage() {
@@ -591,8 +624,20 @@ async function sendChatMessage() {
         return;
     }
 
-    // Get the current user or guest name
-    const username = localStorage.getItem('snailflix_user') || 'Anonymous Snail';
+    // Use the signed-in agent's handle, otherwise a guest name
+    // (the old code read a localStorage key that nothing ever set)
+    let username = 'Anonymous Snail';
+    try {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (user) {
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('username')
+                .eq('id', user.id)
+                .maybeSingle();
+            username = (profile && profile.username) || user.email.split('@')[0];
+        }
+    } catch (e) { /* keep the guest name */ }
 
     // 1. Insert into 'chat_messages'
     const { error } = await supabaseClient
@@ -615,10 +660,9 @@ supabaseClient
       const box = document.getElementById('chatDisplay');
       if (box) {
           // Prevent XSS script injection
-          const safeUser = document.createTextNode(payload.new.username || 'Anonymous').textContent;
-          const safeMsg = document.createTextNode(payload.new.message || '').textContent;
+          appendChatMessage(box, payload.new.username || 'Anonymous', payload.new.message || '');
+          // (createTextNode(...).textContent returns the text unchanged, so it never escaped anything)
 
-          box.innerHTML += `<div class="chat-msg"><span class="chat-user">${safeUser}:</span> ${safeMsg}</div>`;
           box.scrollTop = box.scrollHeight; 
       }
   })
@@ -679,25 +723,6 @@ async function checkUserSession() {
     }
 }
 
-async function loadFriendsList(userId) {
-    const friendsContainer = document.querySelector('#account .card:nth-of-type(2) p');
-    if (!friendsContainer) return;
-    
-    friendsContainer.innerText = "Scanning network for connected partners...";
-    
-    const { data: friends } = await supabaseClient
-        .from('friendships')
-        .select('*')
-        .or(`user_id.eq.${userId},friend_id.eq.${userId}`)
-        .eq('status', 'accepted');
-        
-    if (friends && friends.length > 0) {
-        friendsContainer.innerText = `Found ${friends.length} active field partner(s)!`;
-    } else {
-        friendsContainer.innerText = "No current active connections. Share your handle to add friends!";
-    }
-}
-
 async function saveUserProfile() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return alert("Please sign in first!");
@@ -730,7 +755,7 @@ async function loadChatHistory() {
     const { data: messages, error } = await supabaseClient
         .from('chat_messages')
         .select('*')
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false }) // newest 20, shown oldest-first below
         .limit(20);
 
     if (error) {
@@ -740,8 +765,8 @@ async function loadChatHistory() {
 
     box.innerHTML = `<div class="chat-msg"><span class="chat-user">HQ Automated Bot:</span> Welcome to global dispatch channel. Communication lines are clear!</div>`;
     
-    messages.forEach(msg => {
-        box.innerHTML += `<div class="chat-msg"><span class="chat-user">${msg.username}:</span> ${msg.message}</div>`;
+    messages.slice().reverse().forEach(msg => {
+        appendChatMessage(box, msg.username || 'Anonymous', msg.message || '');
     });
 
     box.scrollTop = box.scrollHeight;
@@ -825,7 +850,7 @@ async function loadFriendsList(userId) {
             const senderName = sender ? sender.username : "Agent";
             reqBox.innerHTML += `
                 <div style="background:#e1f5fe; padding:8px; margin:5px 0; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
-                    <span>@${senderName}</span>
+                    <span>@${escapeHTML(senderName)}</span>
                     <button onclick="acceptFriendRequest('${req.id}', '${userId}')" style="background:#2e7d32; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Accept</button>
                 </div>`;
         }
