@@ -251,6 +251,12 @@
         <form onsubmit="handleAuthSubmit(event)" style="background:#1f1f1f; padding:30px; border-radius:8px; border:1px solid #e50914; width:320px; position:relative;">
             <button type="button" onclick="toggleAuthModal()" style="position:absolute; top:10px; right:15px; background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
             <h2 id="authTitle" style="color:white; margin-bottom:15px; text-align:center;">Sign In</h2>
+
+            <button type="button" onclick="signInWithGoogle()" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:#fff; color:#222; border:0; border-radius:6px; padding:11px; font-size:0.95rem; font-weight:600; cursor:pointer; margin-bottom:12px;">
+                <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9h12.4c-.5 2.9-2.2 5.4-4.6 7l7.3 5.7c4.3-4 6.8-9.9 6.8-17.1z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.3 0 11.7-2.1 15.6-5.7l-7.3-5.7c-2 1.4-4.7 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+                Sign in with Google
+            </button>
+            <p style="color:#666; text-align:center; font-size:0.8rem; margin-bottom:10px;">— or —</p>
             
             <input type="email" id="authEmail" placeholder="Agent Email" required>
             <input type="password" id="authPassword" placeholder="Password" required>
@@ -419,6 +425,35 @@
             }
         }
 
+        async function signInWithGoogle() {
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
+            if (error) alert(error.message);
+        }
+
+        // Returns the session only if the signed-in user is a BOP admin, otherwise alerts and returns null.
+        // (Front-end check for a nicer experience. The real enforcement is the RLS SQL in Supabase.)
+        async function requireAdmin() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                alert('🔒 Sign in with an admin account to add movies.');
+                toggleAuthModal();
+                return null;
+            }
+            const { data: profile, error } = await supabaseClient
+                .from('profiles')
+                .select('is_admin')
+                .eq('id', session.user.id)
+                .single();
+            if (error || !profile || !profile.is_admin) {
+                alert('❌ ACCESS DENIED! Only BOP admins can add movies.');
+                return null;
+            }
+            return session;
+        }
+
         async function handleSignOut() {
             await supabaseClient.auth.signOut();
             checkUserSession();
@@ -536,6 +571,9 @@
     const btn = document.getElementById('uploadBtn');
 
     if (!title) return alert('Please provide a title.');
+
+    // Only BOP admins may add movies
+    if (!(await requireAdmin())) return;
 
     let video_url = '';
 
@@ -701,6 +739,7 @@
         // Initialize Application
         loadMovies();
         checkUserSession();
+        supabaseClient.auth.onAuthStateChange(() => setTimeout(checkUserSession, 0));
     </script>
 </body>
 </html>
